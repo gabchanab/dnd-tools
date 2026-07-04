@@ -1,0 +1,485 @@
+{
+  "char_name": "Locran Darter",
+  "player_name": "gabe",
+  "alignment": "Lawful Good",
+  "species_name": "Astral Elf",
+  "class_name": "Warlock",
+  "subclass_name": "The Seeker",
+  "subclass_homebrew": true,
+  "background_name": "Sage",
+  "level": 5,
+  "proficiency_bonus": 3,
+  "passive_perception": 15,
+  "hp_max": 38,
+  "hp_current": 38,
+  "hp_temp": 0,
+  "hp_pct": 100,
+  "hit_dice_display": "5d8",
+  "armor_class": 13,
+  "speed": 30,
+  "initiative": "+3",
+  "inspiration": true,
+  "spell_mod": "+5",
+  "spell_attack": "+8",
+  "spell_save_dc": 16,
+  "spell_ability": "CHA",
+  "abilities": [
+    {
+      "key": "strength",
+      "label": "STR",
+      "score": 8,
+      "modifier": -1,
+      "save": -1,
+      "save_prof": false
+    },
+    {
+      "key": "dexterity",
+      "label": "DEX",
+      "score": 16,
+      "modifier": 3,
+      "save": 3,
+      "save_prof": false
+    },
+    {
+      "key": "constitution",
+      "label": "CON",
+      "score": 15,
+      "modifier": 2,
+      "save": 2,
+      "save_prof": false
+    },
+    {
+      "key": "intelligence",
+      "label": "INT",
+      "score": 13,
+      "modifier": 1,
+      "save": 1,
+      "save_prof": false
+    },
+    {
+      "key": "wisdom",
+      "label": "WIS",
+      "score": 14,
+      "modifier": 2,
+      "save": 5,
+      "save_prof": true
+    },
+    {
+      "key": "charisma",
+      "label": "CHA",
+      "score": 20,
+      "modifier": 5,
+      "save": 8,
+      "save_prof": true
+    }
+  ],
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "DEX",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "WIS",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Arcana",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 4,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Athletics",
+      "ability": "STR",
+      "base_mod": -1,
+      "bonus": -1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Deception",
+      "ability": "CHA",
+      "base_mod": 5,
+      "bonus": 8,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "History",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 4,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Insight",
+      "ability": "WIS",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Intimidation",
+      "ability": "CHA",
+      "base_mod": 5,
+      "bonus": 5,
+      "proficiency": "none"
+    },
+    {
+      "name": "Investigation",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Medicine",
+      "ability": "WIS",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Nature",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Perception",
+      "ability": "WIS",
+      "base_mod": 2,
+      "bonus": 5,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Performance",
+      "ability": "CHA",
+      "base_mod": 5,
+      "bonus": 5,
+      "proficiency": "none"
+    },
+    {
+      "name": "Persuasion",
+      "ability": "CHA",
+      "base_mod": 5,
+      "bonus": 5,
+      "proficiency": "none"
+    },
+    {
+      "name": "Religion",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "DEX",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "Stealth",
+      "ability": "DEX",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "Survival",
+      "ability": "WIS",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    }
+  ],
+  "spell_slots": [
+    {
+      "level": 3,
+      "max": 2,
+      "used": 0,
+      "available": 2
+    }
+  ],
+  "traits": [
+    {
+      "name": "Size",
+      "desc": "Medium"
+    },
+    {
+      "name": "Speed",
+      "desc": "30 feet"
+    },
+    {
+      "name": "Darkvision",
+      "desc": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern colors in darkness, only shades of gray."
+    },
+    {
+      "name": "Astral Fire",
+      "desc": "You know one of the following cantrips of your choice: Dancing Lights, Light, or Sacred Flame. Intelligence, Wisdom, or Charisma is your spellcasting ability for it (choose when you select this race)."
+    },
+    {
+      "name": "Fey Ancestry",
+      "desc": "You have advantage on saving throws against being charmed, and magic can't put you to sleep."
+    },
+    {
+      "name": "Keen Senses",
+      "desc": "You have proficiency in the Perception skill."
+    },
+    {
+      "name": "Starlight Step",
+      "desc": "As a bonus action, you can teleport up to 30 feet to an unoccupied space you can see. Once you use this trait, you can't use it again until you finish a short or long rest."
+    },
+    {
+      "name": "Astral Trance",
+      "desc": "You don't need to sleep, and magic can't put you to sleep. You can finish a long rest in 4 hours if you spend those hours in a trancelike meditation, during which you remain conscious. Whenever you finish this trance, you gain proficiency in one skill of your choice and with one weapon or tool of your choice, selected from the Player's Handbook. You magically acquire these proficiencies by drawing them from shared elven memory and the experiences of entities on the Astral Plane, and you retain them until you finish your next long rest."
+    }
+  ],
+  "class_features": [
+    {
+      "name": "Ability Score Improvement",
+      "desc": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Warlock levels 8, 12, and 16."
+    },
+    {
+      "name": "Eldritch Invocations",
+      "desc": "You have unearthed Eldritch Invocations, pieces of forbidden knowledge that imbue you with an abiding magical ability or other lessons. You gain one invocation of your choice, such as Pact of the Tome. Invocations are described in the \"Eldritch Invocation Options\" section later in this class's description.\n\n**Prerequisites.** If an invocation has a prerequisite, you must meet it to learn that invocation. For example, if an invocation requires you to be a level 5+ Warlock, you can select the invocation once you reach Warlock level 5.\n\n**Replacing and Gaining Invocations.** Whenever you gain a Warlock level, you can replace one of your invocations with another one for which you qualify. You can't replace an invocation if it's a prerequisite for another invocation that you have.\n\nWhen you gain certain Warlock levels, you gain more invocations of your choice, as shown in the Invocations column of the Warlock Features table.\n\nYou can't pick the same invocation more than once unless its description says otherwise."
+    },
+    {
+      "name": "Magic Cunning",
+      "desc": "You can perform an esoteric rite for 1 minute. At the end of it, you regain expended Pact Magic spell slots but no more than a number equal to half your maximum (round up). Once you use this feature, you can't do so again until you finish a Long Rest."
+    },
+    {
+      "name": "Pact Magic",
+      "desc": "Through occult ceremony, you have formed a pact with a mysterious entity to gain magical powers. The entity is a voice in the shadows—its identity unclear—but its boon to you is concrete: the ability to cast spells. See \"Spells\" for the rules on spellcasting. The information below details how you use those rules with Warlock spells, which appear in the Warlock spell list later in the class's description.\n\n**Cantrips.** You know two Warlock cantrips of your choice. *Eldritch Blast* and *Prestidigitation* are recommended. Whenever you gain a Warlock level, you can replace one of your cantrips from this feature with another Warlock cantrip of your choice.\n\nWhen you reach Warlock levels 4 and 10, you learn another Warlock cantrip of your choice, as shown in the Cantrips column of the Warlock Features table.\n\n**Spell Slots.** The Warlock Features table shows how many spell slots you have to cast your Warlock spells of levels 1–5. The table also shows the level of those slots, all of which are the same level. You regain all expended Pact Magic spell slots when you finish a Short or Long Rest.\n\nFor example, when you're a level 5 Warlock, you have two level 3 spell slots. To cast the level 1 spell *Charm Person*, you must spend one of those slots, and you cast it as a level 3 spell.\n\n**Prepared Spells of Level 1+.** You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose two level 1 Warlock spells. *Charm Person* and *Hex* are recommended.\n\nThe number of spells on your list increases as you gain Warlock levels, as shown in the Prepared Spells column of the Warlock Features table. Whenever that number increases, choose additional Warlock spells until the number of spells on your list matches the number in the table. The chosen spells must be of a level no higher than what's shown in the table's Slot Level column for your level. When you reach level 6, for example, you learn a new Warlock spell, which can be of levels 1–3.\n\nIf another Warlock feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Warlock spells for you.\n\n**Changing Your Prepared Spells.** Whenever you gain a Warlock level, you can replace one spell on your list with another Warlock spell of an eligible level.\n\n**Spellcasting Ability.** Charisma is the spellcasting ability for your Warlock spells.\n\n**Spellcasting Focus.** You can use an Arcane Focus as a Spellcasting Focus for your Warlock spells."
+    },
+    {
+      "name": "Warlock Subclass",
+      "desc": "You gain a Warlock subclass of your choice. The Fiend Patron subclass is detailed after this class's description. A subclass is a specialization that grants you features at certain Warlock levels. For the rest of your career, you gain each of your subclass's features that are of your Warlock level or lower."
+    }
+  ],
+  "subclass_features": [
+    {
+      "name": "Shielding Aurora",
+      "desc": "As a bonus action, you create a whirling aurora of brilliant energy that swirls around you. Until the end of your next turn, you gain resistance to all damage, and if a hostile creature ends its turn within 10 feet of you, it takes radiant damage equal to your warlock level + your Charisma modifier. Once you use this feature, you can't use it again until you finish a short or long rest."
+    },
+    {
+      "name": "Spells Gained",
+      "desc": "You gain access to the following spells: Feather Fall, Jump"
+    },
+    {
+      "name": "Pact of the stars",
+      "desc": "The Seeker grants you a chain forged from starlight, decorated with seven gleaming motes of brightness. While the chain is on your person, you know the augury spell and can cast it as a ritual. The spell doesn't count against your number of spells known. Additionally, you can invoke the Seeker’s power to gain advantage on an Intelligence check while you carry this item. Once you use this ability, you cannot use it again until you complete a short or long rest. If you lose your Star Chain, you can perform a 1-hour ceremony to receive a replacement from the Seeker. The ceremony can be performed during a short or long rest, and it destroys the previous chain. The chain disappears in a flash of light when you die."
+    },
+    {
+      "name": "Spells Gained",
+      "desc": "You gain access to the following spells: Levitate, Locate Object"
+    },
+    {
+      "name": "Spells Gained",
+      "desc": "You gain access to the following spells: Clairvoyance, Sending"
+    }
+  ],
+  "resources": [],
+  "prepared_spells": [
+    {
+      "name": "Mage Hand",
+      "level": 0,
+      "index": "srd-2024_mage-hand"
+    },
+    {
+      "name": "Eldritch Blast",
+      "level": 0,
+      "index": "srd-2024_eldritch-blast"
+    },
+    {
+      "name": "Light",
+      "level": 0,
+      "index": "srd-2024_light"
+    },
+    {
+      "name": "Hex",
+      "level": 1,
+      "index": "srd-2024_hex"
+    },
+    {
+      "name": "Feather Fall",
+      "level": 1,
+      "index": "srd-2024_feather-fall"
+    },
+    {
+      "name": "Jump",
+      "level": 1,
+      "index": "srd-2024_jump"
+    },
+    {
+      "name": "Charm Person",
+      "level": 1,
+      "index": "srd-2024_charm-person"
+    },
+    {
+      "name": "Levitate",
+      "level": 2,
+      "index": "srd-2024_levitate"
+    },
+    {
+      "name": "Augury",
+      "level": 2,
+      "index": "srd-2024_augury"
+    },
+    {
+      "name": "Locate Object",
+      "level": 2,
+      "index": "srd-2024_locate-object"
+    },
+    {
+      "name": "Shatter",
+      "level": 2,
+      "index": "srd-2024_shatter"
+    },
+    {
+      "name": "Invisibility",
+      "level": 2,
+      "index": "srd-2024_invisibility"
+    },
+    {
+      "name": "Clairvoyance",
+      "level": 3,
+      "index": "srd-2024_clairvoyance"
+    },
+    {
+      "name": "Sending",
+      "level": 3,
+      "index": "srd-2024_sending"
+    }
+  ],
+  "cantrips": [],
+  "notes": "Invocations:\n-Eyes of the Rune Keeper: Can read all writing\n-Agonising Blast: Add Charisma modifier to Eldritch Blast damage rolls",
+  "backstory": "Raised by the tranquil group of monks at the Shrine to Pngo in Östrulade sat upon the Dragon's Nose mountain range. Locran Darter heard tales of of the infinite well in Jönemn and dreamt of one day gaining powers to provide water to all of those who need it. \nOne day whilst sorting through a box of old and broken trinkets in the church's cellar, he stumbled across a small necklace. Star-shaped chain links held up an obsidian diamond pendant with purple gemstone engravings twisted throughout. As soon as he laid hands on the pendant, visions plagued his mind of tapestries being ripped apart with flashes of Nebulan's constellations.\nAfter panicked research Locran managed to correlate his visions with the continent's capital Qualihah and he has made it his mission to find answers for these intrusive thoughts.",
+  "gold": 6.0,
+  "class_equipment": "Choose A or B: (A) Leather Armor, Sickle, 2 Daggers, Ar cane Focus (orb), Book (occult lore), Scholar's Pack, and 15 GP; or (B) 100 GP",
+  "bg_equipment": "Bottle of ink, pen, 50 sheets of parchment, common clothes.",
+  "armor_proficiencies": "Light armor",
+  "weapon_proficiencies": "Simple weapons",
+  "bg_tool_proficiency": "",
+  "bg_languages": "",
+  "bg_trait_name": "",
+  "bg_trait_desc": "",
+  "bg_ofeat_name": "",
+  "bg_ofeat_desc": "",
+  "_raw": {
+    "name": "Locran Darter",
+    "player_name": "gabe",
+    "alignment": "Lawful Good",
+    "level": "5",
+    "gold": "6",
+    "backstory": "Raised by the tranquil group of monks at the Shrine to Pngo in Östrulade sat upon the Dragon's Nose mountain range. Locran Darter heard tales of of the infinite well in Jönemn and dreamt of one day gaining powers to provide water to all of those who need it. \nOne day whilst sorting through a box of old and broken trinkets in the church's cellar, he stumbled across a small necklace. Star-shaped chain links held up an obsidian diamond pendant with purple gemstone engravings twisted throughout. As soon as he laid hands on the pendant, visions plagued his mind of tapestries being ripped apart with flashes of Nebulan's constellations.\nAfter panicked research Locran managed to correlate his visions with the continent's capital Qualihah and he has made it his mission to find answers for these intrusive thoughts.",
+    "notes": "Invocations:\n-Eyes of the Rune Keeper: Can read all writing\n-Agonising Blast: Add Charisma modifier to Eldritch Blast damage rolls",
+    "species_key": "astral_elf",
+    "species_name": "Astral Elf",
+    "class_key": "srd-2024_warlock",
+    "class_name": "Warlock",
+    "background_key": "a5e-ag_sage",
+    "background_name": "Sage",
+    "subclass_key": "seeker_patron",
+    "subclass_name": "The Seeker",
+    "subclass_homebrew": true,
+    "str": 8,
+    "dex": 16,
+    "con": 15,
+    "int": 13,
+    "wis": 14,
+    "cha": 20,
+    "skills": [
+      "Arcana",
+      "Deception",
+      "History",
+      "Perception"
+    ],
+    "spells": [
+      {
+        "name": "Mage Hand",
+        "level": 0,
+        "index": "srd-2024_mage-hand"
+      },
+      {
+        "name": "Hex",
+        "level": 1,
+        "index": "srd-2024_hex"
+      },
+      {
+        "name": "Feather Fall",
+        "level": 1,
+        "index": "srd-2024_feather-fall"
+      },
+      {
+        "name": "Jump",
+        "level": 1,
+        "index": "srd-2024_jump"
+      },
+      {
+        "name": "Levitate",
+        "level": 2,
+        "index": "srd-2024_levitate"
+      },
+      {
+        "name": "Augury",
+        "level": 2,
+        "index": "srd-2024_augury"
+      },
+      {
+        "name": "Eldritch Blast",
+        "level": 0,
+        "index": "srd-2024_eldritch-blast"
+      },
+      {
+        "name": "Light",
+        "level": 0,
+        "index": "srd-2024_light"
+      },
+      {
+        "name": "Locate Object",
+        "level": 2,
+        "index": "srd-2024_locate-object"
+      },
+      {
+        "name": "Shatter",
+        "level": 2,
+        "index": "srd-2024_shatter"
+      },
+      {
+        "name": "Charm Person",
+        "level": 1,
+        "index": "srd-2024_charm-person"
+      },
+      {
+        "name": "Invisibility",
+        "level": 2,
+        "index": "srd-2024_invisibility"
+      },
+      {
+        "name": "Clairvoyance",
+        "level": 3,
+        "index": "srd-2024_clairvoyance"
+      },
+      {
+        "name": "Sending",
+        "level": 3,
+        "index": "srd-2024_sending"
+      }
+    ],
+    "hit_die_override": 8,
+    "hp_rolled": null,
+    "species_data": "{\"key\":\"astral_elf\",\"name\":\"Astral Elf\",\"traits\":[{\"name\":\"Size\",\"desc\":\"Medium\"},{\"name\":\"Speed\",\"desc\":\"30 feet\"},{\"name\":\"Darkvision\",\"desc\":\"You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern colors in darkness, only shades of gray.\"},{\"name\":\"Astral Fire\",\"desc\":\"You know one of the following cantrips of your choice: Dancing Lights, Light, or Sacred Flame. Intelligence, Wisdom, or Charisma is your spellcasting ability for it (choose when you select this race).\"},{\"name\":\"Fey Ancestry\",\"desc\":\"You have advantage on saving throws against being charmed, and magic can't put you to sleep.\"},{\"name\":\"Keen Senses\",\"desc\":\"You have proficiency in the Perception skill.\"},{\"name\":\"Starlight Step\",\"desc\":\"As a bonus action, you can teleport up to 30 feet to an unoccupied space you can see. Once you use this trait, you can't use it again until you finish a short or long rest.\"},{\"name\":\"Astral Trance\",\"desc\":\"You don't need to sleep, and magic can't put you to sleep. You can finish a long rest in 4 hours if you spend those hours in a trancelike meditation, during which you remain conscious. Whenever you finish this trance, you gain proficiency in one skill of your choice and with one weapon or tool of your choice, selected from the Player's Handbook. You magically acquire these proficiencies by drawing them from shared elven memory and the experiences of entities on the Astral Plane, and you retain them until you finish your next long rest.\"}],\"document\":{\"display_name\":\"Nebulan\",\"key\":\"homebrew\",\"gamesystem\":{\"key\":\"homebrew\"}},\"_homebrew\":true}",
+    "class_data": "{\"key\":\"srd-2024_warlock\",\"features\":[{\"key\":\"srd-2024_warlock_ability-score-improvement\",\"name\":\"Ability Score Improvement\",\"desc\":\"You gain the Ability Score Improvement feat (see \\\"Feats\\\") or another feat of your choice for which you qualify. You gain this feature again at Warlock levels 8, 12, and 16.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":12,\"detail\":null},{\"level\":16,\"detail\":null},{\"level\":4,\"detail\":null},{\"level\":8,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_cantrips\",\"name\":\"Cantrips\",\"desc\":\"[Column data]\",\"feature_type\":\"CLASS_TABLE_DATA\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":1,\"column_value\":\"2\"},{\"level\":10,\"column_value\":\"4\"},{\"level\":11,\"column_value\":\"4\"},{\"level\":12,\"column_value\":\"4\"},{\"level\":13,\"column_value\":\"4\"},{\"level\":14,\"column_value\":\"4\"},{\"level\":15,\"column_value\":\"4\"},{\"level\":16,\"column_value\":\"4\"},{\"level\":17,\"column_value\":\"4\"},{\"level\":18,\"column_value\":\"4\"},{\"level\":19,\"column_value\":\"4\"},{\"level\":2,\"column_value\":\"2\"},{\"level\":20,\"column_value\":\"4\"},{\"level\":3,\"column_value\":\"2\"},{\"level\":4,\"column_value\":\"3\"},{\"level\":5,\"column_value\":\"3\"},{\"level\":6,\"column_value\":\"3\"},{\"level\":7,\"column_value\":\"3\"},{\"level\":8,\"column_value\":\"3\"},{\"level\":9,\"column_value\":\"3\"}]},{\"key\":\"srd-2024_warlock_contact-patron\",\"name\":\"Contact Patron\",\"desc\":\"In the past, you usually contacted your patron through intermediaries. Now you can communicate directly; you always have the *Contact Other Plane* spell prepared. With this feature, you can cast the spell without expending a spell slot to contact your patron, and you automatically succeed on the spell's saving throw.\\n\\nOnce you cast the spell with this feature, you can't do so in this way again until you finish a Long Rest.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":9,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_core-traits\",\"name\":\"Core Warlock Traits\",\"desc\":\"|||\\n|---|---|\\n|Primary Ability|Charisma|\\n|Hit Point Die|D8 per Warlock level|\\n|Saving Throw Proficiencies|Wisdom and Charisma|\\n|Skill Proficiencies|Choose 2: Arcana, Deception, History, Intimidation, Investigation, Nature, or Religion|\\n|Weapon Proficiencies|Simple weapons|\\n|Armor Training|Light armor|\\n|Starting Equipment|Choose A or B: (A) Leather Armor, Sickle, 2 Daggers, Ar cane Focus (orb), Book (occult lore), Scholar's Pack, and 15 GP; or (B) 100 GP|\",\"feature_type\":\"CORE_TRAITS_TABLE\",\"gained_at\":[],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_eldritch-invocation-count\",\"name\":\"Eldritch Invocations\",\"desc\":\"[Column data]\",\"feature_type\":\"CLASS_TABLE_DATA\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":1,\"column_value\":\"1\"},{\"level\":10,\"column_value\":\"7\"},{\"level\":11,\"column_value\":\"7\"},{\"level\":12,\"column_value\":\"8\"},{\"level\":13,\"column_value\":\"8\"},{\"level\":14,\"column_value\":\"8\"},{\"level\":15,\"column_value\":\"9\"},{\"level\":16,\"column_value\":\"9\"},{\"level\":17,\"column_value\":\"9\"},{\"level\":18,\"column_value\":\"10\"},{\"level\":19,\"column_value\":\"10\"},{\"level\":2,\"column_value\":\"3\"},{\"level\":20,\"column_value\":\"10\"},{\"level\":3,\"column_value\":\"3\"},{\"level\":4,\"column_value\":\"3\"},{\"level\":5,\"column_value\":\"5\"},{\"level\":6,\"column_value\":\"5\"},{\"level\":7,\"column_value\":\"6\"},{\"level\":8,\"column_value\":\"6\"},{\"level\":9,\"column_value\":\"7\"}]},{\"key\":\"srd-2024_warlock_eldritch-invocation-options\",\"name\":\"Eldritch Invocation Options\",\"desc\":\"Eldritch Invocation options appear in alphabetical order.\\n\\n### Agonizing Blast\\n\\n*Prerequisite: Level 2+ Warlock, a Warlock Cantrip That Deals Damage*\\n\\nChoose one of your known Warlock cantrips that deals damage. You can add your Charisma modifier to that spell's damage rolls.\\n\\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.\\n\\n### Armor of Shadows\\n\\nYou can cast *Mage Armor* on yourself without expending a spell slot.\\n\\n### Ascendant Step\\n\\n*Prerequisite: Level 5+ Warlock*\\n\\nYou can cast *Levitate* on yourself without expending a spell slot.\\n\\n### Devil's Sight\\n\\n*Prerequisite: Level 2+ Warlock*\\n\\nYou can see normally in Dim Light and Darkness both magical and nonmagical—within 120 feet of yourself.\\n\\n### Devouring Blade\\n\\n*Prerequisite: Level 12+ Warlock, Thirsting Blade Invocation*\\n\\nThe Extra Attack of your Thirsting Blade invocation confers two extra attacks rather than one.\\n\\n### Eldritch Mind\\n\\nYou have Advantage on Constitution saving throws that you make to maintain Concentration.\\n\\n### Eldritch Smite\\n\\n*Prerequisite: Level 5+ Warlock, Pact of the Blade Invocation*\\n\\nOnce per turn when you hit a creature with your pact weapon, you can expend a Pact Magic spell slot to deal an extra 1d8 Force damage to the target, plus another 1d8 per level of the spell slot, and you can give the target the Prone condition if it is Huge or smaller.\\n\\n### Eldritch Spear\\n\\n*Prerequisite: Level 2+ Warlock, a Warlock Cantrip That Deals Damage*\\n\\nChoose one of your known Warlock cantrips that deals damage and has a range of 10+ feet. When you cast that spell, its range increases by a number of feet equal to 30 times your Warlock level.\\n\\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.\\n\\n### Fiendish Vigor\\n\\n*Prerequisite: Level 2+ Warlock*\\n\\nYou can cast *False Life* on yourself without expending a spell slot. When you cast the spell with this feature, you don't roll the die for the Temporary Hit Points; you automatically get the highest number on the die.\\n\\n### Gaze of Two Minds\\n\\n*Prerequisite: Level 5+ Warlock*\\n\\nYou can use a Bonus Action to touch a willing creature and perceive through its senses until the end of your next turn. As long as the creature is on the same plane of existence as you, you can take a Bonus Action on subsequent turns to maintain this connection, extending the duration until the end of your next turn. The connection ends if you don't maintain it in this way.\\n\\nWhile perceiving through the other creature's senses, you benefit from any special senses possessed by that creature, and you can cast spells as if you were in your space or the other creature's space if the two of you are within 60 feet of each other.\\n\\n### Gift of the Depths\\n\\n*Prerequisite: Level 5+ Warlock*\\n\\nYou can breathe underwater, and you gain a Swim Speed equal to your Speed.\\n\\nYou can also cast *Water Breathing* once without expending a spell slot. You regain the ability to cast it in this way again when you finish a Long Rest.\\n\\n### Gift of the Protectors\\n\\n*Prerequisite: Level 9+ Warlock, Pact of the Tome Invocation*\\n\\nA new page appears in your *Book of Shadows* when you conjure it. With your permission, a creature can take an action to write its name on that page, which can contain a number of names equal to your Charisma modifier (minimum of one name).\\n\\nWhen any creature whose name is on the page is reduced to 0 Hit Points but not killed outright, the creature magically drops to 1 Hit Point instead. Once this magic is triggered, no creature can benefit from it until you finish a Long Rest.\\n\\nAs a Magic action, you can erase a name on the page by touching it.\\n\\n### Investment of the Chain Master\\n\\n*Prerequisite: Level 5+ Warlock, Pact of the Chain Invocation*\\n\\nWhen you cast *Find Familiar*, you infuse the summoned familiar with a measure of your eldritch power, granting the creature the following benefits.\\n\\n**Aerial or Aquatic.** The familiar gains either a Fly Speed or a Swim Speed (your choice) of 40 feet.\\n\\n**Quick Attack.** As a Bonus Action, you can command the familiar to take the Attack action.\\n\\n**Necrotic or Radiant Damage.** Whenever the familiar deals Bludgeoning, Piercing, or Slashing damage, you can make it deal Necrotic or Radiant damage instead.\\n\\n**Your Save DC.** If the familiar forces a creature to make a saving throw, it uses your spell save DC.\\n\\n**Resistance.** When the familiar takes damage, you can take a Reaction to grant it Resistance against that damage.\\n\\n### **Lessons of the First Ones**\\n\\n*Prerequisite: Level 2+ Warlock*\\n\\nYou have received knowledge from an elder entity of the multiverse, allowing you to gain one Origin feat of your choice (see \\\"Feats\\\").\\n\\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different Origin feat.\\n\\n### Lifedrinker\\n\\n*Prerequisite: Level 9+ Warlock, Pact of the Blade Invocation*\\n\\nOnce per turn when you hit a creature with your pact weapon, you can deal an extra 1d6 Necrotic, Psychic, or Radiant damage (your choice) to the creature, and you can expend one of your Hit Point Dice to roll it and regain a number of Hit Points equal to the roll plus your Constitution modifier (minimum of 1 Hit Point).\\n\\n### Mask of Many Faces\\n\\n*Prerequisite: Level 2+ Warlock*\\n\\nYou can cast *Disguise Self* without expending a spell slot.\\n\\n### Master of Myriad Forms\\n\\n*Prerequisite: Level 5+ Warlock*\\n\\nYou can cast *Alter Self* without expending a spell slot.\\n\\n### Misty Visions\\n\\n*Prerequisite: Level 2+ Warlock*\\n\\nYou can cast *Silent Image* without expending a spell slot.\\n\\n### One with Shadows\\n\\n*Prerequisite: Level 5+ Warlock*\\n\\nWhile you're in an area of Dim Light or Darkness, you can cast *Invisibility* on yourself without expending a spell slot.\\n\\n### Otherworldly Leap\\n\\n*Prerequisite: Level 2+ Warlock*\\n\\nYou can cast *Jump* on yourself without expending a spell slot.\\n\\n### Pact of the Blade\\n\\nAs a Bonus Action, you can conjure a pact weapon in your hand—a Simple or Martial Melee weapon of your choice with which you bond—or create a bond with a magic weapon you touch; you can't bond with a magic weapon if someone else is attuned to it or another Warlock is bonded with it. Until the bond ends, you have proficiency with the weapon, and you can use it as a Spellcasting Focus.\\n\\nWhenever you attack with the bonded weapon, you can use your Charisma modifier for the attack and damage rolls instead of using Strength or Dexterity; and you can cause the weapon to deal Necrotic, Psychic, or Radiant damage or its normal damage type.\\n\\nYour bond with the weapon ends if you use this feature's Bonus Action again, if the weapon is more than 5 feet away from you for 1 minute or more, or if you die. A conjured weapon disappears when the bond ends.\\n\\n### Pact of the Chain\\n\\nYou learn the *Find Familiar* spell and can cast it as a Magic action without expending a spell slot.\\n\\nWhen you cast the spell, you choose one of the normal forms for your familiar or one of the following special forms: **Imp, Pseudodragon, Quasit, Skeleton, Sphinx of Wonder, Sprite,** or **Venomous Snake** (see \\\"Monsters\\\" for the familiar's stat block).\\n\\nAdditionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its Reaction.\\n\\n### Pact of the Tome\\n\\nStitching together strands of shadow, you conjure forth a book in your hand at the end of a Short or Long Rest. This *Book of Shadows* (you determine its appearance) contains eldritch magic that only you can access, granting you the benefits below. The book disappears if you conjure another book with this feature or if you die.\\n\\n**Cantrips and Rituals.** When the book appears, choose three cantrips, and choose two level 1 spells that have the Ritual tag. The spells can be from any class's spell list, and they must be spells you don't already have prepared. While the book is on your person, you have the chosen spells prepared, and they function as Warlock spells for you.\\n\\n**Spellcasting Focus.** You can use the book as a Spellcasting Focus.\\n\\n### Repelling Blast\\n\\n*Prerequisite: Level 2+ Warlock, a Warlock Cantrip That Deals Damage via an Attack Roll*\\n\\nChoose one of your known Warlock cantrips that requires an attack roll. When you hit a Large or smaller creature with that cantrip, you can push the creature up to 10 feet straight away from you.\\n\\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.\\n\\n### Thirsting Blade\\n\\n*Prerequisite: Level 5+ Warlock, Pact of the Blade Invocation*\\n\\nYou gain the Extra Attack feature for your pact weapon only. With that feature, you can attack twice with the weapon instead of once when you take the Attack action on your turn.\\n\\n### Visions of Distant Realms\\n\\n*Prerequisite: Level 9+ Warlock*\\n\\nYou can cast *Arcane Eye* without expending a spell slot.\\n\\n### Whispers of the Grave\\n\\n*Prerequisite: Level 7+ Warlock*\\n\\nYou can cast *Speak with Dead* without expending a spell slot.\\n\\n### Witch Sight\\n\\n*Prerequisite: Level 15+ Warlock*\\n\\nYou have Truesight with a range of 30 feet.\",\"feature_type\":\"CLASS_FEATURE_OPTION_LIST\",\"gained_at\":[],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_eldritch-invocations\",\"name\":\"Eldritch Invocations\",\"desc\":\"You have unearthed Eldritch Invocations, pieces of forbidden knowledge that imbue you with an abiding magical ability or other lessons. You gain one invocation of your choice, such as Pact of the Tome. Invocations are described in the \\\"Eldritch Invocation Options\\\" section later in this class's description.\\n\\n**Prerequisites.** If an invocation has a prerequisite, you must meet it to learn that invocation. For example, if an invocation requires you to be a level 5+ Warlock, you can select the invocation once you reach Warlock level 5.\\n\\n**Replacing and Gaining Invocations.** Whenever you gain a Warlock level, you can replace one of your invocations with another one for which you qualify. You can't replace an invocation if it's a prerequisite for another invocation that you have.\\n\\nWhen you gain certain Warlock levels, you gain more invocations of your choice, as shown in the Invocations column of the Warlock Features table.\\n\\nYou can't pick the same invocation more than once unless its description says otherwise.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_eldritch-master\",\"name\":\"Eldritch Master\",\"desc\":\"When you use your Magical Cunning feature, you regain all your expended Pact Magic spell slots.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":20,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_epic-boon\",\"name\":\"Epic Boon\",\"desc\":\"You gain an Epic Boon feat (see \\\"Feats\\\") or another feat of your choice for which you qualify. Boon of Fate is recommended.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":19,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_magical-cunning\",\"name\":\"Magic Cunning\",\"desc\":\"You can perform an esoteric rite for 1 minute. At the end of it, you regain expended Pact Magic spell slots but no more than a number equal to half your maximum (round up). Once you use this feature, you can't do so again until you finish a Long Rest.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":2,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_mystic-arcanum\",\"name\":\"Mystic Arcanum\",\"desc\":\"Your patron grants you a magical secret called an arcanum. Choose one level 6 Warlock spell as this arcanum.\\n\\nYou can cast your arcanum spell once without expending a spell slot, and you must finish a Long Rest before you can cast it in this way again.\\n\\nAs shown in the Warlock Features table, you gain another Warlock spell of your choice that can be cast in this way when you reach Warlock levels 13 (level 7 spell), 15 (level 8 spell), and 17 (level 9 spell). You regain all uses of your Mystic Arcanum when you finish a Long Rest.\\n\\nWhenever you gain a Warlock level, you can replace one of your arcanum spells with another Warlock spell of the same level.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":11,\"detail\":\"level 6 spell\"},{\"level\":13,\"detail\":\"level 7 spell\"},{\"level\":15,\"detail\":\"level 8 spell\"},{\"level\":17,\"detail\":\"level 9 spell\"}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_pact-magic\",\"name\":\"Pact Magic\",\"desc\":\"Through occult ceremony, you have formed a pact with a mysterious entity to gain magical powers. The entity is a voice in the shadows—its identity unclear—but its boon to you is concrete: the ability to cast spells. See \\\"Spells\\\" for the rules on spellcasting. The information below details how you use those rules with Warlock spells, which appear in the Warlock spell list later in the class's description.\\n\\n**Cantrips.** You know two Warlock cantrips of your choice. *Eldritch Blast* and *Prestidigitation* are recommended. Whenever you gain a Warlock level, you can replace one of your cantrips from this feature with another Warlock cantrip of your choice.\\n\\nWhen you reach Warlock levels 4 and 10, you learn another Warlock cantrip of your choice, as shown in the Cantrips column of the Warlock Features table.\\n\\n**Spell Slots.** The Warlock Features table shows how many spell slots you have to cast your Warlock spells of levels 1–5. The table also shows the level of those slots, all of which are the same level. You regain all expended Pact Magic spell slots when you finish a Short or Long Rest.\\n\\nFor example, when you're a level 5 Warlock, you have two level 3 spell slots. To cast the level 1 spell *Charm Person*, you must spend one of those slots, and you cast it as a level 3 spell.\\n\\n**Prepared Spells of Level 1+.** You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose two level 1 Warlock spells. *Charm Person* and *Hex* are recommended.\\n\\nThe number of spells on your list increases as you gain Warlock levels, as shown in the Prepared Spells column of the Warlock Features table. Whenever that number increases, choose additional Warlock spells until the number of spells on your list matches the number in the table. The chosen spells must be of a level no higher than what's shown in the table's Slot Level column for your level. When you reach level 6, for example, you learn a new Warlock spell, which can be of levels 1–3.\\n\\nIf another Warlock feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Warlock spells for you.\\n\\n**Changing Your Prepared Spells.** Whenever you gain a Warlock level, you can replace one spell on your list with another Warlock spell of an eligible level.\\n\\n**Spellcasting Ability.** Charisma is the spellcasting ability for your Warlock spells.\\n\\n**Spellcasting Focus.** You can use an Arcane Focus as a Spellcasting Focus for your Warlock spells.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_prepared-spells\",\"name\":\"Prepared Spells\",\"desc\":\"[Column data]\",\"feature_type\":\"CLASS_TABLE_DATA\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":1,\"column_value\":\"2\"},{\"level\":10,\"column_value\":\"10\"},{\"level\":11,\"column_value\":\"11\"},{\"level\":12,\"column_value\":\"11\"},{\"level\":13,\"column_value\":\"12\"},{\"level\":14,\"column_value\":\"12\"},{\"level\":15,\"column_value\":\"13\"},{\"level\":16,\"column_value\":\"13\"},{\"level\":17,\"column_value\":\"14\"},{\"level\":18,\"column_value\":\"14\"},{\"level\":19,\"column_value\":\"15\"},{\"level\":2,\"column_value\":\"3\"},{\"level\":20,\"column_value\":\"15\"},{\"level\":3,\"column_value\":\"4\"},{\"level\":4,\"column_value\":\"5\"},{\"level\":5,\"column_value\":\"6\"},{\"level\":6,\"column_value\":\"7\"},{\"level\":7,\"column_value\":\"8\"},{\"level\":8,\"column_value\":\"9\"},{\"level\":9,\"column_value\":\"10\"}]},{\"key\":\"srd-2024_warlock_proficiency-bonus\",\"name\":\"Proficiency Bonus\",\"desc\":\"[Column data]\",\"feature_type\":\"PROFICIENCY_BONUS\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":1,\"column_value\":\"+2\"},{\"level\":10,\"column_value\":\"+4\"},{\"level\":11,\"column_value\":\"+4\"},{\"level\":12,\"column_value\":\"+4\"},{\"level\":13,\"column_value\":\"+5\"},{\"level\":14,\"column_value\":\"+5\"},{\"level\":15,\"column_value\":\"+5\"},{\"level\":16,\"column_value\":\"+5\"},{\"level\":17,\"column_value\":\"+6\"},{\"level\":18,\"column_value\":\"+6\"},{\"level\":19,\"column_value\":\"+6\"},{\"level\":2,\"column_value\":\"+2\"},{\"level\":20,\"column_value\":\"+6\"},{\"level\":3,\"column_value\":\"+2\"},{\"level\":4,\"column_value\":\"+2\"},{\"level\":5,\"column_value\":\"+3\"},{\"level\":6,\"column_value\":\"+3\"},{\"level\":7,\"column_value\":\"+3\"},{\"level\":8,\"column_value\":\"+3\"},{\"level\":9,\"column_value\":\"+4\"}]},{\"key\":\"srd-2024_warlock_slot-level\",\"name\":\"Slot Level\",\"desc\":\"[Column data]\",\"feature_type\":\"CLASS_TABLE_DATA\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":1,\"column_value\":\"1st\"},{\"level\":10,\"column_value\":\"5th\"},{\"level\":11,\"column_value\":\"5th\"},{\"level\":12,\"column_value\":\"5th\"},{\"level\":13,\"column_value\":\"5th\"},{\"level\":14,\"column_value\":\"5th\"},{\"level\":15,\"column_value\":\"5th\"},{\"level\":16,\"column_value\":\"5th\"},{\"level\":17,\"column_value\":\"5th\"},{\"level\":18,\"column_value\":\"5th\"},{\"level\":19,\"column_value\":\"5th\"},{\"level\":2,\"column_value\":\"1st\"},{\"level\":20,\"column_value\":\"5th\"},{\"level\":3,\"column_value\":\"2nd\"},{\"level\":4,\"column_value\":\"2nd\"},{\"level\":5,\"column_value\":\"3rd\"},{\"level\":6,\"column_value\":\"3rd\"},{\"level\":7,\"column_value\":\"4th\"},{\"level\":8,\"column_value\":\"4th\"},{\"level\":9,\"column_value\":\"5th\"}]},{\"key\":\"srd-2024_warlock_spell-slots\",\"name\":\"Spell Slots\",\"desc\":\"[Column data]\",\"feature_type\":\"CLASS_TABLE_DATA\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":1,\"column_value\":\"1\"},{\"level\":10,\"column_value\":\"2\"},{\"level\":11,\"column_value\":\"3\"},{\"level\":12,\"column_value\":\"3\"},{\"level\":13,\"column_value\":\"3\"},{\"level\":14,\"column_value\":\"3\"},{\"level\":15,\"column_value\":\"3\"},{\"level\":16,\"column_value\":\"3\"},{\"level\":17,\"column_value\":\"4\"},{\"level\":18,\"column_value\":\"4\"},{\"level\":19,\"column_value\":\"4\"},{\"level\":2,\"column_value\":\"2\"},{\"level\":20,\"column_value\":\"4\"},{\"level\":3,\"column_value\":\"2\"},{\"level\":4,\"column_value\":\"2\"},{\"level\":5,\"column_value\":\"2\"},{\"level\":6,\"column_value\":\"2\"},{\"level\":7,\"column_value\":\"2\"},{\"level\":8,\"column_value\":\"2\"},{\"level\":9,\"column_value\":\"2\"}]},{\"key\":\"srd-2024_warlock_warlock-spell-list\",\"name\":\"Warlock Spell List\",\"desc\":\"This section presents the Warlock spell list. The spells are organized by spell level and then alphabetized, and each spell's school of magic is listed. In the Special column, *C* means the spell requires Concentration, *R* means it's a Ritual, and *M* means it requires a specific Material component.\\n\\nTable: Cantrips (Level 0 Warlock Spells)\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Chill Touch|Necromancy|—|\\n|Eldritch Blast|Evocation|—|\\n|Mage Hand|Conjuration|—|\\n|Minor Illusion|Illusion|—|\\n|Poison Spray|Necromancy|—|\\n|Prestidigitation|Transmutation|—|\\n|True Strike|Divination|—|\\n\\nTable: Level 1 Warlock Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Bane|Enchantment|C|\\n|Charm Person|Enchantment|—|\\n|Comprehend Languages|Divination|R|\\n|Detect Magic|Divination|C, R|\\n|Expeditious Retreat|Transmutation|C|\\n|Hellish Rebuke|Evocation|—|\\n|Hex|Enchantment|C|\\n|Hideous Laughter|Enchantment|C|\\n|Illusory Script|Illusion|R, M|\\n|Protection from Evil and Good|Abjuration|C, M|\\n|Speak with Animals|Divination|R|\\n|Unseen Servant|Conjuration|R|\\n\\nTable: Level 2 Warlock Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Darkness|Evocation|C|\\n|Enthrall|Enchantment|C|\\n|Hold Person|Enchantment|C|\\n|Invisibility|Illusion|C|\\n|Mind Spike|Divination|C|\\n|Mirror Image|Illusion|—|\\n|Misty Step|Conjuration|—|\\n|Ray of Enfeeblement|Necromancy|C|\\n|Spider Climb|Transmutation|C|\\n|Suggestion|Enchantment|C|\\n\\nTable: Level 3 Warlock Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Counterspell|Abjuration|—|\\n|Dispel Magic|Abjuration|—|\\n|Fear|Illusion|C|\\n|Fly|Transmutation|C|\\n|Gaseous Form|Transmutation|C|\\n|Hypnotic Pattern|Illusion|C|\\n|Magic Circle|Abjuration|M|\\n|Major Image|Illusion|C|\\n|Remove Curse|Abjuration|—|\\n|Tongues|Divination|—|\\n|Vampiric Touch|Necromancy|C|\\n\\nTable: Level 4 Warlock Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Banishment|Abjuration|C|\\n|Blight|Necromancy|—|\\n|Charm Monster|Enchantment|—|\\n|Dimension Door|Conjuration|—|\\n|Hallucinatory Terrain|Illusion|—|\\n\\nTable: Level 5 Warlock Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Contact Other Plane|Divination|R|\\n|Dream|Illusion|—|\\n|Hold Monster|Enchantment|C|\\n|Mislead|Illusion|C|\\n|Planar Binding|Abjuration|M|\\n|Scrying|Divination|C, M|\\n|Teleportation Circle|Conjuration|M|\\n\\nTable: Level 6 Warlock Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Circle of Death|Necromancy|M|\\n|Create Undead|Necromancy|M|\\n|Eyebite|Necromancy|C|\\n|True Seeing|Divination|M|\\n\\nTable: Level 7 Warlock Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Etherealness|Conjuration|—|\\n|Finger of Death|Necromancy|—|\\n|Forcecage|Evocation|C, M|\\n|Plane Shift|Conjuration|M|\\n\\nTable: Level 8 Warlock Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Befuddlement|Enchantment|—|\\n|Demiplane|Conjuration|—|\\n|Dominate Monster|Enchantment|C|\\n|Glibness|Enchantment|—|\\n|Power Word Stun|Enchantment|—|\\n\\nTable: Level 9 Warlock Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Astral Projection|Necromancy|M|\\n|Foresight|Divination|—|\\n|Gate|Conjuration|C, M|\\n|Imprisonment|Abjuration|M|\\n|Power Word Kill|Enchantment|—|\\n|True Polymorph|Transmutation|C|\\n|Weird|Illusion|C|\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[],\"data_for_class_table\":[]},{\"key\":\"srd-2024_warlock_warlock-subclass\",\"name\":\"Warlock Subclass\",\"desc\":\"You gain a Warlock subclass of your choice. The Fiend Patron subclass is detailed after this class's description. A subclass is a specialization that grants you features at certain Warlock levels. For the rest of your career, you gain each of your subclass's features that are of your Warlock level or lower.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":3,\"detail\":null}],\"data_for_class_table\":[]}],\"hit_points\":{\"hit_dice\":\"D8\",\"hit_dice_name\":\"1D8 per Warlock level\",\"hit_points_at_1st_level\":\"8 + your Constitution modifier\",\"hit_points_at_higher_levels\":\"1D8 (or 5) + your Constitution modifier per warlock level after 1st\"},\"document\":{\"name\":\"System Reference Document 5.2\",\"key\":\"srd-2024\",\"type\":\"SOURCE\",\"display_name\":\"5e 2024 Rules\",\"publisher\":{\"name\":\"Wizards of the Coast\",\"key\":\"wizards-of-the-coast\"},\"gamesystem\":{\"name\":\"5th Edition 2024\",\"key\":\"5e-2024\"},\"permalink\":\"https://dnd.wizards.com/resources/systems-reference-document\"},\"saving_throws\":[{\"name\":\"Charisma\"},{\"name\":\"Wisdom\"}],\"subclass_of\":null,\"name\":\"Warlock\",\"desc\":\"\",\"hit_dice\":\"D8\",\"caster_type\":\"PACT\",\"primary_abilities\":[],\"crossreferences\":{\"to\":[]}}",
+    "bg_data": "{\"key\":\"a5e-ag_sage\",\"benefits\":[{\"name\":\"Ability Score Increases\",\"desc\":\"+1 to Intelligence and one other ability score.\",\"type\":\"ability_score\"},{\"name\":\"Adventures And Advancement\",\"desc\":\"When you visit libraries and universities you tend to be asked for help in your role as a comparatively rough-and-tumble adventurer. After fetching a few bits of esoteric knowledge and settling a few academic disputes, you may be granted access to the restricted areas of the library (which contain darker secrets and deeper mysteries, such as those answerable with a DC 25 Arcana, Culture, Engineering, History, Nature, or Religion check).\",\"type\":\"adventures_and_advancement\"},{\"name\":\"Connection and Memento\",\"desc\":\"Roll 1d10, choose, or make up your own.\\r\\n\\r\\n#### Sage Connections\\r\\n|d10|Connection|\\n|---|---|\\n|1|Your rival who always seems to be one step ahead of you in the research race.|\\r\\n|2|The college dean who banished you for conduct unbefitting a research fellow.|\\r\\n|3|A former student of yours who has become a dangerous wizard.|\\r\\n|4|The professor who took credit for your research.|\\r\\n|5|The rival sage whose cruel nickname for you has made you a laughingstock.|\\r\\n|6|The alchemist who will pay for bizarre monster trophies and other ingredients—no questions asked.|\\r\\n|7|The peer with a competing cosmological theory that causes endless friendly bickering.|\\r\\n|8|The noble who recognized your intelligence at a young age and sponsored your entrance into academia.|\\r\\n|9|A talented apprentice who ran away after mastering magical power but not the theoretical foundation to control it.|\\r\\n|10|The invading general who burned the library that was once your home.|\\r\\n\\r\\n#### Sage Mementos\\r\\n|d10|Memento|\\n|---|---|\\n|1|A letter from a colleague asking for research help.|\\r\\n|2|Your incomplete manuscript.|\\r\\n|3|An ancient scroll in a language that no magic can decipher.|\\r\\n|4|A copy of your highly unorthodox theoretical work that got you in so much trouble.|\\r\\n|5|A list of the forbidden books that may answer your equally forbidden question.|\\r\\n|6|A formula for a legendary magic item for which you have no ingredients.|\\r\\n|7|An ancient manuscript of a famous literary work believed to have been lost; only you believe that it is genuine.|\\r\\n|8|Your mentor's incomplete bestiary, encyclopedia, or other work that you vowed to complete.|\\r\\n|9|Your prize possession: a magic quill pen that takes dictation.|\\r\\n|10|The name of a book you need for your research that seems to be missing from every library you've visited.|\",\"type\":\"connection_and_memento\"},{\"name\":\"Equipment\",\"desc\":\"Bottle of ink, pen, 50 sheets of parchment, common clothes.\",\"type\":\"equipment\"},{\"name\":\"Library Privileges\",\"desc\":\"As a fellow or friend of several universities you have visiting access to the great libraries, most of which are off-limits to the general public. With enough time spent in a library, you can uncover most of the answers you seek (any question answerable with a DC 20 Arcana, Culture, Engineering, History, Nature, or Religion check).\",\"type\":\"feature\"},{\"name\":\"Skill Proficiencies\",\"desc\":\"History, and either Arcana, Culture, Engineering, or Religion.\",\"type\":\"skill_proficiency\"}],\"document\":{\"name\":\"Adventurer's Guide\",\"key\":\"a5e-ag\",\"type\":\"SOURCE\",\"display_name\":\"Adventurer's Guide\",\"publisher\":{\"name\":\"EN Publishing\",\"key\":\"en-publishing\"},\"gamesystem\":{\"name\":\"Advanced 5th Edition\",\"key\":\"a5e\"},\"permalink\":\"https://a5esrd.com/a5esrd\"},\"name\":\"Sage\",\"desc\":\"\",\"crossreferences\":{\"to\":[]}}",
+    "subclass_data": "{\"key\":\"seeker_patron\",\"name\":\"The Seeker\",\"subclass_of\":{\"key\":\"warlock\",\"name\":\"warlock\"},\"document\":{\"display_name\":\"nebulan\",\"key\":\"homebrew\",\"gamesystem\":{\"key\":\"homebrew\"}},\"_homebrew\":true,\"_hbData\":{\"description\":\"A warlock who serves a mysterious entity seeking knowledge.\",\"features\":{\"1\":[{\"description\":\"As a bonus action, you create a whirling aurora of brilliant energy that swirls around you. Until the end of your next turn, you gain resistance to all damage, and if a hostile creature ends its turn within 10 feet of you, it takes radiant damage equal to your warlock level + your Charisma modifier. Once you use this feature, you can't use it again until you finish a short or long rest.\",\"id\":\"shielding_aurora\",\"mechanics\":{\"damage_type\":\"varies\",\"type\":\"resistance\"},\"name\":\"Shielding Aurora\"},{\"description\":\"You gain access to the following spells: Feather Fall, Jump\",\"id\":\"spells_gained\",\"mechanics\":{\"type\":\"spell_list\"},\"name\":\"Spells Gained\"}],\"3\":[{\"description\":\"The Seeker grants you a chain forged from starlight, decorated with seven gleaming motes of brightness. While the chain is on your person, you know the augury spell and can cast it as a ritual. The spell doesn't count against your number of spells known. Additionally, you can invoke the Seeker’s power to gain advantage on an Intelligence check while you carry this item. Once you use this ability, you cannot use it again until you complete a short or long rest. If you lose your Star Chain, you can perform a 1-hour ceremony to receive a replacement from the Seeker. The ceremony can be performed during a short or long rest, and it destroys the previous chain. The chain disappears in a flash of light when you die.\",\"id\":\"pact_boon\",\"mechanics\":{\"ability_grant\":{\"ability\":\"intelligence\",\"type\":\"advantage_check\"},\"grants_spell\":\"augury\",\"name\":\"Pact of the Stars\",\"restore_on\":\"short_or_long_rest\",\"spell_casting\":\"ritual\",\"spell_known_override\":true,\"type\":\"pact_boon\"},\"name\":\"Pact of the stars\"},{\"description\":\"You gain access to the following spells: Levitate, Locate Object\",\"id\":\"spells_gained\",\"mechanics\":{\"type\":\"spell_list\"},\"name\":\"Spells Gained\"}],\"5\":[{\"description\":\"You gain access to the following spells: Clairvoyance, Sending\",\"id\":\"spells_gained\",\"mechanics\":{\"type\":\"spell_list\"},\"name\":\"Spells Gained\"}],\"6\":[{\"description\":\"As an action, you disappear from the world for a brief moment and enter the Astral Plane, taking advantage of its timeless nature. While in your astral refuge, you can take two actions to cast spells that target only you. After using those two actions, you return to the space you occupied and your turn ends.\",\"id\":\"astral_refuge\",\"mechanics\":{\"type\":\"astral_projection\"},\"name\":\"Astral Refuge\"}],\"7\":[{\"description\":\"You gain access to the following spells: Arcane Eye, Locate Creature\",\"id\":\"spells_gained\",\"mechanics\":{\"type\":\"spell_list\"},\"name\":\"Spells Gained\"}],\"9\":[{\"description\":\"You gain access to the following spells: Legend Lore, Passwall\",\"id\":\"spells_gained\",\"mechanics\":{\"type\":\"spell_list\"},\"name\":\"Spells Gained\"}],\"10\":[{\"description\":\"you no longer need to breathe, and you gain resistance to fire damage and cold damage.\",\"id\":\"far_wanderer\",\"mechanics\":{\"damage_type\":[\"fire\",\"cold\"],\"type\":\"resistance\"},\"name\":\"Far Wanderer\"}],\"14\":[{\"description\":\"By performing a special ritual over the course of 5 minutes, you shift yourself and up to ten willing creatures you can see to the Astral Plane. You and those creatures gain the benefits of a short rest while sequestered on the Astral Plane. You then return to the spaces you all occupied when you used this ability, with no time having passed in the world. During this short rest, you and the creatures you sequester can make use of any options available during a rest that affect only you and the creatures you sequester. Once you use this ability, you cannot use it again until you complete a long rest.\",\"id\":\"astral_sequestration\",\"mechanics\":{\"area_of_effect\":\"10 willing creatures\",\"duration\":\"5 minutes\",\"restore_on\":\"long_rest\",\"type\":\"astral_projection\"},\"name\":\"Astral Sequestration\"}]},\"homebrew\":true,\"id\":\"seeker_patron\",\"name\":\"The Seeker\",\"parent_class_id\":\"warlock\",\"source\":\"nebulan\",\"subclass_spell_list\":[\"feather_fall\",\"jump\",\"levitate\",\"locate_object\",\"clairvoyance\",\"sending\",\"arcane_eye\",\"locate_creature\",\"legend_lore\",\"passwall\"]}}"
+  }
+}

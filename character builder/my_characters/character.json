@@ -1,0 +1,297 @@
+{
+  "char_name": "",
+  "player_name": "",
+  "alignment": "True Neutral",
+  "species_name": "Dwarf",
+  "class_name": "Paladin",
+  "subclass_name": "Oath of the Hearth",
+  "subclass_homebrew": false,
+  "background_name": "Soldier",
+  "level": 1,
+  "proficiency_bonus": 2,
+  "passive_perception": 9,
+  "hp_max": 11,
+  "hp_current": 11,
+  "hp_temp": 0,
+  "hp_pct": 100,
+  "hit_dice_display": "1d10",
+  "armor_class": 11,
+  "speed": 30,
+  "initiative": "+1",
+  "inspiration": true,
+  "spell_mod": "+1",
+  "spell_attack": "+3",
+  "spell_save_dc": 11,
+  "spell_ability": "CHA",
+  "abilities": [
+    {
+      "key": "strength",
+      "label": "STR",
+      "score": 13,
+      "modifier": 1,
+      "save": 1,
+      "save_prof": false
+    },
+    {
+      "key": "dexterity",
+      "label": "DEX",
+      "score": 13,
+      "modifier": 1,
+      "save": 1,
+      "save_prof": false
+    },
+    {
+      "key": "constitution",
+      "label": "CON",
+      "score": 13,
+      "modifier": 1,
+      "save": 1,
+      "save_prof": false
+    },
+    {
+      "key": "intelligence",
+      "label": "INT",
+      "score": 7,
+      "modifier": -2,
+      "save": -2,
+      "save_prof": false
+    },
+    {
+      "key": "wisdom",
+      "label": "WIS",
+      "score": 9,
+      "modifier": -1,
+      "save": 1,
+      "save_prof": true
+    },
+    {
+      "key": "charisma",
+      "label": "CHA",
+      "score": 13,
+      "modifier": 1,
+      "save": 3,
+      "save_prof": true
+    }
+  ],
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "DEX",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "WIS",
+      "base_mod": -1,
+      "bonus": -1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Arcana",
+      "ability": "INT",
+      "base_mod": -2,
+      "bonus": -2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Athletics",
+      "ability": "STR",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Deception",
+      "ability": "CHA",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "History",
+      "ability": "INT",
+      "base_mod": -2,
+      "bonus": -2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Insight",
+      "ability": "WIS",
+      "base_mod": -1,
+      "bonus": -1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Intimidation",
+      "ability": "CHA",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Investigation",
+      "ability": "INT",
+      "base_mod": -2,
+      "bonus": -2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Medicine",
+      "ability": "WIS",
+      "base_mod": -1,
+      "bonus": -1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Nature",
+      "ability": "INT",
+      "base_mod": -2,
+      "bonus": -2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Perception",
+      "ability": "WIS",
+      "base_mod": -1,
+      "bonus": -1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Performance",
+      "ability": "CHA",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Persuasion",
+      "ability": "CHA",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Religion",
+      "ability": "INT",
+      "base_mod": -2,
+      "bonus": -2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "DEX",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Stealth",
+      "ability": "DEX",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Survival",
+      "ability": "WIS",
+      "base_mod": -1,
+      "bonus": -1,
+      "proficiency": "none"
+    }
+  ],
+  "spell_slots": [
+    {
+      "level": 1,
+      "max": 2,
+      "used": 0,
+      "available": 2
+    }
+  ],
+  "traits": [
+    {
+      "name": "Size",
+      "desc": "Medium (about 4–5 feet tall) "
+    },
+    {
+      "name": "Speed",
+      "desc": "30 feet"
+    },
+    {
+      "name": "Darkvision",
+      "desc": "You have Darkvision with a range of 120 feet."
+    },
+    {
+      "name": "Dwarven Resilience",
+      "desc": "You have Resistance to Poison damage. You also have Advantage on saving throws you make to avoid or end the Poisoned condition."
+    },
+    {
+      "name": "Dwarven Toughness",
+      "desc": "Your Hit Point maximum increases by 1, and it increases by 1 again whenever you gain a level."
+    },
+    {
+      "name": "Stonecunning",
+      "desc": "As a Bonus Action, you gain Tremorsense with a range of 60 feet for 10 minutes. You must be on a stone surface or touching a stone surface to use this Tremorsense. The stone can be natural or worked.\n\nYou can use this Bonus Action a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest."
+    }
+  ],
+  "class_features": [
+    {
+      "name": "Lay On Hands",
+      "desc": "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you finish a Long Rest. With that pool, you can restore a total number of Hit Points equal to five times your Paladin level.\n\nAs a Bonus Action, you can touch a creature (which could be yourself) and draw power from the pool of healing to restore a number of Hit Points to that creature, up to the maximum amount remaining in the pool.\n\nYou can also expend 5 Hit Points from the pool of healing power to remove the Poisoned condition from the creature; those points don't also restore Hit Points to the creature."
+    },
+    {
+      "name": "Weapon Mastery",
+      "desc": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Longswords and Javelins.\n\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Halberds and Flails."
+    }
+  ],
+  "subclass_features": [],
+  "resources": [],
+  "prepared_spells": [],
+  "cantrips": [],
+  "notes": "",
+  "backstory": "",
+  "gold": 50.0,
+  "class_equipment": "Choose A or B: (A) Chain Mail, Shield, Longsword, 6 Javelins, Holy Symbol, Priest's Pack, and 9 GP; or (B) 150 GP",
+  "bg_equipment": "*Choose A or B:* (A) Spear, Shortbow, 20 Arrows, Gaming Set (same as above), Healer's Kit, Quiver, Traveler's Clothes, 14 GP; or (B) 50 GP",
+  "armor_proficiencies": "Light, Medium, and Heavy armor and Shields",
+  "weapon_proficiencies": "Simple and Martial weapons",
+  "bg_tool_proficiency": "Choose one kind of Gaming Set",
+  "bg_languages": "",
+  "bg_trait_name": "",
+  "bg_trait_desc": "",
+  "bg_ofeat_name": "Feat",
+  "bg_ofeat_desc": "Savage Attacker",
+  "_raw": {
+    "name": "",
+    "player_name": "",
+    "alignment": "True Neutral",
+    "level": "1",
+    "gold": "50",
+    "backstory": "",
+    "notes": "",
+    "species_key": "srd-2024_dwarf",
+    "species_name": "Dwarf",
+    "class_key": "srd-2024_paladin",
+    "class_name": "Paladin",
+    "background_key": "srd-2024_soldier",
+    "background_name": "Soldier",
+    "subclass_key": "toh_oath-of-the-hearth",
+    "subclass_name": "Oath of the Hearth",
+    "subclass_homebrew": false,
+    "str": 13,
+    "dex": 13,
+    "con": 13,
+    "int": 7,
+    "wis": 9,
+    "cha": 13,
+    "skills": [],
+    "spells": [],
+    "hit_die_override": 10,
+    "hp_rolled": 11,
+    "species_data": "{\"key\":\"srd-2024_dwarf\",\"is_subspecies\":false,\"document\":{\"name\":\"System Reference Document 5.2\",\"key\":\"srd-2024\",\"type\":\"SOURCE\",\"display_name\":\"5e 2024 Rules\",\"publisher\":{\"name\":\"Wizards of the Coast\",\"key\":\"wizards-of-the-coast\"},\"gamesystem\":{\"name\":\"5th Edition 2024\",\"key\":\"5e-2024\"},\"permalink\":\"https://dnd.wizards.com/resources/systems-reference-document\"},\"traits\":[{\"name\":\"Size\",\"desc\":\"Medium (about 4–5 feet tall) \",\"type\":\"SIZE\",\"order\":1},{\"name\":\"Speed\",\"desc\":\"30 feet\",\"type\":\"SPEED\",\"order\":2},{\"name\":\"Darkvision\",\"desc\":\"You have Darkvision with a range of 120 feet.\",\"type\":null,\"order\":3},{\"name\":\"Dwarven Resilience\",\"desc\":\"You have Resistance to Poison damage. You also have Advantage on saving throws you make to avoid or end the Poisoned condition.\",\"type\":null,\"order\":4},{\"name\":\"Dwarven Toughness\",\"desc\":\"Your Hit Point maximum increases by 1, and it increases by 1 again whenever you gain a level.\",\"type\":null,\"order\":5},{\"name\":\"Stonecunning\",\"desc\":\"As a Bonus Action, you gain Tremorsense with a range of 60 feet for 10 minutes. You must be on a stone surface or touching a stone surface to use this Tremorsense. The stone can be natural or worked.\\n\\nYou can use this Bonus Action a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.\",\"type\":null,\"order\":6}],\"name\":\"Dwarf\",\"desc\":\"\",\"subspecies_of\":null,\"crossreferences\":{\"to\":[]}}",
+    "class_data": "{\"key\":\"srd-2024_paladin\",\"features\":[{\"key\":\"srd-2024_paladin_ability-score-improvement\",\"name\":\"Ability Score Improvement\",\"desc\":\"You gain the Ability Score Improvement feat (see \\\"Feats\\\") or another feat of your choice for which you qualify. You gain this feature again at Paladin levels 8, 12, and 16.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":12,\"detail\":null},{\"level\":16,\"detail\":null},{\"level\":4,\"detail\":null},{\"level\":8,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_abjure-foes\",\"name\":\"Abjure Foes\",\"desc\":\"As a Magic action, you can expend one use of this class's Channel Divinity to overwhelm foes with awe. As you present your Holy Symbol or weapon, you can target a number of creatures equal to your Charisma modifier (minimum of one creature) that you can see within 60 feet of yourself. Each target must succeed on a Wisdom saving throw or have the Frightened condition for 1 minute or until it takes any damage. While Frightened in this way, a target can do only one of the following on its turns: move, take an action, or take a Bonus Action.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":9,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_aura-expansion\",\"name\":\"Aura Expansion\",\"desc\":\"Your Aura of Protection is now a 30-foot Emanation.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":18,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_aura-of-courage\",\"name\":\"Aura of Courage\",\"desc\":\"You and your allies have Immunity to the Frightened condition while in your Aura of Protection. If a Frightened ally enters the aura, that condition has no effect on that ally while there.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":10,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_aura-of-protection\",\"name\":\"Aura of Protection\",\"desc\":\"You radiate a protective, unseeable aura in a 10-foot Emanation that originates from you. The aura is inactive while you have the Incapacitated condition.\\n\\nYou and your allies in the aura gain a bonus to saving throws equal to your Charisma modifier (minimum bonus of +1).\\n\\nIf another Paladin is present, a creature can benefit from only one Aura of Protection at a time; the creature chooses which aura while in them.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":6,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_channel-divinity\",\"name\":\"Channel Divinity\",\"desc\":\"You can channel divine energy directly from the Outer Planes, using it to fuel magical effects. You start with one such effect: Divine Sense, which is described below. Other Paladin features give additional Channel Divinity effect options. Each time you use this class's Channel Divinity, you choose which effect from this class to create.\\n\\nYou can use this class's Channel Divinity twice. You regain one of its expended uses when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest. You gain an additional use when you reach Paladin level 11.\\n\\nIf a Channel Divinity effect requires a saving throw, the DC equals the spell save DC from this class's Spellcasting feature.\\n\\n**Divine Sense.** As a Bonus Action, you can open your awareness to detect Celestials, Fiends, and Undead. For the next 10 minutes or until you have the Incapacitated condition, you know the location of any creature of those types within 60 feet of yourself, and you know its creature type. Within the same radius, you also detect the presence of any place or object that has been consecrated or desecrated, as with the *Hallow* spell.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":3,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_channel-divinity-uses\",\"name\":\"Channel Divinity\",\"desc\":\"[Column data]\",\"feature_type\":\"CLASS_TABLE_DATA\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":10,\"column_value\":\"2\"},{\"level\":11,\"column_value\":\"3\"},{\"level\":12,\"column_value\":\"3\"},{\"level\":13,\"column_value\":\"3\"},{\"level\":14,\"column_value\":\"3\"},{\"level\":15,\"column_value\":\"3\"},{\"level\":16,\"column_value\":\"3\"},{\"level\":17,\"column_value\":\"3\"},{\"level\":18,\"column_value\":\"3\"},{\"level\":19,\"column_value\":\"3\"},{\"level\":20,\"column_value\":\"3\"},{\"level\":3,\"column_value\":\"2\"},{\"level\":4,\"column_value\":\"2\"},{\"level\":5,\"column_value\":\"2\"},{\"level\":6,\"column_value\":\"2\"},{\"level\":7,\"column_value\":\"2\"},{\"level\":8,\"column_value\":\"2\"},{\"level\":9,\"column_value\":\"2\"}]},{\"key\":\"srd-2024_paladin_core-traits\",\"name\":\"Core Paladin Traits\",\"desc\":\"|||\\n|---|---|\\n|Primary Ability|Strength and Charisma|\\n|Hit Point Die|D10 per Paladin level|\\n|Saving Throw Proficiencies|Wisdom and Charisma|\\n|Skill Proficiencies|Choose 2: Athletics, Insight, Intimidation, Medicine, Persuasion, or Religion|\\n|Weapon Proficiencies|Simple and Martial weapons|\\n|Armor Training|Light, Medium, and Heavy armor and Shields|\\n|Starting Equipment|Choose A or B: (A) Chain Mail, Shield, Longsword, 6 Javelins, Holy Symbol, Priest's Pack, and 9 GP; or (B) 150 GP|\",\"feature_type\":\"CORE_TRAITS_TABLE\",\"gained_at\":[],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_epic-boon\",\"name\":\"Epic Boon\",\"desc\":\"You gain an Epic Boon feat (see \\\"Feats\\\") or another feat of your choice for which you qualify. Boon of Truesight is recommended.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":19,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_extra-attack\",\"name\":\"Extra Attack\",\"desc\":\"You can attack twice instead of once whenever you take the Attack action on your turn.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":5,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_faithful-steed\",\"name\":\"Faithful Steed\",\"desc\":\"You can call on the aid of an otherworldly steed. You always have the *Find Steed* spell prepared.\\n\\nYou can also cast the spell once without expending a spell slot, and you regain the ability to do so when you finish a Long Rest.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":5,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_fighting-style\",\"name\":\"Fighting Style\",\"desc\":\"You gain a Fighting Style feat of your choice (see \\\"Feats\\\" for feats). Instead of choosing one of those feats, you can choose the option below.\\n\\n**Blessed Warrior.** You learn two Cleric cantrips of your choice (see the Cleric class's section for a list of Cleric spells). *Guidance* and *Sacred Flame* are recommended. The chosen cantrips count as Paladin spells for you, and Charisma is your spellcasting ability for them. Whenever you gain a Paladin level, you can replace one of these cantrips with another Cleric cantrip.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":2,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_lay-on-hands\",\"name\":\"Lay On Hands\",\"desc\":\"Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you finish a Long Rest. With that pool, you can restore a total number of Hit Points equal to five times your Paladin level.\\n\\nAs a Bonus Action, you can touch a creature (which could be yourself) and draw power from the pool of healing to restore a number of Hit Points to that creature, up to the maximum amount remaining in the pool.\\n\\nYou can also expend 5 Hit Points from the pool of healing power to remove the Poisoned condition from the creature; those points don't also restore Hit Points to the creature.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_paladin-subclass\",\"name\":\"Paladin Subclass\",\"desc\":\"You gain a Paladin subclass of your choice. The Oath of Devotion subclass is detailed after this class's description. A subclass is a specialization that grants you features at certain Paladin levels. For the rest of your career, you gain each of your subclass's features that are of your Paladin level or lower.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":3,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_paladins-smite\",\"name\":\"Paladin's Smite\",\"desc\":\"You always have the *Divine Smite* spell prepared. In addition, you can cast it without expending a spell slot, but you must finish a Long Rest before you can cast it in this way again.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":2,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_prepared-spells\",\"name\":\"Prepared Spells\",\"desc\":\"[Column data]\",\"feature_type\":\"CLASS_TABLE_DATA\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":1,\"column_value\":\"2\"},{\"level\":10,\"column_value\":\"9\"},{\"level\":11,\"column_value\":\"10\"},{\"level\":12,\"column_value\":\"10\"},{\"level\":13,\"column_value\":\"11\"},{\"level\":14,\"column_value\":\"11\"},{\"level\":15,\"column_value\":\"12\"},{\"level\":16,\"column_value\":\"12\"},{\"level\":17,\"column_value\":\"14\"},{\"level\":18,\"column_value\":\"14\"},{\"level\":19,\"column_value\":\"15\"},{\"level\":2,\"column_value\":\"3\"},{\"level\":20,\"column_value\":\"15\"},{\"level\":3,\"column_value\":\"4\"},{\"level\":4,\"column_value\":\"5\"},{\"level\":5,\"column_value\":\"6\"},{\"level\":6,\"column_value\":\"6\"},{\"level\":7,\"column_value\":\"7\"},{\"level\":8,\"column_value\":\"7\"},{\"level\":9,\"column_value\":\"9\"}]},{\"key\":\"srd-2024_paladin_proficiency-bonus\",\"name\":\"Proficiency Bonus\",\"desc\":\"[Column data]\",\"feature_type\":\"PROFICIENCY_BONUS\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":1,\"column_value\":\"+2\"},{\"level\":10,\"column_value\":\"+4\"},{\"level\":11,\"column_value\":\"+4\"},{\"level\":12,\"column_value\":\"+4\"},{\"level\":13,\"column_value\":\"+5\"},{\"level\":14,\"column_value\":\"+5\"},{\"level\":15,\"column_value\":\"+5\"},{\"level\":16,\"column_value\":\"+5\"},{\"level\":17,\"column_value\":\"+6\"},{\"level\":18,\"column_value\":\"+6\"},{\"level\":19,\"column_value\":\"+6\"},{\"level\":2,\"column_value\":\"+2\"},{\"level\":20,\"column_value\":\"+6\"},{\"level\":3,\"column_value\":\"+2\"},{\"level\":4,\"column_value\":\"+2\"},{\"level\":5,\"column_value\":\"+3\"},{\"level\":6,\"column_value\":\"+3\"},{\"level\":7,\"column_value\":\"+3\"},{\"level\":8,\"column_value\":\"+3\"},{\"level\":9,\"column_value\":\"+4\"}]},{\"key\":\"srd-2024_paladin_radiant-strikes\",\"name\":\"Radiant Strikes\",\"desc\":\"Your strikes now carry supernatural power. When you hit a target with an attack roll using a Melee weapon or an Unarmed Strike, the target takes an extra 1d8 Radiant damage.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":11,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_restoring-touch\",\"name\":\"Restoring Touch\",\"desc\":\"When you use Lay On Hands on a creature, you can also remove one or more of the following conditions from the creature: Blinded, Charmed, Deafened, Frightened, Paralyzed, or Stunned. You must expend 5 Hit Points from the healing pool of Lay On Hands for each of these conditions you remove; those points don't also restore Hit Points to the creature.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":14,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_slots-1st\",\"name\":\"1st\",\"desc\":\"[Column data]\",\"feature_type\":\"SPELL_SLOTS\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":1,\"column_value\":\"2\"},{\"level\":10,\"column_value\":\"4\"},{\"level\":11,\"column_value\":\"4\"},{\"level\":12,\"column_value\":\"4\"},{\"level\":13,\"column_value\":\"4\"},{\"level\":14,\"column_value\":\"4\"},{\"level\":15,\"column_value\":\"4\"},{\"level\":16,\"column_value\":\"4\"},{\"level\":17,\"column_value\":\"4\"},{\"level\":18,\"column_value\":\"4\"},{\"level\":19,\"column_value\":\"4\"},{\"level\":2,\"column_value\":\"2\"},{\"level\":20,\"column_value\":\"4\"},{\"level\":3,\"column_value\":\"3\"},{\"level\":4,\"column_value\":\"3\"},{\"level\":5,\"column_value\":\"4\"},{\"level\":6,\"column_value\":\"4\"},{\"level\":7,\"column_value\":\"4\"},{\"level\":8,\"column_value\":\"4\"},{\"level\":9,\"column_value\":\"4\"}]},{\"key\":\"srd-2024_paladin_slots-2nd\",\"name\":\"2nd\",\"desc\":\"[Column data]\",\"feature_type\":\"SPELL_SLOTS\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":10,\"column_value\":\"3\"},{\"level\":11,\"column_value\":\"3\"},{\"level\":12,\"column_value\":\"3\"},{\"level\":13,\"column_value\":\"3\"},{\"level\":14,\"column_value\":\"3\"},{\"level\":15,\"column_value\":\"3\"},{\"level\":16,\"column_value\":\"3\"},{\"level\":17,\"column_value\":\"3\"},{\"level\":18,\"column_value\":\"3\"},{\"level\":19,\"column_value\":\"3\"},{\"level\":20,\"column_value\":\"3\"},{\"level\":5,\"column_value\":\"2\"},{\"level\":6,\"column_value\":\"2\"},{\"level\":7,\"column_value\":\"3\"},{\"level\":8,\"column_value\":\"3\"},{\"level\":9,\"column_value\":\"3\"}]},{\"key\":\"srd-2024_paladin_slots-3rd\",\"name\":\"3rd\",\"desc\":\"[Column data]\",\"feature_type\":\"SPELL_SLOTS\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":10,\"column_value\":\"2\"},{\"level\":11,\"column_value\":\"3\"},{\"level\":12,\"column_value\":\"3\"},{\"level\":13,\"column_value\":\"3\"},{\"level\":14,\"column_value\":\"3\"},{\"level\":15,\"column_value\":\"3\"},{\"level\":16,\"column_value\":\"3\"},{\"level\":17,\"column_value\":\"3\"},{\"level\":18,\"column_value\":\"3\"},{\"level\":19,\"column_value\":\"3\"},{\"level\":20,\"column_value\":\"3\"},{\"level\":9,\"column_value\":\"2\"}]},{\"key\":\"srd-2024_paladin_slots-4th\",\"name\":\"4th\",\"desc\":\"[Column data]\",\"feature_type\":\"SPELL_SLOTS\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":13,\"column_value\":\"1\"},{\"level\":14,\"column_value\":\"1\"},{\"level\":15,\"column_value\":\"2\"},{\"level\":16,\"column_value\":\"2\"},{\"level\":17,\"column_value\":\"3\"},{\"level\":18,\"column_value\":\"3\"},{\"level\":19,\"column_value\":\"3\"},{\"level\":20,\"column_value\":\"3\"}]},{\"key\":\"srd-2024_paladin_slots-5th\",\"name\":\"5th\",\"desc\":\"[Column data]\",\"feature_type\":\"SPELL_SLOTS\",\"gained_at\":[],\"data_for_class_table\":[{\"level\":17,\"column_value\":\"1\"},{\"level\":18,\"column_value\":\"1\"},{\"level\":19,\"column_value\":\"2\"},{\"level\":20,\"column_value\":\"2\"}]},{\"key\":\"srd-2024_paladin_spell-list\",\"name\":\"Paladin Spell List\",\"desc\":\"This section presents the Paladin spell list. The spells are organized by spell level and then alphabetized, and each spell's school of magic is listed. In the Special column, *C* means the spell requires Concentration, *R* means it's a Ritual, and *M* means it requires a specific Material component.\\n\\nTable: Level 1 Paladin Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Bless|Enchantment|C, M|\\n|Command|Enchantment|—|\\n|Cure Wounds|Abjuration|—|\\n|Detect Evil and Good|Divination|C|\\n|Detect Magic|Divination|C, R|\\n|Detect Poison and Disease|Divination|C, R|\\n|Divine Favor|Transmutation|—|\\n|Divine Smite|Evocation|—|\\n|Heroism|Enchantment|C|\\n|Protection from Evil and Good|Abjuration|C, M|\\n|Purify Food and Drink|Transmutation|R|\\n|Searing Smite|Evocation|—|\\n|Shield of Faith|Abjuration|C|\\n\\nTable: Level 2 Paladin Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Aid|Abjuration|—|\\n|Find Steed|Conjuration|—|\\n|Gentle Repose|Necromancy|R, M|\\n|Lesser Restoration|Abjuration|—|\\n|Locate Object|Divination|C|\\n|Magic Weapon|Transmutation|—|\\n|Prayer of Healing|Abjuration|—|\\n|Protection from Poison|Abjuration|—|\\n|Shining Smite|Transmutation|C|\\n|Warding Bond|Abjuration|M|\\n|Zone of Truth|Enchantment|—|\\n\\nTable: Level 3 Paladin Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Create Food and Water|Conjuration|—|\\n|Daylight|Evocation|—|\\n|Dispel Magic|Abjuration|—|\\n|Magic Circle|Abjuration|M|\\n|Remove Curse|Abjuration|—|\\n|Revivify|Necromancy|M|\\n\\nTable: Level 4 Paladin Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Aura of Life|Abjuration|C|\\n|Banishment|Abjuration|C|\\n|Death Ward|Abjuration|—|\\n|Locate Creature|Divination|C|\\n\\nTable: Level 5 Paladin Spells\\n\\n|Spell|School|Special|\\n|---|---|---|\\n|Dispel Evil and Good|Abjuration|C|\\n|Geas|Enchantment|—|\\n|Greater Restoration|Abjuration|M|\\n|Raise Dead|Necromancy|M|\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_spellcasting\",\"name\":\"Spellcasting\",\"desc\":\"You have learned to cast spells through prayer and meditation. See \\\"Spells\\\" for the rules on spellcasting. The information below details how you use those rules with Paladin spells, which appear in the Paladin spell list later in the class's description.\\n\\n**Spell Slots.** The Paladin Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest.\\n\\n**Prepared Spells of Level 1+**. You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose two level 1 Paladin spells. *Heroism* and *Searing Smite* are recommended.\\n\\nThe number of spells on your list increases as you gain Paladin levels, as shown in the Prepared Spells column of the Paladin Features table. Whenever that number increases, choose additional Paladin spells until the number of spells on your list matches the number in the Paladin Features table. The chosen spells must be of a level for which you have spell slots. For example, if you're a level 5 Paladin, your list of prepared spells can include six Paladin spells of level 1 or 2 in any combination.\\n\\nIf another Paladin feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Paladin spells for you.\\n\\n**Changing Your Prepared Spells.** Whenever you finish a Long Rest, you can replace one spell on your list with another Paladin spell for which you have spell slots.\\n\\n**Spellcasting Ability.** Charisma is your spellcasting ability for your Paladin spells.\\n\\n**Spellcasting Focus.** You can use a Holy Symbol as a Spellcasting Focus for your Paladin spells.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"srd-2024_paladin_weapon-mastery\",\"name\":\"Weapon Mastery\",\"desc\":\"Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Longswords and Javelins.\\n\\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Halberds and Flails.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1,\"detail\":null}],\"data_for_class_table\":[]}],\"hit_points\":{\"hit_dice\":\"D10\",\"hit_dice_name\":\"1D10 per Paladin level\",\"hit_points_at_1st_level\":\"10 + your Constitution modifier\",\"hit_points_at_higher_levels\":\"1D10 (or 6) + your Constitution modifier per paladin level after 1st\"},\"document\":{\"name\":\"System Reference Document 5.2\",\"key\":\"srd-2024\",\"type\":\"SOURCE\",\"display_name\":\"5e 2024 Rules\",\"publisher\":{\"name\":\"Wizards of the Coast\",\"key\":\"wizards-of-the-coast\"},\"gamesystem\":{\"name\":\"5th Edition 2024\",\"key\":\"5e-2024\"},\"permalink\":\"https://dnd.wizards.com/resources/systems-reference-document\"},\"saving_throws\":[{\"name\":\"Charisma\"},{\"name\":\"Wisdom\"}],\"subclass_of\":null,\"name\":\"Paladin\",\"desc\":\"\",\"hit_dice\":\"D10\",\"caster_type\":\"HALF\",\"primary_abilities\":[],\"crossreferences\":{\"to\":[]}}",
+    "bg_data": "{\"key\":\"srd-2024_soldier\",\"benefits\":[{\"name\":\"Ability Scores\",\"desc\":\"Strength, Dexterity, Constitution\",\"type\":\"ability_score\"},{\"name\":\"Equipment\",\"desc\":\"*Choose A or B:* (A) Spear, Shortbow, 20 Arrows, Gaming Set (same as above), Healer's Kit, Quiver, Traveler's Clothes, 14 GP; or (B) 50 GP\",\"type\":\"equipment\"},{\"name\":\"Feat\",\"desc\":\"Savage Attacker\",\"type\":\"feat\"},{\"name\":\"Skill Proficiencies\",\"desc\":\"Athletics and Intimidation\",\"type\":\"skill_proficiency\"},{\"name\":\"Tool Proficiency\",\"desc\":\"Choose one kind of Gaming Set\",\"type\":\"tool_proficiency\"}],\"document\":{\"name\":\"System Reference Document 5.2\",\"key\":\"srd-2024\",\"type\":\"SOURCE\",\"display_name\":\"5e 2024 Rules\",\"publisher\":{\"name\":\"Wizards of the Coast\",\"key\":\"wizards-of-the-coast\"},\"gamesystem\":{\"name\":\"5th Edition 2024\",\"key\":\"5e-2024\"},\"permalink\":\"https://dnd.wizards.com/resources/systems-reference-document\"},\"name\":\"Soldier\",\"desc\":\"\",\"crossreferences\":{\"to\":[]}}",
+    "subclass_data": "{\"key\":\"toh_oath-of-the-hearth\",\"features\":[{\"key\":\"toh_oath-of-the-hearth_aura-of-the-hearth\",\"name\":\"Aura of the Hearth\",\"desc\":\"Beginning at 7th level, you and friendly creatures within 10 feet of you have advantage on saving throws against spells and effects that deal cold damage. If such a creature succeeds on a saving throw against a spell or effect that allows the creature to take only half the cold damage on a successful save, the creature instead takes no damage. In addition, you and friendly creatures within 10 feet of you have advantage on saving throws against the longterm effects of exposure to cold weather. When you reach 18th level in this class, the range of this aura increases to 30 feet.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":7,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"toh_oath-of-the-hearth_channel-divinity\",\"name\":\"Channel Divinity\",\"desc\":\"When you take this oath at 3rd level, you gain the following two Channel Divinity options. See the Sacred Oath class feature for how Channel Divinity works.\\n\\n ***Cease Hostility.*** As an action, you can use your Channel Divinity and speak soothing words. For 1 minute, each creature within 60 feet of you that can see or hear you must succeed on a Charisma saving throw to attack another creature. A creature hostile to you has disadvantage on the saving throw. This effect ends on a creature if it is attacked or harmed by a spell.\\n\\n ***Turn Boreal Creatures.*** As an action, you can use your Channel Divinity and speak a prayer against unnatural cold. Each cold creature within 30 feet of you and that can see or hear you must succeed on a Wisdom saving throw or be turned for 1 minute or until it takes damage.\\n  A turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":3,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"toh_oath-of-the-hearth_divine-sense\",\"name\":\"Divine Sense\",\"desc\":\"In addition to knowing the location of any celestial, fiend, or undead, your Divine Sense feature allows you to know the location of any cold creature within 60 feet of you that is not behind total cover.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[],\"data_for_class_table\":[]},{\"key\":\"toh_oath-of-the-hearth_fiery-smite\",\"name\":\"Fiery Smite\",\"desc\":\"When you use your Divine Smite feature, you can choose for the extra damage you deal to be fire or radiant, and the extra damage increases to 1d8 only if the target is an undead or a cold creature.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[],\"data_for_class_table\":[]},{\"key\":\"toh_oath-of-the-hearth_icewalker\",\"name\":\"Icewalker\",\"desc\":\"Starting at 15th level, you have resistance to cold damage, and you can't be restrained or petrified by cold or ice. In addition, you can move across and climb icy surfaces without needing to make an ability check, and difficult terrain composed of ice or snow doesn't cost you extra movement.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":15,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"toh_oath-of-the-hearth_oath-spells\",\"name\":\"Oath Spells\",\"desc\":\"You gain oath spells at the paladin levels listed in the Oath of the Hearth Spells table. See the Sacred Oath class feature for how oath spells work.\\n\\n **Oath of the Hearth Spells (table)**\\n| Paladin Level  | Spells                               | \\n|----------------|--------------------------------------| \\n| 3rd            | *burning hands*, *sanctuary*         | \\n| 5th            | *calm emotions*, *flame blade*       | \\n| 9th            | *protection from energy*, *tiny hut* | \\n| 13th           | *guardian of faith*, *wall of fire*  | \\n| 17th           | *flame strike*, *hallow*             |\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[],\"data_for_class_table\":[]},{\"key\":\"toh_oath-of-the-hearth_roaring-fire\",\"name\":\"Roaring Fire\",\"desc\":\"At 20th level, you can take on the aspects of a healthy, tended fire, radiating heat and light. For 1 minute, you gain the following benefits: \\n* You shed bright light in a 20-foot radius and dim light for an additional 20 feet. \\n* Whenever a cold creature starts its turn within 20 feet of you, the creature takes 2d8 fire damage, which ignores resistance and immunity to fire damage. \\n* Whenever you cast a paladin spell that deals fire damage and has a casting time of 1 action, you can cast it as a bonus action instead. \\n* Your weapon attacks deal an extra 1d6 fire damage on a hit. If you deal fire damage to a cold creature, it must succeed on a Wisdom saving throw or become frightened of you for 1 minute, or until it takes any damage.\\nOnce you use this feature, you can't use it again until you finish a long rest.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":20,\"detail\":null}],\"data_for_class_table\":[]},{\"key\":\"toh_oath-of-the-hearth_tenets-of-the-hearth\",\"name\":\"Tenets of the Hearth\",\"desc\":\"Paladins who take the Oath of the Hearth accommodate all creatures and attempt to find diplomatic solutions to conflicts. Once engaged in battle, though, these paladins fight until they defeat their enemies, or their enemies surrender. They rarely extend this peaceful stance to creatures who attack with cold or desire to spread cold conditions beyond natural confines.\\n\\n***Bastion of Peace.*** Reach out the hand of friendship when encountering strangers, and advocate for peace at the outset of any meeting. Encourage your companions to do likewise. When it becomes clear your opponents wish for violence, don't shrink away from combat.\\n\\n ***Beacon in the Dark.*** When winter comes and the nights increasingly lengthen, shine a welcoming light to which all people can rally. No creature shall prey on others under the cover of darkness while you are there.\\n\\n ***Hospitality of Home.*** Provide the comforts of home to those who meet with you peacefully. Respect others' cultures and traditions, provided they don't espouse aggression and violence toward others.\\n\\n ***Protection from the Elements.*** Ensure all people have shelter from the weather. Help during spring flooding, wintry blizzards, and when the blistering sun threatens heatstroke in the summer.\\n\\n ***Repel the Cold.*** Strive against foes that seek to bring eternal winter to the world or expand their icy domains into warmer climates. Understand the necessity of the changing of seasons and seek to banish only cold that is abnormal.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[],\"data_for_class_table\":[]}],\"document\":{\"name\":\"Tome of Heroes\",\"key\":\"toh\",\"type\":\"SOURCE\",\"display_name\":\"Tome of Heroes\",\"publisher\":{\"name\":\"Kobold Press\",\"key\":\"kobold-press\"},\"gamesystem\":{\"name\":\"5th Edition 2014\",\"key\":\"5e-2014\"},\"permalink\":\"https://koboldpress.com/kpstore/product/tome-of-heroes-for-5th-edition/\"},\"saving_throws\":[],\"subclass_of\":{\"name\":\"Paladin\",\"key\":\"srd_paladin\"},\"name\":\"Oath of the Hearth\",\"desc\":\"Paladins who swear the Oath of the Hearth endeavor to extend the comforts of home to others, by allaying the rigors of travel or simply assuring those who grow despondent of the possibility of returning home. Ironically, paladins who follow this oath remain far from home in pursuit of their goals. Their oath reflects the welcoming warmth and light provided by the hearth, and paladins following the oath use these elements to turn away the cold or defeat enemies who employ cold as weapons.\",\"hit_dice\":null,\"caster_type\":null,\"primary_abilities\":[],\"crossreferences\":{\"to\":[]}}"
+  }
+}

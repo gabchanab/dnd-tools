@@ -1,0 +1,359 @@
+{
+  "char_name": "samson",
+  "player_name": "gabe",
+  "alignment": "True Neutral",
+  "species_name": "Aasimar",
+  "class_name": "Wizard",
+  "subclass_name": "Evoker",
+  "subclass_homebrew": false,
+  "background_name": "Acolyte",
+  "level": 10,
+  "proficiency_bonus": 4,
+  "passive_perception": 11,
+  "hp_max": 52,
+  "hp_current": 52,
+  "hp_temp": 0,
+  "hp_pct": 100,
+  "hit_dice_display": "10d6",
+  "armor_class": 13,
+  "speed": 30,
+  "initiative": "+3",
+  "inspiration": true,
+  "spell_mod": "+1",
+  "spell_attack": "+5",
+  "spell_save_dc": 13,
+  "spell_ability": "INT",
+  "abilities": [
+    {
+      "key": "strength",
+      "label": "STR",
+      "score": 6,
+      "modifier": -2,
+      "save": -2,
+      "save_prof": false
+    },
+    {
+      "key": "dexterity",
+      "label": "DEX",
+      "score": 16,
+      "modifier": 3,
+      "save": 3,
+      "save_prof": false
+    },
+    {
+      "key": "constitution",
+      "label": "CON",
+      "score": 12,
+      "modifier": 1,
+      "save": 1,
+      "save_prof": false
+    },
+    {
+      "key": "intelligence",
+      "label": "INT",
+      "score": 12,
+      "modifier": 1,
+      "save": 5,
+      "save_prof": true
+    },
+    {
+      "key": "wisdom",
+      "label": "WIS",
+      "score": 13,
+      "modifier": 1,
+      "save": 5,
+      "save_prof": true
+    },
+    {
+      "key": "charisma",
+      "label": "CHA",
+      "score": 14,
+      "modifier": 2,
+      "save": 2,
+      "save_prof": false
+    }
+  ],
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "DEX",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 5,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Arcana",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Athletics",
+      "ability": "STR",
+      "base_mod": -2,
+      "bonus": -2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Deception",
+      "ability": "CHA",
+      "base_mod": 2,
+      "bonus": 6,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "History",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Insight",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 5,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Intimidation",
+      "ability": "CHA",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Investigation",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Medicine",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Nature",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 5,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Perception",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Performance",
+      "ability": "CHA",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Persuasion",
+      "ability": "CHA",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Religion",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "DEX",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "Stealth",
+      "ability": "DEX",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "Survival",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    }
+  ],
+  "spell_slots": [
+    {
+      "level": 1,
+      "max": 4,
+      "used": 0,
+      "available": 4
+    },
+    {
+      "level": 2,
+      "max": 3,
+      "used": 0,
+      "available": 3
+    },
+    {
+      "level": 3,
+      "max": 3,
+      "used": 0,
+      "available": 3
+    },
+    {
+      "level": 4,
+      "max": 3,
+      "used": 0,
+      "available": 3
+    },
+    {
+      "level": 5,
+      "max": 2,
+      "used": 0,
+      "available": 2
+    }
+  ],
+  "traits": [
+    {
+      "name": "Size",
+      "desc": "Medium"
+    },
+    {
+      "name": "Speed",
+      "desc": "30 feet"
+    },
+    {
+      "name": "Darkvision",
+      "desc": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern colors in darkness, only shades of gray."
+    },
+    {
+      "name": "Celestial Resistance",
+      "desc": "You have resistance to necrotic damage and radiant damage."
+    },
+    {
+      "name": "Healing Hands",
+      "desc": "As an action, you can touch a creature and roll a number of d4s equal to your proficiency bonus. The creature regains hit points equal to the total rolled. Once you use this trait, you can't use it again until you finish a long rest."
+    },
+    {
+      "name": "Light Bearer",
+      "desc": "You know the Light cantrip. Charisma is your spellcasting ability for it."
+    },
+    {
+      "name": "Celestial Revelation",
+      "desc": "Once you reach level 3, as a bonus action you can transform using one of these options (Once per long rest): Heavenly Wings, Inner Radiance, Necrotic Shroud. Deal radiant or necrotic damage equal to your proficiency bonus if you hit with an attack or spell"
+    },
+    {
+      "name": "Heavenly Wings",
+      "desc": "You sprout a pair of luminous wings from your back, you have a fly speed equal to your speed for 1 minute."
+    },
+    {
+      "name": "Inner Radiance",
+      "desc": "Your eyes emit a bright light in a 10-foot radius and dim light for an additional 10 feet. Any creature within 10 feet takes radiant damage equal to your proficiency bonus at the start of each of your turns. "
+    },
+    {
+      "name": "Necrotic Shroud",
+      "desc": "Your body is surrounded by a shroud of necrotic energy. Ceatures within 10 feet of you must succeed on a charisma saving throw (DC = 8 + your charisma modifier) or have the Frightened condition."
+    }
+  ],
+  "class_features": [
+    {
+      "name": "Ability Score Improvement",
+      "desc": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Wizard levels 8, 12, and 16."
+    },
+    {
+      "name": "Arcane Recovery",
+      "desc": "You can regain some of your magical energy by studying your spellbook. When you finish a Short Rest, you can choose expended spell slots to recover. The spell slots can have a combined level equal to no more than half your Wizard level (round up), and none of the slots can be level 6 or higher. For example, if you're a level 4 Wizard, you can recover up to two levels' worth of spell slots, regaining either one level 2 spell slot or two level 1 spell slots.\n\nOnce you use this feature, you can't do so again until you finish a Long Rest."
+    },
+    {
+      "name": "Memorize Spell",
+      "desc": "Whenever you finish a Short Rest, you can study your spellbook and replace one of the level 1+ Wizard spells you have prepared for your Spellcasting feature with another level 1+ spell from the book."
+    },
+    {
+      "name": "Ritual Adept",
+      "desc": "You can cast any spell as a Ritual if that spell has the Ritual tag and the spell is in your spellbook. You needn't have the spell prepared, but you must read from the book to cast a spell in this way."
+    },
+    {
+      "name": "Scholar",
+      "desc": "While studying magic, you also specialized in another field of study. Choose one of the following skills in which you have proficiency: Arcana, History, Investigation, Medicine, Nature, or Religion. You have Expertise in the chosen skill."
+    },
+    {
+      "name": "Wizard Subclass",
+      "desc": "You gain a Wizard subclass of your choice. The Evoker subclass is detailed after this class's description. A subclass is a specialization that grants you features at certain Wizard levels. For the rest of your career, you gain each of your subclass's features that are of your Wizard level or lower."
+    }
+  ],
+  "subclass_features": [
+    {
+      "name": "Empowered Evocation",
+      "desc": "Whenever you cast a Wizard spell from the Evocation school, you can add your Intelligence modifier to one damage roll of that spell."
+    },
+    {
+      "name": "Evocation Savant",
+      "desc": "Choose two Wizard spells from the Evocation school, each of which must be no higher than level 2, and add them to your spellbook for free.\n\nIn addition, whenever you gain access to a new level of spell slots in this class, you can add one Wizard spell from the Evocation school to your spellbook for free. The chosen spell must be of a level for which you have spell slots."
+    },
+    {
+      "name": "Potent Cantrip",
+      "desc": "Your damaging cantrips affect even creatures that avoid the brunt of the effect. When you cast a cantrip at a creature and you miss with the attack roll or the target succeeds on a saving throw against the cantrip, the target takes half the cantrip's damage (if any) but suffers no additional effect from the cantrip."
+    },
+    {
+      "name": "Sculpt Spells",
+      "desc": "You can create pockets of relative safety within the effects of your evocations. When you cast an Evocation spell that affects other creatures that you can see, you can choose a number of them equal to 1 plus the spell's level. The chosen creatures automatically succeed on their saving throws against the spell, and they take no damage if they would normally take half damage on a successful save."
+    }
+  ],
+  "resources": [],
+  "prepared_spells": [
+    {
+      "name": "Expeditious Retreat",
+      "level": 1,
+      "index": "srd-2024_expeditious-retreat"
+    },
+    {
+      "name": "Enlarge/Reduce",
+      "level": 2,
+      "index": "srd-2024_enlargereduce"
+    },
+    {
+      "name": "Confusion",
+      "level": 4,
+      "index": "srd-2024_confusion"
+    },
+    {
+      "name": "Create Undead",
+      "level": 6,
+      "index": "srd-2024_create-undead"
+    }
+  ],
+  "cantrips": [],
+  "notes": "red",
+  "backstory": "blue",
+  "gold": 50.0,
+  "class_equipment": "Choose A or B: (A) 2 Daggers, Arcane Focus (Quarterstaff), Robe, Spellbook, Scholar's Pack, and 5 GP; or (B) 55 GP",
+  "bg_equipment": "*Choose A or B:* (A) Calligrapher's Supplies, Book (prayers), Holy Symbol, Parchment (10 sheets), Robe, 8 GP; or (B) 50 GP",
+  "armor_proficiencies": "None",
+  "weapon_proficiencies": "Simple weapons",
+  "bg_tool_proficiency": "Calligrapher's Supplies",
+  "bg_languages": "",
+  "bg_trait_name": "",
+  "bg_trait_desc": "",
+  "bg_ofeat_name": "",
+  "bg_ofeat_desc": ""
+}

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combat Tracker — D&D 5e</title>
+<link rel="stylesheet" href="combat.css">
+</head>
+<body>
+
+<header class="combat-header">
+  <a href="index.html" class="back-link">← Encounter Builder</a>
+  <h1>⚔ Combat Tracker</h1>
+  <div id="round-display" class="round-display" style="display:none">Round <span id="round-num">1</span></div>
+</header>
+
+<!-- ── INITIATIVE PHASE ─────────────────────────────────────────── -->
+<div id="phase-initiative">
+  <div class="phase-header">
+    <h2>Roll Initiative</h2>
+    <p class="phase-sub">Set HP · AC · Initiative for each combatant, then begin combat.</p>
+    <div class="init-actions">
+      <button class="btn-secondary" onclick="rollAllMonsters()">🎲 Roll All Creatures</button>
+      <button class="btn-primary" onclick="beginCombat()">▶ Begin Combat</button>
+    </div>
+  </div>
+
+  <div id="init-cards" class="init-cards"></div>
+</div>
+
+<!-- ── COMBAT PHASE ──────────────────────────────────────────────── -->
+<div id="phase-combat" style="display:none">
+  <div class="combat-layout">
+
+    <!-- Turn Order Strip -->
+    <div class="turn-strip-wrap">
+      <div id="turn-strip" class="turn-strip"></div>
+    </div>
+
+    <!-- Active Combatant Panel -->
+    <div class="combat-main">
+      <div id="active-panel" class="active-panel"></div>
+
+      <!-- Combatants List -->
+      <div class="combatants-card">
+        <div class="combatants-title">All Combatants</div>
+        <div id="combatants-list" class="combatants-list"></div>
+      </div>
+
+      <!-- Inline stat card (shown when a combatant row is clicked) -->
+      <div id="stat-card-panel"></div>
+    </div>
+
+    <!-- Combat Log -->
+    <div class="combat-log-wrap">
+      <div class="combat-log-title">Log</div>
+      <div id="combat-log" class="combat-log"></div>
+      <button class="btn-small btn-danger" onclick="clearLog()">Clear</button>
+    </div>
+
+  </div>
+
+  <div class="combat-footer">
+    <button class="btn-secondary" onclick="nextTurn()">Next Turn ▶</button>
+    <button class="btn-secondary" onclick="prevTurn()">◀ Prev Turn</button>
+    <button class="btn-danger" onclick="resetCombat()">↺ Restart Initiative</button>
+    <button class="btn-danger" onclick="window.location.href='index.html'">✕ End Encounter</button>
+  </div>
+</div>
+
+<script>
+// ── Conditions ────────────────────────────────────────────────────
+const CONDITIONS = [
+  'Blinded','Charmed','Deafened','Exhaustion','Frightened',
+  'Grappled','Incapacitated','Invisible','Paralyzed','Petrified',
+  'Poisoned','Prone','Restrained','Stunned','Unconscious',
+];
+
+const CONDITION_COLORS = {
+  Blinded:'#546e7a', Charmed:'#e91e8c', Deafened:'#78909c',
+  Exhaustion:'#795548', Frightened:'#9c27b0', Grappled:'#ff9800',
+  Incapacitated:'#f44336', Invisible:'#b0bec5', Paralyzed:'#673ab7',
+  Petrified:'#607d8b', Poisoned:'#388e3c', Prone:'#8d6e63',
+  Restrained:'#ff5722', Stunned:'#3f51b5', Unconscious:'#37474f',
+};
+
+// ── Load encounter state ──────────────────────────────────────────
+const encounterState = JSON.parse(localStorage.getItem('encounter_state') || 'null');
+
+if (!encounterState || !encounterState.monsters?.length) {
+  document.body.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px">
+      <p style="color:#8892a4;font-size:1.1rem">No encounter loaded.</p>
+      <a href="index.html" style="color:#e94560">← Back to Encounter Builder</a>
+    </div>`;
+}
+
+// ── Build combatants array ────────────────────────────────────────
+// Expand monsters by quantity → individual combatants
+let combatants = [];
+let _id = 1;
+
+(encounterState?.monsters || []).forEach(m => {
+  if (m.isPC) {
+    // One entry per PC
+    const cd = m.charData || {};
+    combatants.push({
+      id: _id++,
+      name: m.name,
+      isPC: true,
+      level: m.level,
+      charData: cd,
+      // Stats from charData
+      hp_max:  cd.hp_max  || 10,
+      hp:      cd.hp_current || cd.hp_max || 10,
+      hp_temp: cd.hp_temp || 0,
+      ac:      cd.armor_class || 10,
+      initBonus: parseInitBonus(cd.initiative),
+      initiative: null,   // to be rolled
+      conditions: [],
+      deathSaves: { successes: 0, failures: 0 },
+    });
+  } else {
+    // Expand by quantity
+    const qty = m.quantity || 1;
+    // Use real stats if available (from API fetch when card was viewed), else estimate
+    const s = m.stats || m.customStats || {};
+    const hp_max   = s.hp        || estimateHP(m.cr);
+    const ac       = s.ac        || estimateAC(m.cr);
+    const initBonus = s.initBonus != null ? s.initBonus : estimateInitBonus(m.cr);
+    for (let i = 1; i <= qty; i++) {
+      const label = qty > 1 ? `${m.name} ${i}` : m.name;
+      combatants.push({
+        id: _id++,
+        name: label,
+        baseName: m.name,
+        isPC: false,
+        cr: m.cr,
+        key: m.key || '',
+        isCustom: m.isCustom || false,
+        monsterData: m.monsterData || null,
+        hp_max,
+        hp: hp_max,
+        hp_temp: 0,
+        ac,
+        initBonus,
+        initiative: null,
+        conditions: [],
+        deathSaves: { successes: 0, failures: 0 },
+      });
+    }
+  }
+});
+
+function parseInitBonus(str) {
+  if (str == null) return 0;
+  const n = parseInt(String(str).replace(/[^-\d]/g, ''), 10);
+  return isNaN(n) ? 0 : n;
+}
+function estimateHP(cr) {
+  // Rough average — DM should edit
+  if (cr <= 0)   return 3;
+  if (cr <= 0.5) return 7;
+  if (cr <= 1)   return 15;
+  if (cr <= 2)   return 30;
+  if (cr <= 4)   return 55;
+  if (cr <= 6)   return 90;
+  if (cr <= 8)   return 120;
+  if (cr <= 12)  return 175;
+  if (cr <= 16)  return 230;
+  if (cr <= 20)  return 300;
+  return 400;
+}
+function estimateAC(cr) {
+  if (cr <= 1)  return 12;
+  if (cr <= 4)  return 13;
+  if (cr <= 8)  return 15;
+  if (cr <= 12) return 16;
+  if (cr <= 16) return 17;
+  return 18;
+}
+function estimateInitBonus(cr) {
+  if (cr <= 1)  return 1;
+  if (cr <= 4)  return 2;
+  if (cr <= 8)  return 3;
+  if (cr <= 12) return 4;
+  return 5;
+}
+function d20() { return Math.floor(Math.random() * 20) + 1; }
+function rollInit(bonus) { return d20() + bonus; }
+
+// ── Render Initiative Phase ───────────────────────────────────────
+function renderInitCards() {
+  const el = document.getElementById('init-cards');
+  el.innerHTML = combatants.map(c => {
+    const bonusStr = c.initBonus >= 0 ? `+${c.initBonus}` : `${c.initBonus}`;
+    const pcClass  = c.isPC ? 'init-card init-card-pc' : 'init-card';
+    return `
+    <div class="${pcClass}" id="init-card-${c.id}">
+      <div class="init-card-header">
+        <span class="init-card-name">${c.name}</span>
+        ${c.isPC
+          ? `<span class="init-tag init-tag-pc">PC · Lvl ${c.level}</span>`
+          : `<span class="init-tag">CR ${formatCR(c.cr)}</span>`}
+      </div>
+      <div class="init-card-body">
+        <div class="init-field">
+          <label>Initiative</label>
+          <div class="init-roll-wrap">
+            <input type="number" id="ic-init-${c.id}" value="${c.initiative ?? ''}" placeholder="—"
+              oninput="combatants.find(x=>x.id===${c.id}).initiative = this.value ? parseInt(this.value) : null">
+            <button class="btn-roll" onclick="rollInitFor(${c.id})" title="Roll d20 ${bonusStr}">
+              🎲 ${bonusStr}
+            </button>
+          </div>
+        </div>
+        <div class="init-field">
+          <label>Max HP</label>
+          <input type="number" id="ic-hp-${c.id}" value="${c.hp_max}" min="1"
+            oninput="updateHPMax(${c.id}, this.value)">
+        </div>
+        <div class="init-field">
+          <label>AC</label>
+          <input type="number" id="ic-ac-${c.id}" value="${c.ac}" min="1"
+            oninput="combatants.find(x=>x.id===${c.id}).ac = parseInt(this.value)||10">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function calcPB(cr) { return Math.ceil(Math.max(cr, 1) / 4) + 1; }
+function formatCR(cr) {
+  if (cr == null) return '—';
+  if (cr === 0.125) return '⅛';
+  if (cr === 0.25)  return '¼';
+  if (cr === 0.5)   return '½';
+  return cr % 1 === 0 ? String(cr) : cr.toFixed(2);
+}
+
+function updateHPMax(id, val) {
+  const c = combatants.find(x => x.id === id);
+  if (!c) return;
+  c.hp_max = parseInt(val) || 1;
+  c.hp = Math.min(c.hp, c.hp_max);
+}
+
+function spawnRollPop(anchorEl, value) {
+  const pop = document.createElement('div');
+  pop.className = 'roll-pop';
+  pop.textContent = value >= 0 ? `+${value} = ${value}` : value;
+  // We actually want to show the final rolled total
+  pop.textContent = value;
+  document.body.appendChild(pop);
+  const rect = anchorEl.getBoundingClientRect();
+  pop.style.left = (rect.left + rect.width / 2 - pop.offsetWidth / 2) + 'px';
+  pop.style.top  = (rect.top + window.scrollY - 8) + 'px';
+  pop.classList.add('roll-pop-animate');
+  setTimeout(() => pop.remove(), 800);
+}
+
+function rollInitFor(id) {
+  const c = combatants.find(x => x.id === id);
+  if (!c) return;
+  c.initiative = rollInit(c.initBonus);
+  const el = document.getElementById(`ic-init-${id}`);
+  if (el) el.value = c.initiative;
+  el?.classList.add('rolled-flash');
+  setTimeout(() => el?.classList.remove('rolled-flash'), 600);
+  // Pop-up: anchor to the roll button inside the same init-roll-wrap
+  const btn = el?.closest('.init-roll-wrap')?.querySelector('.btn-roll');
+  if (btn) spawnRollPop(btn, c.initiative);
+}
+
+function rollAllMonsters() {
+  combatants.forEach(c => {
+    c.initiative = rollInit(c.initBonus);
+    const el = document.getElementById(`ic-init-${c.id}`);
+    if (el) { el.value = c.initiative; el.classList.add('rolled-flash'); }
+    const btn = el?.closest('.init-roll-wrap')?.querySelector('.btn-roll');
+    if (btn) spawnRollPop(btn, c.initiative);
+  });
+  setTimeout(() => document.querySelectorAll('.rolled-flash').forEach(el => el.classList.remove('rolled-flash')), 600);
+}
+
+// ── Begin Combat ──────────────────────────────────────────────────
+let turnIndex = 0;
+let round = 1;
+let turnOrder = []; // sorted combatant ids
+
+function beginCombat() {
+  // Assign 0 to any un-rolled initiatives
+  combatants.forEach(c => { if (c.initiative == null) c.initiative = 0; });
+
+  // Sort: high init first, ties broken by initBonus
+  turnOrder = [...combatants]
+    .sort((a, b) => b.initiative - a.initiative || b.initBonus - a.initBonus)
+    .map(c => c.id);
+
+  turnIndex = 0;
+  round = 1;
+  document.getElementById('phase-initiative').style.display = 'none';
+  document.getElementById('phase-combat').style.display    = '';
+  document.getElementById('round-display').style.display   = '';
+  renderCombat();
+  log(`⚔ Combat begins! Round 1`);
+}
+
+function resetCombat() {
+  combatants.forEach(c => { c.initiative = null; c.conditions = []; });
+  document.getElementById('phase-initiative').style.display = '';
+  document.getElementById('phase-combat').style.display    = 'none';
+  document.getElementById('round-display').style.display   = 'none';
+  renderInitCards();
+}
+
+// ── Combat rendering ──────────────────────────────────────────────
+function renderCombat() {
+  document.getElementById('round-num').textContent = round;
+  renderTurnStrip();
+  renderActivePanel();
+  renderCombatantsList();
+}
+
+function renderTurnStrip() {
+  const el = document.getElementById('turn-strip');
+  el.innerHTML = turnOrder.map((id, idx) => {
+    const c = combatants.find(x => x.id === id);
+    const isActive = idx === turnIndex;
+    const isDead   = c.hp <= 0 && !c.isPC;
+    return `
+    <div class="turn-token ${isActive ? 'turn-token-active' : ''} ${c.isPC ? 'turn-token-pc' : ''} ${isDead ? 'turn-token-dead' : ''}"
+         onclick="jumpToTurn(${idx})" title="${c.name} (Init ${c.initiative})">
+      <div class="turn-token-name">${c.name}</div>
+      <div class="turn-token-init">${c.initiative}</div>
+      ${c.conditions.length ? `<div class="turn-token-conds">${c.conditions.map(cd => `<span class="cond-dot" style="background:${CONDITION_COLORS[cd]||'#888'}" title="${cd}"></span>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderActivePanel() {
+  const el = document.getElementById('active-panel');
+  const id = turnOrder[turnIndex];
+  const c  = combatants.find(x => x.id === id);
+  if (!c) { el.innerHTML = ''; return; }
+
+  const hpPct   = Math.max(0, Math.min(100, (c.hp / c.hp_max) * 100));
+  const hpColor = hpPct > 60 ? '#4caf50' : hpPct > 30 ? '#ffb300' : '#f44336';
+
+  el.innerHTML = `
+  <div class="active-card ${c.isPC ? 'active-card-pc' : ''}">
+    <div class="active-header">
+      <div>
+        <div class="active-name">${c.name}</div>
+        <div class="active-sub">${c.isPC ? `PC · Level ${c.level}` : `CR: ${formatCR(c.cr)} · Initiative: ${c.initiative}`}</div>
+      </div>
+      <div class="active-ac-badge">AC ${c.ac}</div>
+    </div>
+
+    <!-- HP Bar -->
+    <div class="hp-section">
+      <div class="hp-bar-wrap">
+        <div class="hp-bar-fill" style="width:${hpPct}%;background:${hpColor}"></div>
+      </div>
+      <div class="hp-numbers">
+        <span class="hp-current" style="color:${hpColor}">${c.hp}</span>
+        <span class="hp-sep"> / </span>
+        <span class="hp-max" style="color:#4caf50">${c.hp_max}</span>
+        ${c.hp_temp ? `<span class="hp-temp">+${c.hp_temp} temp</span>` : ''}
+      </div>
+
+      <div class="conditions-title">Conditions: </div>
+        <div class="conditions-active">
+          ${c.conditions.map(cd => `
+            <span class="cond-tag" style="background:${CONDITION_COLORS[cd]||'#555'}">
+              ${cd}
+              <button class="cond-remove" onclick="removeCondition(${c.id},'${cd}')">×</button>
+            </span>`).join('')}
+          ${!c.conditions.length ? '<span class="no-conditions">None</span>' : ''}
+        </div>
+      </div>
+    </div>
+
+    <!-- HP Controls -->
+    <div class="hp-controls">
+      <div class="dmg-heal-row">
+        <input type="number" id="dmg-input" placeholder="Amount" min="0" class="hp-input">
+        <button class="btn-damage" onclick="applyDamage(${c.id})">⚔ Damage</button>
+        <button class="btn-heal"   onclick="applyHeal(${c.id})">✚ Heal</button>
+        <button class="btn-temp"   onclick="applyTemp(${c.id})">🛡 Temp HP</button>
+        <div class="conditions-add">
+        <select id="cond-select-${c.id}" class="cond-select">
+          <option value="">+ Add condition…</option>
+          ${CONDITIONS.map(cd => `<option value="${cd}">${cd}</option>`).join('')}
+        </select>
+        <button class="btn-small" onclick="addConditionFromSelect(${c.id})">Add</button>
+      </div>
+    </div>
+
+    ${c.isPC && c.hp <= 0 ? `
+    <div class="death-saves-section">
+      <div class="conditions-title">Death Saves</div>
+      <div class="death-saves-row">
+        <span>Successes:</span>
+        ${[0,1,2].map(i => `<input type="checkbox" ${c.deathSaves.successes > i ? 'checked' : ''} onchange="updateDeathSave(${c.id},'successes',${i+1},this.checked)">`).join('')}
+        <span style="margin-left:12px">Failures:</span>
+        ${[0,1,2].map(i => `<input type="checkbox" ${c.deathSaves.failures > i ? 'checked' : ''} onchange="updateDeathSave(${c.id},'failures',${i+1},this.checked)">`).join('')}
+      </div>
+    </div>` : ''}
+  </div>`;
+}
+
+function renderCombatantsList() {
+  const el = document.getElementById('combatants-list');
+  el.innerHTML = turnOrder.map((id, idx) => {
+    const c = combatants.find(x => x.id === id);
+    const isActive = idx === turnIndex;
+    const isDead   = c.hp <= 0;
+    const hpPct    = Math.max(0, Math.min(100, (c.hp / c.hp_max) * 100));
+    const hpColor  = hpPct > 60 ? '#4caf50' : hpPct > 30 ? '#ffb300' : '#f44336';
+    return `
+    <div class="comb-row ${isActive ? 'comb-row-active' : ''} ${c.isPC ? 'comb-row-pc' : ''} ${isDead && !c.isPC ? 'comb-row-dead' : ''}"
+         onclick="jumpToTurn(${idx})">
+      <div class="comb-init">${c.initiative}</div>
+      <div class="comb-name">${c.name}</div>
+      <div class="comb-hp" style="color:${hpColor}">${c.hp}/${c.hp_max}</div>
+      <div class="comb-ac">AC ${c.ac}</div>
+      <div class="comb-conds">
+        ${c.conditions.map(cd => `<span class="cond-dot" style="background:${CONDITION_COLORS[cd]||'#888'}" title="${cd}"></span>`).join('')}
+      </div>
+      ${(c.monsterData || c.isPC) ? `<button class="comb-info-btn" onclick="event.stopPropagation(); showStatCard(${c.id})" title="View stat block">📋</button>` : '<div></div>'}
+    </div>`;
+  }).join('');
+}
+
+// ── Combat actions ────────────────────────────────────────────────
+function jumpToTurn(idx) {
+  turnIndex = idx;
+  renderCombat();
+}
+
+function nextTurn() {
+  turnIndex++;
+  if (turnIndex >= turnOrder.length) {
+    turnIndex = 0;
+    round++;
+    log(`📅 Round ${round} begins`);
+  }
+  const c = combatants.find(x => x.id === turnOrder[turnIndex]);
+  if (c) log(`🔷 ${c.name}'s turn (Init ${c.initiative})`);
+  renderCombat();
+}
+
+function prevTurn() {
+  turnIndex--;
+  if (turnIndex < 0) {
+    if (round > 1) { round--; turnIndex = turnOrder.length - 1; }
+    else turnIndex = 0;
+  }
+  renderCombat();
+}
+
+function applyDamage(id) {
+  const c   = combatants.find(x => x.id === id);
+  const amt = parseInt(document.getElementById('dmg-input')?.value) || 0;
+  if (!c || amt <= 0) return;
+  // Temp HP absorbs first
+  const tempUsed = Math.min(c.hp_temp, amt);
+  c.hp_temp -= tempUsed;
+  const remaining = amt - tempUsed;
+  c.hp = Math.max(0, c.hp - remaining);
+  log(`💥 ${c.name} takes ${amt} damage → ${c.hp}/${c.hp_max} HP`);
+  if (c.hp === 0 && !c.isPC) log(`💀 ${c.name} is defeated!`);
+  if (c.hp === 0 && c.isPC)  log(`💔 ${c.name} falls unconscious!`);
+  renderCombat();
+}
+
+function applyHeal(id) {
+  const c   = combatants.find(x => x.id === id);
+  const amt = parseInt(document.getElementById('dmg-input')?.value) || 0;
+  if (!c || amt <= 0) return;
+  c.hp = Math.min(c.hp_max, c.hp + amt);
+  log(`✚ ${c.name} heals ${amt} HP → ${c.hp}/${c.hp_max} HP`);
+  renderCombat();
+}
+
+function applyTemp(id) {
+  const c   = combatants.find(x => x.id === id);
+  const amt = parseInt(document.getElementById('dmg-input')?.value) || 0;
+  if (!c || amt <= 0) return;
+  c.hp_temp = Math.max(c.hp_temp, amt); // temp HP doesn't stack
+  log(`🛡 ${c.name} gains ${amt} temporary HP`);
+  renderCombat();
+}
+
+function addConditionFromSelect(id) {
+  const sel = document.getElementById(`cond-select-${id}`);
+  const cd  = sel?.value;
+  if (!cd) return;
+  addCondition(id, cd);
+  sel.value = '';
+}
+
+function addCondition(id, condition) {
+  const c = combatants.find(x => x.id === id);
+  if (!c || c.conditions.includes(condition)) return;
+  c.conditions.push(condition);
+  log(`🔵 ${c.name} is now ${condition}`);
+  renderCombat();
+}
+
+function removeCondition(id, condition) {
+  const c = combatants.find(x => x.id === id);
+  if (!c) return;
+  c.conditions = c.conditions.filter(cd => cd !== condition);
+  log(`⬜ ${c.name}: ${condition} removed`);
+  renderCombat();
+}
+
+function updateDeathSave(id, type, count, checked) {
+  const c = combatants.find(x => x.id === id);
+  if (!c) return;
+  c.deathSaves[type] = checked ? count : count - 1;
+  if (c.deathSaves.failures >= 3) log(`💀 ${c.name} has died (3 failed death saves)`);
+  if (c.deathSaves.successes >= 3) log(`✨ ${c.name} is stable!`);
+}
+
+// ── Stat card panel ───────────────────────────────────────────────
+let statCardOpenId = null;
+
+function showStatCard(id) {
+  const panel = document.getElementById('stat-card-panel');
+  const c = combatants.find(x => x.id === id);
+  if (!c) return;
+
+  // Toggle off if already open
+  if (statCardOpenId === id) {
+    statCardOpenId = null;
+    panel.innerHTML = '';
+    return;
+  }
+  statCardOpenId = id;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  if (c.isPC) { renderPCStatCard(c, panel); return; }
+  if (c.monsterData) { renderMonsterStatCard(c.monsterData, panel); return; }
+  panel.innerHTML = '';
+}
+
+function modStr(n) { return n >= 0 ? `+${n}` : `${n}`; }
+
+function renderMonsterStatCard(m, panel) {
+  const cr   = m.challenge_rating;
+  const sub  = [m.size?.name, m.type?.name, m.alignment].filter(Boolean).join(' ');
+  const speed = m.speed_all || {};
+  const speedParts = [
+    speed.walk   ? `${speed.walk} ft.`         : '',
+    speed.fly    ? `fly ${speed.fly} ft.`       : '',
+    speed.swim   ? `swim ${speed.swim} ft.`     : '',
+    speed.climb  ? `climb ${speed.climb} ft.`   : '',
+    speed.burrow ? `burrow ${speed.burrow} ft.` : '',
+  ].filter(Boolean).join(', ') || '—';
+
+  const abs   = m.ability_scores || {};
+  const mods  = m.modifiers      || {};
+  const saves = m.saving_throws  || {};
+  const immun = m.resistances_and_immunities || {};
+
+  const resistLines = [
+    immun.damage_immunities_display      ? `<span class="sc-ri-label">Immunities</span> ${immun.damage_immunities_display}`           : '',
+    immun.damage_resistances_display     ? `<span class="sc-ri-label">Resistances</span> ${immun.damage_resistances_display}`         : '',
+    immun.damage_vulnerabilities_display ? `<span class="sc-ri-label">Vulnerabilities</span> ${immun.damage_vulnerabilities_display}` : '',
+    immun.condition_immunities_display   ? `<span class="sc-ri-label">Condition Immunities</span> ${immun.condition_immunities_display}` : '',
+  ].filter(Boolean);
+
+  const senses = [
+    m.darkvision_range   ? `Darkvision ${m.darkvision_range} ft.`   : '',
+    m.blindsight_range   ? `Blindsight ${m.blindsight_range} ft.`   : '',
+    m.tremorsense_range  ? `Tremorsense ${m.tremorsense_range} ft.` : '',
+    m.truesight_range    ? `Truesight ${m.truesight_range} ft.`     : '',
+    `Passive Perception ${m.passive_perception}`,
+  ].filter(Boolean).join(', ');
+
+  const profSkills = Object.entries(m.skill_bonuses || {})
+    .map(([k, v]) => `${k.charAt(0).toUpperCase()+k.slice(1)} ${modStr(v)}`).join(', ');
+
+  const ACTION_LABELS = { ACTION:'Actions', BONUS_ACTION:'Bonus Actions', REACTION:'Reactions', LEGENDARY_ACTION:'Legendary Actions', LAIR_ACTION:'Lair Actions' };
+  const actionGroups = {};
+  for (const a of (m.actions || [])) { const t = a.action_type; if (!actionGroups[t]) actionGroups[t] = []; actionGroups[t].push(a); }
+
+  const traitsHtml = (m.traits || []).map(a => `<p class="sc-detail-text"><strong>${a.name}:</strong> ${a.desc}</p>`).join('');
+  const actionsHtml = ['ACTION','BONUS_ACTION','REACTION','LEGENDARY_ACTION','LAIR_ACTION']
+    .filter(t => actionGroups[t]?.length)
+    .map(t => `<div class="sc-section-title">${ACTION_LABELS[t]}</div>${actionGroups[t].map(a => `<p class="sc-detail-text"><strong>${a.name}:</strong> ${a.desc}</p>`).join('')}`)
+    .join('');
+
+  panel.innerHTML = `
+  <div class="stat-card">
+    <div class="stat-card-close" onclick="showStatCard(${statCardOpenId})">✕ Close</div>
+    <div class="stat-card-name">${m.name}</div>
+    <div class="stat-card-sub">${sub}</div>
+    <div class="sc-divider"></div>
+    <div class="sc-row"><span class="sc-label">Armor Class</span> ${m.armor_class}${m.armor_detail ? ` (${m.armor_detail})` : ''}</div>
+    <div class="sc-row"><span class="sc-label">Hit Points</span> ${m.hit_points} (${m.hit_dice})</div>
+    <div class="sc-row"><span class="sc-label">Speed</span> ${speedParts}</div>
+    <div class="sc-divider"></div>
+    <div class="sc-abilities">
+      ${['strength','dexterity','constitution','intelligence','wisdom','charisma'].map(s => `
+        <div class="sc-ability">
+          <div class="sc-ab-label">${s.slice(0,3).toUpperCase()}</div>
+          <div class="sc-ab-score">${abs[s] ?? '—'}</div>
+          <div class="sc-ab-mod">${modStr(mods[s] ?? 0)}</div>
+          <div class="sc-ab-save">Save ${modStr(saves[s] ?? 0)}</div>
+        </div>`).join('')}
+    </div>
+    <div class="sc-divider"></div>
+    ${profSkills         ? `<div class="sc-row"><span class="sc-label">Skills</span> ${profSkills}</div>` : ''}
+    ${resistLines.length ? `<div class="sc-row">${resistLines.join('<br>')}</div>` : ''}
+    <div class="sc-row"><span class="sc-label">Senses</span> ${senses}</div>
+    ${m.languages?.as_string ? `<div class="sc-row"><span class="sc-label">Languages</span> ${m.languages.as_string}</div>` : ''}
+    <div class="sc-row"><span class="sc-label">CR</span> ${formatCR(cr)} · Proficiency Bonus +${calcPB(cr)}</div>
+    <div class="sc-divider"></div>
+    ${traitsHtml}
+    ${actionsHtml}
+  </div>`;
+}
+
+function renderPCStatCard(c, panel) {
+  const cd = c.charData || {};
+  const abilities = cd.abilities || [];
+  const prepSpells = cd.prepared_spells || [];
+  const classFeatures = cd.class_features || [];
+  const subclassFeatures = cd.subclass_features || [];
+  const speciesTraits = cd.traits || [];
+  const skills = cd.skills || [];
+  const miscDetails = [
+    cd.armor_proficiencies  ? `<strong>Armor Proficiencies:</strong> ${cd.armor_proficiencies}` : '',
+    cd.weapon_proficiencies ? `<strong>Weapon Proficiencies:</strong> ${cd.weapon_proficiencies}` : '',
+    cd.bg_tool_proficiency   ? `<strong>Tool Proficiencies:</strong> ${cd.bg_tool_proficiency}` : '',
+    cd.bg_trait_desc       ? `<strong>Background Trait:</strong> ${cd.bg_trait_desc}` : '',
+    cd.bg_ofeat_desc       ? `<strong>Background Feature:</strong> ${cd.bg_ofeat_desc}` : ''
+  
+  ].filter(Boolean);
+  panel.innerHTML = `
+  <div class="stat-card stat-card-pc">
+    <div class="stat-card-close" onclick="showStatCard(${statCardOpenId})">✕ Close</div>
+    <div class="stat-card-name">${c.name}</div>
+    <div class="stat-card-sub">Level ${c.level} ${cd.class_name || 'Adventurer'}: ${cd.subclass_name || ''}; of the ${cd.background_name || ''} origin</div>
+    <div class="sc-divider"></div>
+    <div class="sc-stats">
+      <div class="sc-ability"><div class="sc-ab-label">MAX HP</div><div class="sc-ab-score">${cd.hp_max ?? '—'}</div></div>
+      <div class="sc-ability"><div class="sc-ab-label">AC</div><div class="sc-ab-score">${cd.armor_class ?? '—'}</div></div>
+      <div class="sc-ability"><div class="sc-ab-label">INITIATIVE</div><div class="sc-ab-score">${cd.initiative ?? '—'}</div></div>
+      <div class="sc-ability"><div class="sc-ab-label">SPEED</div><div class="sc-ab-score">${cd.speed ?? '—'} ft.</div></div>
+      <div class="sc-ability"><div class="sc-ab-label">PROFICIENCY BONUS</div><div class="sc-ab-score">+${cd.proficiency_bonus ?? '—'}</div></div>
+      <div class="sc-ability"><div class="sc-ab-label">PASSIVE PERCEPTION</div><div class="sc-ab-score">${cd.passive_perception ?? '—'}</div></div>
+      <div class="sc-ability"><div class="sc-ab-label">SPELL MODIFIER (${cd.spell_ability ?? '—'})</div><div class="sc-ab-score">${cd.spell_mod ?? '—'}</div></div>
+      <div class="sc-ability"><div class="sc-ab-label">SPELL ATK BONUS</div><div class="sc-ab-score">${cd.spell_attack ?? '—'}</div></div>
+      <div class="sc-ability"><div class="sc-ab-label">SPELL SAVE DC</div><div class="sc-ab-score">${cd.spell_save_dc ?? '—'}</div></div>
+    </div>
+    ${abilities.length ? `
+    <div class="sc-divider"></div>
+    <div class="sc-abilities">
+      ${abilities.map(a => `
+        <div class="sc-ability">
+          <div class="sc-ab-label">${a.key.slice(0,3).toUpperCase()}</div>
+          <div class="sc-ab-score">${a.score}</div>
+          <div class="sc-ab-mod">${modStr(a.modifier)}</div>
+          <div class="sc-ab-save">Save ${modStr(a.save)}</div>
+        </div>`).join('')}
+    </div>` : ''}
+    ${skills.length ? `
+    <div class="sc-section-title">Skills</div>
+    <div class="sc-skills">
+      ${skills.map(s => `<span class="sc-ab-label" style="font-size: 0.80rem;">${s.name}: </span><span class="sc-ab-mod">${modStr(s.bonus)}</span>`).join(' ')}
+    </div>` : ''} 
+    ${cd.spell_slots?.length ? `
+    <div class="sc-divider"></div>
+    <div class="sc-section-title">Spell Slots</div>
+    <div class="sc-spell-slots">
+      ${cd.spell_slots.map(s => `<span class="sc-slot">Lvl ${s.level}: ${s.used ?? 0}/${s.available}</span>`).join('')}
+    </div>` : ''}
+    ${prepSpells.length ? `
+    <div class="sc-divider"></div>
+    <div class="sc-section-title">Prepared Spells</div>
+      ${prepSpells.map(s => `<span class="sc-detail-text">(Level ${s.level}) <strong>${s.name}</strong></span>`).join(', ')}` : ''}
+    ${classFeatures.length ? `
+    <div class="sc-divider"></div>
+    <div class="sc-section-title">${cd.class_name || 'Class'} Features</div>
+      ${classFeatures.map(f => `<p class="sc-detail-text"><strong>${f.name}</strong>: ${f.desc}</p>`).join('')}` : ''}
+    ${subclassFeatures.length ? `
+    <div class="sc-divider"></div>
+    <div class="sc-section-title">${cd.subclass_name || 'Subclass'} Features</div>
+      ${subclassFeatures.map(f => `<p class="sc-detail-text"><strong>${f.name}</strong>: ${f.desc}</p>`).join('')}` : ''}
+    ${speciesTraits.length ? `
+    <div class="sc-divider"></div>
+    <div class="sc-section-title">${cd.species_name || 'Species'} Traits</div>
+      ${speciesTraits.map(f => `<p class="sc-detail-text"><strong>${f.name}</strong>: ${f.desc}</p>`).join('')}` : ''}
+    <div class="sc-divider"></div>
+    <div class="sc-section-title">Proficiencies and ${cd.background_name || 'Background'} Traits</div>
+      ${miscDetails.length ? `<p class="sc-detail-text">${miscDetails.join('<br>')}</p>` : '<p class="sc-detail-text">None</p>'}
+  </div>`;
+}
+
+// ── Combat Log ────────────────────────────────────────────────────
+function log(msg) {
+  const el = document.getElementById('combat-log');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.textContent = msg;
+  el.prepend(entry);
+}
+function clearLog() {
+  document.getElementById('combat-log').innerHTML = '';
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+if (encounterState) renderInitCards();
+</script>
+</body>
+</html>

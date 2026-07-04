@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Character Builder — D&D 2024</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBE9E7;--bg-warm:#F5DDD8;--bg-panel:rgba(255,250,248,0.82);
+  --border:rgba(185,155,80,.32);--border-mid:rgba(185,155,80,.62);--border-dim:rgba(185,155,80,.14);
+  --gold:#b8973a;--gold-bright:#d9bf77;--gold-dim:#8a7020;--gold-glow:rgba(217,191,119,.22);
+  --purple:#6b4f9a;--purple-bright:#9b7ac7;--purple-dim:#4a3570;--purple-glow:rgba(107,79,154,.10);
+  --text:#2D3A4D;--text-mid:#4a5272;--text-dim:#8a90b0;--text-bright:#1a2535;
+  --fh:'Raleway',sans-serif;--fb:'Nunito',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:
+    radial-gradient(ellipse at 15% 20%,rgba(217,191,119,.30) 0%,transparent 55%),
+    radial-gradient(ellipse at 85% 80%,rgba(217,191,119,.22) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.35) 0%,transparent 60%),
+    var(--bg);
+  color:var(--text);font-family:var(--fb);min-height:100vh;padding:2rem 1rem}
+.shell{max-width:900px;margin:0 auto;
+  background:rgba(255,252,250,0.92);
+  border-radius:6px;border:1px solid var(--border-mid);
+  box-shadow:0 0 0 1px rgba(217,191,119,.18),0 4px 30px rgba(45,58,77,.12),
+             0 20px 60px rgba(45,58,77,.08);
+  padding:2.5rem 2rem 2rem;animation:appear .5s ease both}
+@keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.builder-title{font-family:var(--fh);font-size:clamp(1.3rem,3.5vw,2rem);text-align:center;font-weight:700;
+  color:var(--text-bright);letter-spacing:.04em;margin-bottom:.3rem}
+.builder-sub{font-family:var(--fh);font-size:.72rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--text-dim);text-align:center;margin-bottom:1.2rem}
+.divider{text-align:center;font-family:var(--fh);font-size:.72rem;font-weight:500;letter-spacing:.35em;
+  color:var(--gold);opacity:.70;margin:.6rem 0 1.4rem;user-select:none}
+/* ── Progress bar ── */
+.progress-bar{display:flex;margin-bottom:2rem;border:1px solid var(--border);
+  border-radius:4px;overflow:hidden}
+.step-tab{flex:1;padding:.5rem .25rem;text-align:center;font-family:var(--fh);font-size:.58rem;
+  font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);
+  background:rgba(251,233,231,.75);border-right:1px solid var(--border);cursor:default;transition:all .2s;line-height:1.3}
+.step-tab:last-child{border-right:none}
+.step-tab.active{background:var(--gold-glow);border-bottom:2px solid var(--gold);color:var(--gold)}
+.step-tab.done{background:var(--purple-glow);border-bottom:2px solid var(--purple);color:var(--purple)}
+.step-num{display:block;font-size:.85rem;font-weight:700;margin-bottom:1px}
+/* ── Step panels ── */
+.step-panel{display:none;animation:fadein .3s ease}
+.step-panel.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.panel-title{font-family:var(--fh);font-size:.65rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold-dim);border-bottom:1px solid var(--border);padding-bottom:.4rem;margin-bottom:1rem}
+/* ── Form controls ── */
+.field-group{margin-bottom:1.1rem}
+label{display:block;font-family:var(--fh);font-size:.62rem;font-weight:600;letter-spacing:.10em;
+  text-transform:uppercase;color:var(--text-dim);margin-bottom:.3rem}
+input[type=text],input[type=number],select,textarea{
+  width:100%;background:rgba(255,250,248,.85);border:1px solid var(--border);
+  border-radius:4px;padding:.5rem .65rem;font-family:var(--fb);font-size:1rem;font-weight:400;
+  color:var(--text);outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 8px var(--gold-glow)}
+textarea{min-height:80px;resize:vertical}
+select{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8973a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .7rem center;padding-right:2rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+/* ── Filter chips ── */
+.filter-row{display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap;align-items:center}
+.filter-chip{font-family:var(--fh);font-size:.60rem;font-weight:600;letter-spacing:.08em;padding:4px 12px;
+  border-radius:20px;border:1px solid var(--border);cursor:pointer;
+  background:rgba(255,248,245,.70);color:var(--text-dim);transition:all .15s;user-select:none}
+.filter-chip:hover{border-color:var(--border-mid);color:var(--text-mid)}
+.filter-chip.red-active{background:var(--purple-glow);border-color:var(--purple);color:var(--purple)}
+.filter-chip.teal-active{background:var(--gold-glow);border-color:var(--gold);color:var(--gold-dim)}
+.filter-label{font-family:var(--fh);font-size:.60rem;font-weight:500;letter-spacing:.06em;color:var(--text-dim)}
+/* ── Card grids ── */
+.search-bar{width:100%;margin-bottom:.75rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.6rem;
+  max-height:340px;overflow-y:auto;padding:.25rem;scrollbar-width:thin}
+.card-grid::-webkit-scrollbar{width:5px}
+.card-grid::-webkit-scrollbar-thumb{background:rgba(185,155,80,.30);border-radius:3px}
+.pick-card{border:1px solid var(--border);border-radius:4px;padding:.65rem .75rem;
+  cursor:pointer;background:rgba(255,248,245,.70);transition:all .18s}
+.pick-card:hover{border-color:var(--border-mid);background:rgba(255,250,248,.92)}
+.pick-card.selected{border-color:var(--gold);background:var(--gold-glow);
+  box-shadow:0 0 0 1px rgba(185,155,80,.20)}
+.pick-card.hb{border-left:3px solid var(--purple)}
+.pick-card.hb.selected{border-color:var(--purple);background:var(--purple-glow)}
+.card-name{font-family:var(--fh);font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:.15rem}
+.card-src{font-size:.65rem;color:var(--text-dim);font-family:var(--fb)}
+.hb-tag{display:inline-block;font-family:var(--fh);font-size:.50rem;font-weight:700;letter-spacing:.10em;
+  text-transform:uppercase;color:var(--purple);border:1px solid rgba(107,79,154,.40);
+  padding:1px 5px;border-radius:20px;margin-left:3px;vertical-align:middle}
+/* ── Detail panes ── */
+.detail-pane{background:rgba(255,250,248,.94);
+  border:1px solid var(--border);border-radius:4px;padding:.85rem 1rem;margin-top:.85rem;display:none}
+.detail-pane.visible{display:block}
+.detail-title{font-family:var(--fh);font-size:.95rem;font-weight:700;color:var(--text-bright);margin-bottom:.45rem}
+.detail-body{font-size:.92rem;color:var(--text-mid);line-height:1.72}
+.detail-body em{font-style:italic}
+.trait-chip{display:inline-block;font-size:.72rem;font-weight:500;padding:2px 9px;border-radius:20px;
+  background:var(--gold-glow);border:1px solid rgba(185,155,80,.28);
+  color:var(--text-mid);margin:2px 2px 2px 0;font-family:var(--fb)}
+/* Feature level headings inside detail panes */
+.feature-level-heading{font-family:var(--fh);font-size:.60rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold-dim);margin:0 0 .3rem;padding-top:.5rem;
+  border-top:1px dashed var(--border-dim)}
+.feature-level-heading:first-child{border-top:none;padding-top:0}
+.feature-name{font-family:var(--fh);font-size:.78rem;font-weight:600;color:var(--text);
+  display:block;margin-bottom:2px}
+.feature-desc{font-style:italic;font-size:.90rem;color:var(--text-mid);
+  line-height:1.65;display:block;margin-bottom:.5rem}
+/* ── Ability scores ── */
+.ability-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-bottom:.7rem}
+.ab-block{text-align:center;background:rgba(255,248,245,.80);border:1px solid var(--border);
+  border-radius:4px;padding:.6rem .25rem}
+.ab-label{font-family:var(--fh);font-size:.50rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-dim);margin-bottom:.3rem}
+.ab-input{width:100%;text-align:center;font-family:var(--fh);font-size:1.3rem;font-weight:700;
+  color:var(--text-bright);background:transparent;border:none;border-bottom:1px solid var(--border);
+  padding:.1rem 0;outline:none}
+.ab-input:focus{border-color:var(--gold)}
+.ab-mod{font-family:var(--fh);font-size:.90rem;font-weight:700;margin-top:.3rem;color:var(--purple)}
+.array-btns{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.2rem}
+/* ── Skills ── */
+.skill-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.2rem;max-height:260px;overflow-y:auto}
+.skill-check{display:flex;align-items:center;gap:.35rem;padding:.22rem .3rem;border-radius:3px;
+  cursor:pointer;transition:background .15s}
+.skill-check:hover{background:rgba(185,155,80,.08)}
+.skill-check input{accent-color:var(--purple);cursor:pointer;flex-shrink:0}
+.skill-check .sk-name{font-size:.90rem;color:var(--text-mid);font-family:var(--fb);font-weight:400}
+.skill-check .sk-ab{font-family:var(--fh);font-size:.55rem;font-weight:600;color:var(--text-dim);margin-left:auto}
+/* ── Custom subclass block ── */
+.custom-block{background:var(--purple-glow);border:1px solid rgba(107,79,154,.25);
+  border-radius:4px;padding:.8rem 1rem;margin-top:.85rem}
+/* ── Review ── */
+.review-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1rem}
+.review-block{background:rgba(255,248,245,.80);border:1px solid var(--border);
+  border-radius:4px;padding:.65rem .9rem}
+.review-label{font-family:var(--fh);font-size:.56rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--text-dim);margin-bottom:.15rem}
+.review-val{font-family:var(--fh);font-size:.90rem;font-weight:600;color:var(--text)}
+.review-sub{font-size:.84rem;color:var(--text-dim);font-family:var(--fb);font-style:italic;margin-top:1px}
+/* ── Buttons ── */
+.btn-row{display:flex;justify-content:space-between;align-items:center;
+  margin-top:1.6rem;border-top:1px solid var(--border);padding-top:1.1rem}
+.btn{font-family:var(--fh);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.52rem 1.3rem;border-radius:20px;cursor:pointer;border:1px solid;transition:all .2s}
+.btn-back{background:transparent;border-color:var(--border);color:var(--text-dim)}
+.btn-back:hover{border-color:var(--border-mid);color:var(--text-mid)}
+.btn-sm{font-size:.55rem;padding:.32rem .9rem}
+.btn-next{background:var(--gold-glow);border-color:var(--gold);color:var(--gold-dim)}
+.btn-next:hover{background:rgba(185,155,80,.28);border-color:var(--gold-dim)}
+.btn-submit{background:var(--purple-glow);border-color:var(--purple);color:var(--purple);
+  font-size:.65rem;padding:.58rem 1.7rem}
+.btn-submit:hover{background:rgba(107,79,154,.20);border-color:var(--purple-bright)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+.loading{text-align:center;padding:2rem;font-style:italic;
+  color:var(--text-dim);font-size:.95rem;font-family:var(--fb)}
+.empty-msg{text-align:center;padding:1.2rem;font-style:italic;
+  color:var(--text-dim);font-size:.9rem;font-family:var(--fb)}
+/* ── Spell step ── */
+.sl-filter-row{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.7rem;align-items:center}
+.sl-label{font-family:var(--fh);font-size:.60rem;font-weight:600;letter-spacing:.10em;text-transform:uppercase;color:var(--text-dim);min-width:48px}
+.sl-select,.sl-name-input{flex:1;min-width:120px;padding:.42rem .65rem;border:1px solid var(--border);background:rgba(255,250,248,.85);border-radius:4px;font-family:var(--fb);font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s;appearance:none}
+.sl-select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8973a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .6rem center;padding-right:1.8rem;background-color:rgba(255,250,248,.85)}
+.sl-select:focus,.sl-name-input:focus{border-color:var(--gold);box-shadow:0 0 6px var(--gold-glow)}
+.sl-search-btn{font-family:var(--fh);font-size:.60rem;font-weight:700;letter-spacing:.10em;text-transform:uppercase;padding:.42rem 1.1rem;border-radius:20px;cursor:pointer;border:1px solid var(--gold);background:var(--gold-glow);color:var(--gold-dim);transition:all .2s;white-space:nowrap}
+.sl-search-btn:hover{background:rgba(185,155,80,.25)}
+.sl-results-wrap{background:rgba(255,250,248,.90);border:1px solid var(--border);border-radius:4px;max-height:260px;overflow-y:auto;scrollbar-width:thin;margin-bottom:.8rem}
+.sl-results-wrap::-webkit-scrollbar{width:5px}
+.sl-results-wrap::-webkit-scrollbar-thumb{background:rgba(185,155,80,.30);border-radius:3px}
+.sl-result-item{padding:.5rem .85rem;border-bottom:1px solid var(--border-dim);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;transition:background .12s}
+.sl-result-item:last-child{border-bottom:none}
+.sl-result-item:hover{background:rgba(217,191,119,.14)}
+.sl-result-item.sl-active{background:var(--gold-glow)}
+.sl-result-left{display:flex;align-items:center;gap:9px}
+.sl-badge{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sl-badge svg{width:14px;height:14px}
+.sl-spell-name{font-family:var(--fb);font-size:.88rem;color:var(--text)}
+.sl-lvl{font-size:.70rem;color:var(--text-dim);font-style:italic;font-family:var(--fh)}
+.sl-status{padding:1.1rem;text-align:center;color:var(--text-dim);font-style:italic;font-size:.88rem;font-family:var(--fb)}
+.sl-card{background:rgba(255,250,248,.96);border:1px solid var(--border-mid);border-radius:4px;overflow:hidden;margin-bottom:.8rem;display:none}
+.sl-card.visible{display:block}
+.sl-card-head{padding:.9rem 1.1rem;display:flex;align-items:center;gap:12px;border-bottom:2px solid}
+.sl-card-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.55)}
+.sl-card-icon svg{width:20px;height:20px}
+.sl-card-name{font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.03em;margin:0;color:inherit}
+.sl-card-sub{font-style:italic;font-size:.75rem;opacity:.8;margin-top:1px;font-family:var(--fb)}
+.sl-card-tags{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
+.sl-tag{font-size:.55rem;letter-spacing:.10em;text-transform:uppercase;padding:2px 6px;border-radius:2px;background:rgba(255,255,255,.55);font-weight:600;font-family:var(--fh)}
+.sl-card-body{padding:.9rem 1.1rem}
+.sl-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;padding:.65rem 0 .9rem;border-bottom:1px dashed var(--border);margin-bottom:.8rem}
+.sl-meta-cell{display:flex;gap:7px;align-items:flex-start}
+.sl-meta-cell svg{width:17px;height:17px;flex-shrink:0;opacity:.45;margin-top:1px}
+.sl-meta-label{font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.10em;font-family:var(--fh)}
+.sl-meta-val{font-size:.84rem;color:var(--text)}
+.sl-desc{font-size:.86rem;line-height:1.72;color:var(--text-mid)}
+.sl-desc p{margin:0 0 .65em}
+.sl-desc p:last-child{margin-bottom:0}
+.sl-higher{margin-top:.8rem;padding:.55rem .85rem;background:var(--gold-glow);border-left:3px solid var(--gold);font-size:.82rem;color:var(--text-mid);border-radius:0 3px 3px 0}
+.sl-classes-row{margin-top:.8rem;padding-top:.7rem;border-top:1px dashed var(--border);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.sl-classes-label{font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.10em;margin-right:4px;font-family:var(--fh)}
+.sl-class-chip{font-size:.72rem;padding:2px 7px;background:rgba(217,191,119,.15);border:1px solid var(--border-dim);border-radius:2px;color:var(--text-mid)}
+.sl-add-btn{margin-top:.75rem;font-family:var(--fh);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.4rem 1rem;border-radius:20px;cursor:pointer;border:1px solid var(--purple);background:var(--purple-glow);color:var(--purple);transition:all .2s}
+.sl-add-btn:hover{background:rgba(107,79,154,.18)}
+.sl-add-btn.added{border-color:var(--gold);background:var(--gold-glow);color:var(--gold-dim)}
+.sl-selected-section{background:rgba(255,250,248,.80);border:1px solid var(--border);border-radius:4px;padding:.7rem .9rem;margin-bottom:.8rem}
+.sl-selected-title{font-family:var(--fh);font-size:.60rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:.45rem;display:flex;align-items:baseline;flex-wrap:wrap;gap:.3rem}
+.sl-slots-info{font-family:var(--fh);font-size:.58rem;font-weight:600;color:var(--gold-dim);letter-spacing:.06em;opacity:.88;text-transform:none}
+.sl-selected-chips{display:flex;flex-wrap:wrap;gap:.3rem}
+.sl-spell-chip{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;padding:2px 7px 2px 9px;background:var(--purple-glow);border:1px solid rgba(107,79,154,.25);border-radius:20px;color:var(--purple);font-family:var(--fb)}
+.sl-spell-chip button{background:none;border:none;cursor:pointer;opacity:.55;font-size:.85rem;line-height:1;padding:0 1px;color:inherit;font-family:monospace}
+.sl-spell-chip button:hover{opacity:1}
+/* School colour themes */
+.sl-abjuration  {background-color:rgba(90,126,163,.15);border-color:rgba(90,126,163,.65);color:#1e3a5f}
+.sl-conjuration {background-color:rgba(107,95,184,.15);border-color:rgba(107,95,184,.65);color:#2e2766}
+.sl-divination  {background-color:rgba(74,138,110,.15);border-color:rgba(74,138,110,.65);color:#1f4a35}
+.sl-enchantment {background-color:rgba(168,83,122,.15);border-color:rgba(168,83,122,.65);color:#5a1e3a}
+.sl-evocation   {background-color:rgba(181,96,53,.15); border-color:rgba(181,96,53,.65); color:#5a2410}
+.sl-illusion    {background-color:rgba(122,95,168,.15);border-color:rgba(122,95,168,.65);color:#2a1f5a}
+.sl-necromancy  {background-color:rgba(90,86,78,.15);  border-color:rgba(90,86,78,.65);  color:#2a2620}
+.sl-transmutation{background-color:rgba(168,130,58,.15);border-color:rgba(168,130,58,.65);color:#5a3f10}
+@media(max-width:580px){
+  .ability-grid{grid-template-columns:repeat(3,1fr)}
+  .skill-grid{grid-template-columns:repeat(2,1fr)}
+  .row2,.row3,.review-grid{grid-template-columns:1fr}
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+}
+/* ── HP Calculator ── */
+.hp-calc{background:rgba(255,248,245,.80);border:1px solid var(--border);border-radius:4px;
+  padding:.75rem 1rem;margin-bottom:.8rem}
+.hp-calc-row{display:flex;align-items:center;gap:.65rem;margin-bottom:.55rem;flex-wrap:wrap}
+.hp-calc-row:last-child{margin-bottom:0}
+.hp-calc-label{font-family:var(--fh);font-size:.58rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text-dim);min-width:54px}
+.hp-die-group{display:flex;gap:.28rem}
+.hp-die-btn{font-family:var(--fh);font-size:.66rem;font-weight:700;letter-spacing:.06em;
+  padding:.22rem .58rem;border-radius:3px;border:1px solid var(--border);
+  background:rgba(255,250,248,.70);color:var(--text-dim);cursor:pointer;transition:all .15s}
+.hp-die-btn:hover{border-color:var(--gold);color:var(--gold-dim)}
+.hp-die-btn.active{border-color:var(--gold);background:var(--gold-glow);color:var(--gold-dim)}
+.hp-class-hint{font-size:.62rem;color:var(--text-dim);font-style:italic;font-family:var(--fb)}
+.hp-method-label{display:flex;align-items:center;gap:.28rem;font-size:.88rem;
+  color:var(--text-mid);font-family:var(--fb);cursor:pointer}
+.hp-method-label input{accent-color:var(--purple);cursor:pointer}
+.hp-result-row{display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap;
+  padding-top:.45rem;border-top:1px dashed var(--border-dim);margin-top:.1rem}
+.hp-total{font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--text-bright)}
+.hp-breakdown{font-size:.80rem;color:var(--text-dim);font-family:var(--fb);font-style:italic}
+.hp-breakdown .hp-lbl{font-size:.68rem;opacity:.70}
+.hp-breakdown .hp-nat-max{color:var(--gold-dim);font-weight:600}
+.hp-breakdown .hp-nat-min{color:#b84040;font-weight:600}
+.hp-reroll-btn{font-family:var(--fh);font-size:.56rem;font-weight:700;letter-spacing:.10em;
+  text-transform:uppercase;padding:.22rem .7rem;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s}
+.hp-reroll-btn:hover{border-color:var(--purple);color:var(--purple)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <h1 class="builder-title">Character Builder</h1>
+  <p class="builder-sub">D&D 2024 · Open5e API</p>
+  <div class="divider">⟡ ── ── ── ⟡ ── ── ── ⟡</div>
+
+  <!-- Progress tabs -->
+  <div class="progress-bar">
+    <div class="step-tab active"><span class="step-num">1</span>Identity</div>
+    <div class="step-tab"><span class="step-num">2</span>Species</div>
+    <div class="step-tab"><span class="step-num">3</span>Class</div>
+    <div class="step-tab"><span class="step-num">4</span>Spells</div>
+    <div class="step-tab"><span class="step-num">5</span>Background</div>
+    <div class="step-tab"><span class="step-num">6</span>Abilities</div>
+    <div class="step-tab"><span class="step-num">7</span>Review</div>
+  </div>
+
+  <!-- ══ STEP 1: Identity ══ -->
+  <div class="step-panel active" id="s1">
+    <div class="panel-title">Identity & Basics</div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Character Name *</label>
+        <input type="text" id="name" placeholder="e.g. Seraphina Dawnblade">
+      </div>
+      <div class="field-group">
+        <label>Player Name</label>
+        <input type="text" id="player_name" placeholder="Your name">
+      </div>
+    </div>
+    <div class="row3">
+      <div class="field-group">
+        <label>Level</label>
+        <select id="level">
+          <option value="1">Level 1</option><option value="2">Level 2</option>
+          <option value="3">Level 3</option><option value="4">Level 4</option>
+          <option value="5">Level 5</option><option value="6">Level 6</option>
+          <option value="7">Level 7</option><option value="8">Level 8</option>
+          <option value="9">Level 9</option><option value="10">Level 10</option>
+          <option value="11">Level 11</option><option value="12">Level 12</option>
+          <option value="13">Level 13</option><option value="14">Level 14</option>
+          <option value="15">Level 15</option><option value="16">Level 16</option>
+          <option value="17">Level 17</option><option value="18">Level 18</option>
+          <option value="19">Level 19</option><option value="20">Level 20</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Alignment</label>
+        <select id="alignment">
+          <option>Lawful Good</option><option>Neutral Good</option><option>Chaotic Good</option>
+          <option>Lawful Neutral</option><option selected>True Neutral</option>
+          <option>Chaotic Neutral</option><option>Lawful Evil</option>
+          <option>Neutral Evil</option><option>Chaotic Evil</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Starting Gold (gp)</label>
+        <input type="number" id="gold" value="50" min="0">
+      </div>
+    </div>
+    <div class="field-group">
+      <label>Backstory</label>
+      <textarea id="backstory" placeholder="A brief history of your character…"></textarea>
+    </div>
+    <div class="field-group">
+      <label>Notes / Personality</label>
+      <textarea id="notes" placeholder="Personality traits, ideals, bonds, flaws…" style="min-height:60px"></textarea>
+    </div>
+    <div class="btn-row">
+      <span></span>
+      <button class="btn btn-next" onclick="goTo(2)">Next: Species →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2: Species ══ -->
+  <div class="step-panel" id="s2">
+    <div class="panel-title">Choose Your Species</div>
+    <div class="filter-row">
+      <span class="filter-label">Show:</span>
+      <span class="filter-chip red-active" id="sp-f-2024"     onclick="setFilter('sp','2024')">2024 Official</span>
+      <span class="filter-chip"            id="sp-f-homebrew" onclick="setFilter('sp','homebrew')">Expanded / Homebrew</span>
+      <span class="filter-chip"            id="sp-f-all"      onclick="setFilter('sp','all')">All</span>
+    </div>
+    <input type="text" class="search-bar" id="sp-search" placeholder="Search species…" oninput="renderSpecies()">
+    <div id="sp-grid" class="card-grid"><div class="loading">Loading species…</div></div>
+    <!-- Species detail pane — shown after selecting a card -->
+    <div id="sp-detail" class="detail-pane">
+      <div class="detail-title" id="sp-dtitle"></div>
+      <div class="detail-body"  id="sp-dbody"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goTo(1)">← Back</button>
+      <button class="btn btn-next" onclick="goTo(3)">Next: Class →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3: Class ══ -->
+  <div class="step-panel" id="s3">
+    <div class="panel-title">Choose Your Class</div>
+    <div class="filter-row">
+      <span class="filter-label">Show:</span>
+      <span class="filter-chip red-active" id="cl-f-2024"     onclick="setFilter('cl','2024')">2024 Official</span>
+      <span class="filter-chip"            id="cl-f-homebrew" onclick="setFilter('cl','homebrew')">Expanded / Homebrew</span>
+      <span class="filter-chip"            id="cl-f-all"      onclick="setFilter('cl','all')">All</span>
+    </div>
+    <input type="text" class="search-bar" id="cl-search" placeholder="Search classes…" oninput="renderClasses()">
+    <div id="cl-grid" class="card-grid"><div class="loading">Loading classes…</div></div>
+
+    <!-- Class info panel — shown after selecting a class card -->
+    <div id="cl-detail" class="detail-pane">
+      <div class="detail-title" id="cl-dtitle"></div>
+      <div class="detail-body"  id="cl-dbody"></div>
+    </div>
+
+    <!-- Subclass section — shown below class info panel -->
+    <div id="sub-section" style="display:none;margin-top:1rem">
+      <div class="panel-title">Subclass</div>
+      <div id="sub-grid" class="card-grid" style="max-height:210px"></div>
+      <div id="sub-detail" class="detail-pane" style="margin-top:.75rem">
+        <div class="detail-title" id="sub-dtitle"></div>
+        <div class="detail-body"  id="sub-dbody"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goTo(2)">← Back</button>
+      <button class="btn btn-next" onclick="goTo(4)">Next: Spells →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4: Spells ══ -->
+  <div class="step-panel" id="s4">
+    <div class="panel-title">Spells &amp; Grimoire</div>
+    <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:.9rem;font-family:var(--fb);font-style:italic">Search the spell list and add spells to your character sheet. Skip this step if your class is non-magical.</p>
+
+    <div class="sl-filter-row">
+      <span class="sl-label">Level</span>
+      <select class="sl-select" id="sl-level">
+        <option value="">Any</option>
+        <option value="0">Cantrip</option>
+        <option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option>
+        <option value="4">4th</option><option value="5">5th</option><option value="6">6th</option>
+        <option value="7">7th</option><option value="8">8th</option><option value="9">9th</option>
+      </select>
+      <span class="sl-label">School</span>
+      <select class="sl-select" id="sl-school">
+        <option value="">Any</option>
+        <option value="abjuration">Abjuration</option>
+        <option value="conjuration">Conjuration</option>
+        <option value="divination">Divination</option>
+        <option value="enchantment">Enchantment</option>
+        <option value="evocation">Evocation</option>
+        <option value="illusion">Illusion</option>
+        <option value="necromancy">Necromancy</option>
+        <option value="transmutation">Transmutation</option>
+      </select>
+    </div>
+    <div class="sl-filter-row">
+      <span class="sl-label">Class</span>
+      <select class="sl-select" id="sl-class">
+        <option value="">Any</option>
+        <option value="bard">Bard</option><option value="cleric">Cleric</option>
+        <option value="druid">Druid</option><option value="paladin">Paladin</option>
+        <option value="ranger">Ranger</option><option value="sorcerer">Sorcerer</option>
+        <option value="warlock">Warlock</option><option value="wizard">Wizard</option>
+      </select>
+      <span class="sl-label">Name</span>
+      <input type="text" class="sl-name-input" id="sl-name" placeholder="e.g. fireball">
+      <button class="sl-search-btn" id="sl-search-btn">Search</button>
+    </div>
+
+    <div class="sl-selected-section">
+      <div class="sl-selected-title">Selected Spells&nbsp;<span id="sl-count" style="opacity:.55">(0)</span><span id="sl-slots-info" class="sl-slots-info"></span></div>
+      <div class="sl-selected-chips" id="sl-selected-chips"></div>
+    </div>
+
+    <div id="sl-results"></div>
+    <div class="sl-card" id="sl-card"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goTo(3)">← Back</button>
+      <button class="btn btn-next" onclick="goTo(5)">Next: Background →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 5: Background ══ -->
+  <div class="step-panel" id="s5">
+    <div class="panel-title">Choose Your Background</div>
+    <div class="filter-row">
+      <span class="filter-label">Show:</span>
+      <span class="filter-chip red-active" id="bg-f-2024"     onclick="setFilter('bg','2024')">2024 Official</span>
+      <span class="filter-chip"            id="bg-f-homebrew" onclick="setFilter('bg','homebrew')">Expanded / Homebrew</span>
+      <span class="filter-chip"            id="bg-f-all"      onclick="setFilter('bg','all')">All</span>
+    </div>
+    <input type="text" class="search-bar" id="bg-search" placeholder="Search backgrounds…" oninput="renderBg()">
+    <div id="bg-grid" class="card-grid"><div class="loading">Loading backgrounds…</div></div>
+    <!-- Background detail pane -->
+    <div id="bg-detail" class="detail-pane">
+      <div class="detail-title" id="bg-dtitle"></div>
+      <div class="detail-body"  id="bg-dbody"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goTo(4)">← Back</button>
+      <button class="btn btn-next" onclick="goTo(6)">Next: Abilities →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 6: Abilities & Skills ══ -->
+  <div class="step-panel" id="s6">
+    <div class="panel-title">Ability Scores</div>
+    <p style="font-size:.84rem;color:var(--ink-faint);margin-bottom:.8rem;
+       font-family:var(--fi);font-style:italic">Standard array: 15, 14, 13, 12, 10, 8 — or customise below.<span id="bg-asi-hint"></span></p>
+    <div class="ability-grid">
+      <div class="ab-block" data-ab="str">
+        <div class="ab-label">Strength</div>
+        <input class="ab-input" type="number" min="1" max="20" value="10" oninput="recalcMod(this,'str-mod')">
+        <div class="ab-mod" id="str-mod">+0</div>
+      </div>
+      <div class="ab-block" data-ab="dex">
+        <div class="ab-label">Dexterity</div>
+        <input class="ab-input" type="number" min="1" max="20" value="10" oninput="recalcMod(this,'dex-mod')">
+        <div class="ab-mod" id="dex-mod">+0</div>
+      </div>
+      <div class="ab-block" data-ab="con">
+        <div class="ab-label">Constitution</div>
+        <input class="ab-input" type="number" min="1" max="20" value="10" oninput="recalcMod(this,'con-mod');hpCalcUpdate()">
+        <div class="ab-mod" id="con-mod">+0</div>
+      </div>
+      <div class="ab-block" data-ab="int">
+        <div class="ab-label">Intelligence</div>
+        <input class="ab-input" type="number" min="1" max="20" value="10" oninput="recalcMod(this,'int-mod')">
+        <div class="ab-mod" id="int-mod">+0</div>
+      </div>
+      <div class="ab-block" data-ab="wis">
+        <div class="ab-label">Wisdom</div>
+        <input class="ab-input" type="number" min="1" max="20" value="10" oninput="recalcMod(this,'wis-mod')">
+        <div class="ab-mod" id="wis-mod">+0</div>
+      </div>
+      <div class="ab-block" data-ab="cha">
+        <div class="ab-label">Charisma</div>
+        <input class="ab-input" type="number" min="1" max="20" value="10" oninput="recalcMod(this,'cha-mod')">
+        <div class="ab-mod" id="cha-mod">+0</div>
+      </div>
+    </div>
+    <div class="array-btns">
+      <button class="btn btn-back btn-sm" onclick="setArray([15,14,13,12,10,8])">Standard Array</button>
+      <button class="btn btn-back btn-sm" onclick="setArray([15,15,15,8,8,8])">Heroic Array</button>
+      <button class="btn btn-back btn-sm" onclick="rollAll()">🎲 Roll 4d6 Drop</button>
+    </div>
+    <div class="panel-title">Skill Proficiencies</div>
+    <p style="font-size:.8rem;color:var(--ink-faint);margin-bottom:.6rem;
+       font-family:var(--fi);font-style:italic">Select the skills granted by your class and background: <span id="class-skills-hint"></span><span id="bg-skills-hint"></span></p>
+    <div class="skill-grid" id="skill-grid"></div>
+
+    <div class="panel-title" style="margin-top:1.3rem">Hit Points</div>
+    <div class="hp-calc">
+      <!-- Hit die selector -->
+      <div class="hp-calc-row">
+        <span class="hp-calc-label">Hit Die</span>
+        <div class="hp-die-group">
+          <button type="button" class="hp-die-btn" data-die="6"  onclick="hpCalcSetDie(6)">d6</button>
+          <button type="button" class="hp-die-btn" data-die="8"  onclick="hpCalcSetDie(8)">d8</button>
+          <button type="button" class="hp-die-btn" data-die="10" onclick="hpCalcSetDie(10)">d10</button>
+          <button type="button" class="hp-die-btn" data-die="12" onclick="hpCalcSetDie(12)">d12</button>
+        </div>
+        <span class="hp-class-hint" id="hp-class-hint"></span>
+      </div>
+      <!-- Method selector -->
+      <div class="hp-calc-row">
+        <span class="hp-calc-label">Method</span>
+        <label class="hp-method-label">
+          <input type="radio" name="hp-method" value="standard" checked onchange="hpCalcUpdate()">
+          Standard (average)
+        </label>
+        <label class="hp-method-label">
+          <input type="radio" name="hp-method" value="roll" onchange="hpCalcRoll()">
+          Roll Hit Points
+        </label>
+      </div>
+      <!-- Result -->
+      <div class="hp-result-row">
+        <span class="hp-total" id="hp-total">— HP</span>
+        <span class="hp-breakdown" id="hp-breakdown"></span>
+        <button type="button" class="hp-reroll-btn" id="hp-reroll-btn" style="display:none" onclick="hpCalcRoll()">🎲 Re-roll</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goTo(5)">← Back</button>
+      <button class="btn btn-next" onclick="goTo(7)">Review Character →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 7: Review ══ -->
+  <div class="step-panel" id="s7">
+    <div class="panel-title">Review Your Character</div>
+    <div class="review-grid" id="review-main"></div>
+    <div style="background:rgba(255,255,255,.22);border:1px solid var(--parch-deep);
+         border-radius:3px;padding:.7rem 1rem;margin-bottom:.8rem">
+      <div class="panel-title">Ability Scores</div>
+      <div id="review-abs" style="display:flex;gap:.5rem;flex-wrap:wrap"></div>
+    </div>
+    <div style="background:rgba(255,255,255,.22);border:1px solid var(--parch-deep);
+         border-radius:3px;padding:.7rem 1rem">
+      <div class="panel-title">Selected Skills</div>
+      <div id="review-skills" style="display:flex;flex-wrap:wrap;gap:.3rem"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goTo(6)">← Back</button>
+      <button class="btn btn-submit" id="submit-btn" onclick="submitCharacter()">⚔ Generate Character Sheet</button>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// State — single object holding all selections and loaded data
+// ═══════════════════════════════════════════════════════════════════════════
+const S = {
+  spFilter: '2024', clFilter: '2024', bgFilter: '2024',
+  allSp: [], allCl: [], allSub: [], allBg: [],
+  spKey: null, spName: '', spData: null,
+  clKey: null, clName: '', clData: null,
+  subKey: null, subName: '', subHb: false, subData: null,
+  bgKey: null, bgName: '', bgData: null,
+  selectedSpells: [],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Navigation
+// ═══════════════════════════════════════════════════════════════════════════
+function goTo(n) {
+  if (n === 7) buildReview();
+  if (n === 4) slInitStep();
+  if (n === 6) hpCalcUpdate();
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if      (i + 1 < n) t.classList.add('done');
+    else if (i + 1 === n) t.classList.add('active');
+  });
+  document.getElementById('s' + n).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Open5e API — called directly from the browser (CORS allowed)
+// ═══════════════════════════════════════════════════════════════════════════
+const API = '/api/open5e';
+
+async function fetchAll(endpoint) {
+  let results = [], page = 1, total = null;
+  while (true) {
+    const url = `${API}/${endpoint}?limit=100&page=${page}`;
+    const r = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!r.ok) throw new Error(`HTTP ${r.status} from Open5e (${endpoint})`);
+    const data = await r.json();
+    results = results.concat(data.results || []);
+    if (total === null) total = data.count || 0;
+    if (!data.next || results.length >= total) break;
+    page++;
+    if (page > 15) break;
+  }
+  return results;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Filter helpers
+// ═══════════════════════════════════════════════════════════════════════════
+function is2024Official(item) {
+  return item?.document?.gamesystem?.key === '5e-2024' && !item._homebrew;
+}
+function isHomebrew(item) {
+  if (item?._homebrew) return true;
+  const dk = item?.document?.key || '';
+  return !['srd-2024', 'srd-2014'].includes(dk);
+}
+function passesFilter(item, filter) {
+  if (filter === '2024')     return is2024Official(item);
+  if (filter === 'homebrew') return isHomebrew(item);
+  return true;
+}
+
+function setFilter(section, value) {
+  S[section + 'Filter'] = value;
+  ['2024', 'homebrew', 'all'].forEach(v => {
+    const el = document.getElementById(`${section}-f-${v}`);
+    if (el) el.classList.remove('red-active', 'teal-active');
+  });
+  const chip = document.getElementById(`${section}-f-${value}`);
+  if (chip) chip.classList.add(value === 'homebrew' ? 'teal-active' : 'red-active');
+  if (section === 'sp') renderSpecies();
+  if (section === 'cl') renderClasses();
+  if (section === 'bg') renderBg();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Shared detail-pane helper — renders a chip row + description block
+// ═══════════════════════════════════════════════════════════════════════════
+function renderDetailPane(paneId, titleId, bodyId, title, chips, bodyHtml) {
+  document.getElementById(titleId).textContent = title;
+  const chipsHtml = chips.length
+    ? `<div style="margin-bottom:.5rem">${chips.map(c => `<span class="trait-chip">${c}</span>`).join('')}</div>`
+    : '';
+  document.getElementById(bodyId).innerHTML = chipsHtml + bodyHtml;
+  document.getElementById(paneId).classList.add('visible');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SPECIES
+// ═══════════════════════════════════════════════════════════════════════════
+function renderSpecies() {
+  const q = document.getElementById('sp-search').value.toLowerCase();
+  const items = S.allSp
+    .filter(s => passesFilter(s, S.spFilter) && (!q || s.name.toLowerCase().includes(q)))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const grid = document.getElementById('sp-grid');
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-msg">No species match — try a different filter or search.</div>';
+    return;
+  }
+  grid.innerHTML = items.map(s => `
+    <div class="pick-card${S.spKey === s.key ? ' selected' : ''}${s._homebrew ? ' hb' : ''}"
+         onclick="pickSpecies('${s.key}')">
+      <div class="card-name">${s.name}${s._homebrew ? '<span class="hb-tag">HB</span>' : ''}</div>
+      <div class="card-src">${s.document?.display_name || ''}</div>
+    </div>`).join('');
+}
+
+function pickSpecies(key) {
+  S.spKey  = key;
+  const found = S.allSp.find(s => s.key === key);
+  S.spName = found?.name || key;
+  S.spData = found || null;
+  renderSpecies();
+
+  // Build trait list — works for both Open5e and homebrew entries
+  const traits = (found?.traits || []).filter(t => t.name);
+  const bodyHtml = traits.length
+    ? traits.map(t => `
+        <div style="margin-bottom:.55rem">
+          <span class="feature-name">${t.name}</span>
+          <span class="feature-desc">${(t.desc || '').slice(0, 240)}${(t.desc || '').length > 240 ? '…' : ''}</span>
+        </div>`).join('')
+    : '<em>No trait data available.</em>';
+
+  const chips = [];
+  if (found?.document?.display_name) chips.push(found.document.display_name);
+  renderDetailPane('sp-detail', 'sp-dtitle', 'sp-dbody', S.spName, chips, bodyHtml);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CLASSES
+// ═══════════════════════════════════════════════════════════════════════════
+function renderClasses() {
+  const q = document.getElementById('cl-search').value.toLowerCase();
+  const items = S.allCl
+    .filter(c => passesFilter(c, S.clFilter) && (!q || c.name.toLowerCase().includes(q)))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const grid = document.getElementById('cl-grid');
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-msg">No classes match — try a different filter.</div>';
+    return;
+  }
+  grid.innerHTML = items.map(c => `
+    <div class="pick-card${S.clKey === c.key ? ' selected' : ''}${c._homebrew ? ' hb' : ''}"
+         onclick="pickClass('${c.key}')">
+      <div class="card-name">${c.name}${c._homebrew ? '<span class="hb-tag">HB</span>' : ''}</div>
+      <div class="card-src">${c.document?.display_name || ''}</div>
+      <div class="card-src" style="margin-top:2px">Hit Die: ${c.hit_dice || c.hit_die || '—'}</div>
+    </div>`).join('');
+}
+
+function pickClass(key) {
+  S.clKey  = key;
+  S.subKey = null; S.subName = ''; S.subHb = false;
+  const found  = S.allCl.find(c => c.key === key);
+  S.clName = found?.name || key;
+  S.clData = found || null;
+  renderClasses();
+
+  // Class detail chips
+  const saves = (found?.saving_throws || [])
+    .map(s => typeof s === 'object' ? s.name : s).join(', ') || '—';
+  const chips = [
+    `Hit Die: ${found?.hit_dice || found?.hit_die || '?'}`,
+    `Saves: ${saves}`,
+    `Casting: ${found?.caster_type || 'None'}`,
+  ];
+
+  // Extract core traits table rows (skills, weapons, armour, tools)
+  const coreTraitFeature = (found?.features || []).find(f => f.feature_type === 'CORE_TRAITS_TABLE');
+  let traitsHtml = '';
+  let classSkillText = '';
+
+  if (coreTraitFeature?.desc) {
+    const rows = coreTraitFeature.desc.split('\n').filter(l => l.startsWith('|') && !l.startsWith('|---'));
+    const SKIP = new Set(['', '||', 'primary ability']);
+    traitsHtml = rows
+      .map(row => {
+        const cells = row.split('|').map(c => c.trim()).filter(Boolean);
+        if (cells.length < 2) return '';
+        const label = cells[0].toLowerCase();
+        if (SKIP.has(label)) return '';
+        if (label === 'skill proficiencies') classSkillText = cells[1];
+        return `<div style="margin-bottom:.35rem"><span class="feature-name">${cells[0]}</span><span class="feature-desc">${cells[1]}</span></div>`;
+      })
+      .join('');
+  }
+  // Update skills hint on step 5
+  const skillsHint = document.getElementById('class-skills-hint');
+  if (skillsHint) skillsHint.innerHTML = classSkillText
+    ? `<strong style="color:var(--ink)">${S.clName}:</strong> ${classSkillText}`
+    : '';
+
+  const desc = found?.desc || '';
+  const descHtml = desc
+    ? `<span class="feature-desc">${desc.slice(0, 400)}${desc.length > 400 ? '…' : ''}</span>`
+    : '';
+
+  const bodyHtml = descHtml + (traitsHtml ? `<div style="margin-top:.6rem">${traitsHtml}</div>` : '');
+
+  renderDetailPane('cl-detail', 'cl-dtitle', 'cl-dbody', S.clName, chips, bodyHtml);
+
+  // Sync HP calculator die to the class's hit die
+  const classDie = parseInt((found?.hit_dice || found?.hit_die || 'D8').replace(/\D/g, '')) || 8;
+  hpCalcSetDie(classDie, /*fromClass=*/true);
+
+  // Show subclass section, reset subclass detail
+  document.getElementById('sub-section').style.display = 'block';
+  document.getElementById('sub-detail').classList.remove('visible');
+
+  renderSubclasses();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUBCLASSES
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderSubclasses() {
+  const subs = S.allSub.filter(s => {
+    const parentKey  = (s.subclass_of?.key || s.subclass_of?.slug || '').toLowerCase();
+    const parentName = (s.subclass_of?.name || '').toLowerCase();
+    const activeKey  = (S.clKey  || '').toLowerCase();
+    const activeName = (S.clName || '').toLowerCase();
+    return parentKey === activeKey || parentName === activeName;
+  }).sort((a, b) => a.name.localeCompare(b.name));
+
+  const grid = document.getElementById('sub-grid');
+  if (!subs.length) {
+    grid.innerHTML = '<div class="empty-msg" style="font-size:.78rem">No subclasses in Open5e for this class — use the Homebrew field below, or add a <code>subclasses.json</code> to your <code>homebrew/</code> folder.</div>';
+    return;
+  }
+  grid.innerHTML = subs.map(s => `
+    <div class="pick-card${S.subKey === s.key ? ' selected' : ''}${s._homebrew ? ' hb' : ''}"
+         onclick="pickSubclass('${s.key}', ${!!s._homebrew})">
+      <div class="card-name">${s.name}${s._homebrew ? '<span class="hb-tag">HB</span>' : ''}</div>
+      <div class="card-src">${s.document?.display_name || 'Official'}</div>
+    </div>`).join('');
+}
+
+function pickSubclass(key, hb) {
+  S.subKey  = key;
+  S.subHb   = hb;
+  const found = S.allSub.find(s => s.key === key);
+  S.subName  = found?.name || key;
+  S.subData  = found || null;
+  renderSubclasses();
+
+  if (!found) return;
+
+  const titleSuffix = hb ? ' ✦ Homebrew' : '';
+
+  // ── Homebrew subclass — render level-by-level features from JSON ──────
+  if (found._hbData) {
+    const hbData = found._hbData;
+    const spells = hbData.subclass_spell_list || [];
+    const spellLine = spells.length
+      ? `<div style="margin-bottom:.7rem">
+           <span class="trait-chip">Subclass Spells</span>
+           ${spells.map(sp => `<span class="trait-chip">${sp.replace(/_/g,' ')}</span>`).join('')}
+         </div>`
+      : '';
+
+    const featureHtml = Object.entries(hbData.features || {})
+      .sort(([a], [b]) => parseInt(a) - parseInt(b))
+      .map(([level, traits]) => {
+        const traitRows = (traits || []).map(t => `
+          <span class="feature-name">${t.name || ''}</span>
+          <span class="feature-desc">${(t.description || '').slice(0, 350)}${(t.description || '').length > 350 ? '…' : ''}</span>
+        `).join('');
+        return `<div class="feature-level-heading">Level ${level}</div>${traitRows}`;
+      }).join('');
+
+    const bodyHtml = spellLine + (featureHtml || '<em>No features defined in your JSON yet.</em>');
+    renderDetailPane('sub-detail', 'sub-dtitle', 'sub-dbody', S.subName + titleSuffix, [], bodyHtml);
+
+  // ── Open5e subclass — show whatever description the API provides ──────
+  } else {
+    const desc = found.desc || found.description || '';
+    const chips = [];
+    if (found.document?.display_name) chips.push(found.document.display_name);
+    if (found.caster_type) chips.push(`Casting: ${found.caster_type}`);
+    const bodyHtml = desc
+      ? `<span class="feature-desc">${desc.slice(0, 500)}${desc.length > 500 ? '…' : ''}</span>`
+      : '<em>No description available from Open5e for this subclass.</em>';
+    renderDetailPane('sub-detail', 'sub-dtitle', 'sub-dbody', S.subName + titleSuffix, chips, bodyHtml);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BACKGROUNDS
+// ═══════════════════════════════════════════════════════════════════════════
+function renderBg() {
+  const q = document.getElementById('bg-search').value.toLowerCase();
+  const items = S.allBg
+    .filter(b => passesFilter(b, S.bgFilter) && (!q || b.name.toLowerCase().includes(q)))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const grid = document.getElementById('bg-grid');
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-msg">No backgrounds match — try a different filter.</div>';
+    return;
+  }
+  grid.innerHTML = items.map(b => `
+    <div class="pick-card${S.bgKey === b.key ? ' selected' : ''}${b._homebrew ? ' hb' : ''}"
+         onclick="pickBg('${b.key}')">
+      <div class="card-name">${b.name}${b._homebrew ? '<span class="hb-tag">HB</span>' : ''}</div>
+      <div class="card-src">${b.document?.display_name || ''}</div>
+    </div>`).join('');
+}
+
+function bgBenefit(bg, type) {
+  return (bg?.benefits || []).find(b => b.type === type)?.desc || null;
+}
+
+function pickBg(key) {
+  S.bgKey  = key;
+  const found = S.allBg.find(b => b.key === key);
+  S.bgName = found?.name || key;
+  S.bgData = found || null;
+  renderBg();
+
+  const benefits = found?.benefits || [];
+
+  // Update ASI hint on the abilities step
+  const asiText = bgBenefit(found, 'ability_score') || '';
+  const asiHint = document.getElementById('bg-asi-hint');
+  if (asiHint) asiHint.innerHTML = asiText
+    ? ` &nbsp;·&nbsp; <strong style="color:var(--ink)">${S.bgName} ASI:</strong> ${asiText}`
+    : '';
+
+  // Update skill proficiencies hint on the abilities step
+  const skillprofText = bgBenefit(found, 'skill_proficiency') || found?.skill_proficiencies?.join(', ') || '';
+  const skillprofHint = document.getElementById('bg-skills-hint');
+  if (skillprofHint) skillprofHint.innerHTML = skillprofText
+    ? ` &nbsp;·&nbsp; <strong style="color:var(--ink)">${S.bgName} Skills:</strong> ${skillprofText}`
+    : '';
+
+  // Build chips from benefits array or flat homebrew fields
+  const skillsText    = bgBenefit(found, 'skill_proficiency') || found?.skill_proficiencies?.join(', ') || '';
+  const toolText      = bgBenefit(found, 'tool_proficiency')  || found?.tool_proficiency || '';
+  const originFeatText      = bgBenefit(found, 'origin_feat')              || found?.origin_feat?.name || '';
+  const traitText = (found?.benefits || []).find(b => b.type === 'trait')?.name || found?.trait?.name || '';
+  const languagesText = bgBenefit(found, 'language')          || found?.languages || '';
+
+  const chips = [
+    ...(skillsText    ? [skillsText] : []),
+    ...(toolText      ? [`Tool: ${toolText}`] : []),
+    ...(originFeatText      ? [`Origin Feat: ${originFeatText}`] : []),
+    ...(traitText     ? [`Trait: ${traitText}`] : []),
+    ...(languagesText ? [`Lang: ${languagesText}`] : []),
+    ...(found?.document?.display_name ? [found.document.display_name] : []),
+  ];
+
+  let bodyHtml = '';
+
+  if (benefits.length) {
+    // Render each benefit as a labeled block; skip the very long lore-table types
+    const SKIP_TYPES = new Set(['adventures_and_advancement', 'connection_and_memento']);
+    const CAP = 350;
+    bodyHtml = benefits
+      .filter(b => !SKIP_TYPES.has(b.type))
+      .map(b => {
+        const text = b.desc ? b.desc.slice(0, CAP) + (b.desc.length > CAP ? '…' : '') : '';
+        return `<div style="margin-bottom:.55rem">
+          <span class="feature-name">${b.name}</span>
+          ${text ? `<span class="feature-desc">${text}</span>` : ''}
+        </div>`;
+      })
+      .join('');
+    if (!bodyHtml) bodyHtml = '<em>No description available.</em>';
+  } else {
+    // Homebrew / flat-field fallback
+    const desc = found?.description || found?.desc || '';
+    const equipment = found?.starting_equipment || [];
+    const equipHtml = equipment.length
+      ? `<div style="margin-top:.5rem"><span class="feature-name">Starting Equipment</span>
+         <span class="feature-desc">${equipment.join(', ')}</span></div>`
+      : '';
+    bodyHtml = (desc
+      ? `<span class="feature-desc">${desc.slice(0, 400)}${desc.length > 400 ? '…' : ''}</span>`
+      : '') + equipHtml || '<em>No description available.</em>';
+  }
+
+  renderDetailPane('bg-detail', 'bg-dtitle', 'bg-dbody', S.bgName, chips, bodyHtml);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ABILITIES & SKILLS
+// ═══════════════════════════════════════════════════════════════════════════
+function recalcMod(inp, id) {
+  const m = Math.floor(((parseInt(inp.value) || 10) - 10) / 2);
+  document.getElementById(id).textContent = m >= 0 ? `+${m}` : `${m}`;
+}
+function setArray(arr) {
+  ['str','dex','con','int','wis','cha'].forEach((ab, i) => {
+    const inp = document.querySelector(`[data-ab="${ab}"] input`);
+    inp.value = arr[i];
+    recalcMod(inp, ab + '-mod');
+  });
+}
+function rollAll() {
+  setArray(['str','dex','con','int','wis','cha'].map(() => {
+    const dice = [0,0,0,0].map(() => Math.ceil(Math.random() * 6));
+    return dice.sort((a,b) => a - b).slice(1).reduce((a,b) => a + b, 0);
+  }));
+}
+
+const SKILLS = [
+  ['Acrobatics','DEX'],['Animal Handling','WIS'],['Arcana','INT'],['Athletics','STR'],
+  ['Deception','CHA'],['History','INT'],['Insight','WIS'],['Intimidation','CHA'],
+  ['Investigation','INT'],['Medicine','WIS'],['Nature','INT'],['Perception','WIS'],
+  ['Performance','CHA'],['Persuasion','CHA'],['Religion','INT'],['Sleight of Hand','DEX'],
+  ['Stealth','DEX'],['Survival','WIS'],
+];
+function buildSkillGrid() {
+  document.getElementById('skill-grid').innerHTML = SKILLS.map(([sk, ab]) => `
+    <label class="skill-check">
+      <input type="checkbox" name="skill" value="${sk}">
+      <span class="sk-name">${sk}</span>
+      <span class="sk-ab">${ab}</span>
+    </label>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REVIEW
+// ═══════════════════════════════════════════════════════════════════════════
+function buildReview() {
+
+
+  const rows = [
+    ['Name',       document.getElementById('name').value || '—', ''],
+    ['Species',    S.spName   || '—', ''],
+    ['Class',      S.clName   || '—', S.subName ? `Subclass: ${S.subName}${S.subHb ? ' (Homebrew)' : ''}` : ''],
+    ['Background', S.bgName   || '—', ''],
+    ['Level',      document.getElementById('level').value, ''],
+    ['Alignment',  document.getElementById('alignment').value, ''],
+  ];
+  document.getElementById('review-main').innerHTML = rows.map(([l,v,s]) => `
+    <div class="review-block">
+      <div class="review-label">${l}</div>
+      <div class="review-val">${v}</div>
+      ${s ? `<div class="review-sub">${s}</div>` : ''}
+    </div>`).join('');
+
+  const ABS = [['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']];
+  document.getElementById('review-abs').innerHTML = ABS.map(([lbl, id]) => {
+    const v = parseInt(document.querySelector(`[data-ab="${id}"] input`)?.value) || 10;
+    const m = Math.floor((v - 10) / 2);
+    return `<div style="text-align:center;background:var(--parch-dk);border:1px solid var(--parch-deep);
+      border-radius:3px;padding:.4rem .6rem;min-width:52px">
+      <div style="font-family:var(--fh);font-size:.52rem;letter-spacing:.12em;color:var(--ink-faint)">${lbl}</div>
+      <div style="font-family:var(--fd);font-size:1.15rem">${v}</div>
+      <div style="font-family:var(--fh);font-size:.82rem;color:var(--crimson)">${m >= 0 ? '+' : ''}${m}</div>
+    </div>`;
+  }).join('');
+
+  const sk = Array.from(document.querySelectorAll('input[name="skill"]:checked')).map(i => i.value);
+  document.getElementById('review-skills').innerHTML = sk.length
+    ? sk.map(s => `<span class="trait-chip">${s}</span>`).join('')
+    : '<em style="font-size:.8rem;color:var(--text-dim)">None selected</em>';
+
+  // Spells summary
+  let spellsSection = document.getElementById('review-spells-section');
+  if (!spellsSection) {
+    spellsSection = document.createElement('div');
+    spellsSection.id = 'review-spells-section';
+    spellsSection.style.cssText = 'background:rgba(255,255,255,.22);border:1px solid var(--border);border-radius:3px;padding:.7rem 1rem;margin-top:.8rem';
+    document.getElementById('s7').querySelector('.btn-row').before(spellsSection);
+  }
+  spellsSection.innerHTML = `
+    <div class="panel-title">Selected Spells</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.3rem">
+      ${S.selectedSpells.length
+        ? S.selectedSpells.map(s => `<span class="trait-chip">${s.name} <span style="opacity:.6;font-size:.68rem">${s.level===0?'cantrip':'L'+s.level}</span></span>`).join('')
+        : '<em style="font-size:.8rem;color:var(--text-dim)">None selected</em>'}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════════════════════════
+async function submitCharacter() {
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = '⏳ Building…'; btn.disabled = true;
+
+
+
+  const skills = Array.from(document.querySelectorAll('input[name="skill"]:checked')).map(i => i.value);
+  const getAb  = ab => parseInt(document.querySelector(`[data-ab="${ab}"] input`)?.value) || 10;
+
+  const payload = {
+    name:            document.getElementById('name').value,
+    player_name:     document.getElementById('player_name').value,
+    alignment:       document.getElementById('alignment').value,
+    level:           document.getElementById('level').value,
+    gold:            document.getElementById('gold').value,
+    backstory:       document.getElementById('backstory').value,
+    notes:           document.getElementById('notes').value,
+    species_key:     S.spKey  || '',
+    species_name:    S.spName,
+    class_key:       S.clKey  || '',
+    class_name:      S.clName,
+    background_key:  S.bgKey  || '',
+    background_name: S.bgName,
+    subclass_key:    S.subKey  || '',
+    subclass_name:   S.subName,
+    subclass_homebrew: S.subHb,
+    str: getAb('str'), dex: getAb('dex'), con: getAb('con'),
+    int: getAb('int'), wis: getAb('wis'), cha: getAb('cha'),
+    skills,
+    spells: S.selectedSpells.map(s => ({ name: s.name, level: s.level, index: s.index })),
+    hit_die_override: HPC.die,
+    hp_rolled: HPC.method === 'roll' ? hpCalcTotal() : null,
+    // Pass pre-fetched data so Flask never needs to call Open5e
+    species_data:   S.spData  ? JSON.stringify(S.spData)  : null,
+    class_data:     S.clData  ? JSON.stringify(S.clData)  : null,
+    bg_data:        S.bgData  ? JSON.stringify(S.bgData)  : null,
+    subclass_data:  S.subData ? JSON.stringify(S.subData) : null
+  };
+
+  try {
+    const r    = await fetch('/api/build', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json();
+    if (data.ok) { window.location.href = '/sheet'; }
+    else { throw new Error(data.error || 'Unknown error'); }
+  } catch (e) {
+    btn.textContent = '⚔ Generate Character Sheet'; btn.disabled = false;
+    alert('Error building character: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SPELL STEP
+// ═══════════════════════════════════════════════════════════════════════════
+const slSchoolIcons = {
+  abjuration:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 5 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V5 Z"/></svg>',
+  conjuration:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/><circle cx="12" cy="12" r="10" stroke-dasharray="1 4"/></svg>',
+  divination:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 6 8 4 12 4 C16 4 19 6 22 12 C19 18 16 20 12 20 C8 20 5 18 2 12 Z"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>',
+  enchantment:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 6.6 A5 5 0 0 0 12 6 A5 5 0 0 0 3.2 6.6 C2.5 9.5 4.5 12.5 12 19 C19.5 12.5 21.5 9.5 20.8 6.6 Z"/></svg>',
+  evocation:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L5 13 H11 L9 22 L19 10 H13 Z"/></svg>',
+  illusion:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 7 8 5 12 5 C16 5 19 7 22 12 C19 17 16 19 12 19 C8 19 5 17 2 12 Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  necromancy:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 C7.5 3 5 6 5 10 V14 L7 16 V19 H10 V17 H14 V19 H17 V16 L19 14 V10 C19 6 16.5 3 12 3 Z"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/></svg>',
+  transmutation:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 H16 L13 6 M20 15 H8 L11 18"/></svg>',
+};
+const slGlyphs = {
+  time:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15 14"/></svg>',
+  range:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 C8 8 8 16 12 22 C16 16 16 8 12 2 Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  comp:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L21 8 V16 L12 21 L3 16 V8 Z"/><path d="M12 3 V21 M3 8 L21 16 M21 8 L3 16"/></svg>',
+  duration:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4 H19 M5 20 H19 M7 4 C7 9 17 11 17 12 C17 13 7 15 7 20 M17 4 C17 9 7 11 7 12 C7 13 17 15 17 20"/></svg>',
+};
+
+const SPELLCASTING_CLASSES = new Set(['bard','cleric','druid','paladin','ranger','sorcerer','warlock','wizard']);
+
+function slTableValue(clData, featureName) {
+  const level = parseInt(document.getElementById('level')?.value) || 1;
+  const feat = (clData?.features || []).find(
+    f => f.feature_type === 'CLASS_TABLE_DATA' && f.name === featureName
+  );
+  if (!feat) return null;
+  const rows = (feat.data_for_class_table || []).filter(r => r.level <= level);
+  if (!rows.length) return null;
+  rows.sort((a, b) => b.level - a.level);
+  return rows[0].column_value;
+}
+
+function slInitStep() {
+  const cls = (S.clName || '').toLowerCase();
+  const sel = document.getElementById('sl-class');
+  if (sel && SPELLCASTING_CLASSES.has(cls)) sel.value = cls;
+  slUpdateSelectedDisplay();
+}
+
+async function slSearch() {
+  const wrap = document.getElementById('sl-results');
+  document.getElementById('sl-card').classList.remove('visible');
+  wrap.innerHTML = '<div class="sl-results-wrap"><div class="sl-status">Consulting the archives…</div></div>';
+
+  const params = new URLSearchParams();
+  const lvl = document.getElementById('sl-level').value;
+  const sch = document.getElementById('sl-school').value;
+  const cls = document.getElementById('sl-class').value;
+  const nm  = document.getElementById('sl-name').value.trim();
+  if (lvl !== '') params.append('level', lvl);
+  if (sch) params.append('school', sch);
+  if (cls) params.append('class', cls);
+  if (nm)  params.append('name', nm);
+
+  try {
+    const res  = await fetch('/api/spells/search?' + params.toString());
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Search failed');
+    slRenderList(data.results);
+  } catch (err) {
+    wrap.innerHTML = `<div class="sl-results-wrap"><div class="sl-status">Search failed: ${err.message}</div></div>`;
+  }
+}
+
+function slRenderList(list) {
+  const wrap = document.getElementById('sl-results');
+  if (!list.length) {
+    wrap.innerHTML = '<div class="sl-results-wrap"><div class="sl-status">No spells match those filters.</div></div>';
+    return;
+  }
+  const shown = list.slice(0, 120);
+  const rows = shown.map(s => {
+    const school = s.school || 'evocation';
+    const lvlLabel = s.level === 0 ? 'Cantrip' : `Level ${s.level}`;
+    const icon = slSchoolIcons[school] || '';
+    return `<div class="sl-result-item" data-idx="${s.index}" data-school="${school}">
+      <div class="sl-result-left">
+        <span class="sl-badge sl-${school}">${icon}</span>
+        <span class="sl-spell-name">${s.name}</span>
+      </div>
+      <span class="sl-lvl">${lvlLabel}</span>
+    </div>`;
+  }).join('');
+  const note = list.length > 120
+    ? `<div class="sl-status">Showing 120 of ${list.length} — add filters to narrow.</div>` : '';
+  wrap.innerHTML = `<div class="sl-results-wrap">${rows}</div>${note}`;
+  wrap.querySelectorAll('.sl-result-item').forEach(el => {
+    el.addEventListener('click', () => {
+      wrap.querySelectorAll('.sl-result-item').forEach(e => e.classList.remove('sl-active'));
+      el.classList.add('sl-active');
+      slLoadSpell(el.dataset.idx);
+    });
+  });
+}
+
+let _slCurrentSpell = null;
+
+async function slLoadSpell(idx) {
+  const card = document.getElementById('sl-card');
+  card.className = 'sl-card visible';
+  card.innerHTML = '<div class="sl-card-body"><div class="sl-status">Unfurling the scroll…</div></div>';
+  try {
+    const res = await fetch('/api/spells/' + idx);
+    const s   = await res.json();
+    if (!res.ok) throw new Error(s.error || 'Load failed');
+    _slCurrentSpell = s;
+    slRenderSpell(s);
+  } catch (err) {
+    card.innerHTML = `<div class="sl-card-body"><div class="sl-status">Failed: ${err.message}</div></div>`;
+  }
+}
+
+function slRenderSpell(s) {
+  const school   = s.school_index || 'evocation';
+  const icon     = slSchoolIcons[school] || '';
+  const subtitle = s.level === 0 ? `${s.school_name} cantrip` : `Level ${s.level} ${(s.school_name||'').toLowerCase()}`;
+  const tags     = [s.ritual && 'Ritual', s.concentration && 'Concentration'].filter(Boolean);
+  const desc     = (s.desc || []).map(p => `<p>${p}</p>`).join('');
+  const higher   = s.higher_level && s.higher_level.length
+    ? `<div class="sl-higher"><strong>At higher levels.</strong> ${s.higher_level.join(' ')}</div>` : '';
+  const compsText = s.material ? `${s.components} <em>(${s.material})</em>` : s.components;
+  const classes   = (s.classes || []).length
+    ? `<div class="sl-classes-row"><span class="sl-classes-label">Classes</span>${s.classes.map(c=>`<span class="sl-class-chip">${c}</span>`).join('')}</div>` : '';
+  const isAdded  = S.selectedSpells.some(x => x.index === s.index);
+
+  document.getElementById('sl-card').innerHTML = `
+    <div class="sl-card-head sl-${school}">
+      <div class="sl-card-icon sl-${school}">${icon}</div>
+      <div>
+        <h3 class="sl-card-name">${s.name}</h3>
+        <div class="sl-card-sub">${subtitle}</div>
+      </div>
+      <div class="sl-card-tags">${tags.map(t=>`<span class="sl-tag">${t}</span>`).join('')}</div>
+    </div>
+    <div class="sl-card-body">
+      <div class="sl-meta">
+        <div class="sl-meta-cell">${slGlyphs.time}<div><div class="sl-meta-label">Casting Time</div><div class="sl-meta-val">${s.casting_time}</div></div></div>
+        <div class="sl-meta-cell">${slGlyphs.range}<div><div class="sl-meta-label">Range</div><div class="sl-meta-val">${s.range}</div></div></div>
+        <div class="sl-meta-cell">${slGlyphs.comp}<div><div class="sl-meta-label">Components</div><div class="sl-meta-val">${compsText}</div></div></div>
+        <div class="sl-meta-cell">${slGlyphs.duration}<div><div class="sl-meta-label">Duration</div><div class="sl-meta-val">${s.duration}</div></div></div>
+      </div>
+      <div class="sl-desc">${desc}${higher}</div>
+      ${classes}
+      <button class="sl-add-btn${isAdded ? ' added' : ''}" onclick="slToggleSpell()">${isAdded ? '✓ Added' : '✦ Add to Sheet'}</button>
+    </div>`;
+}
+
+function slToggleSpell() {
+  if (!_slCurrentSpell) return;
+  const idx = _slCurrentSpell.index;
+  const existing = S.selectedSpells.findIndex(x => x.index === idx);
+  if (existing >= 0) {
+    S.selectedSpells.splice(existing, 1);
+  } else {
+    S.selectedSpells.push({
+      index: _slCurrentSpell.index,
+      name:  _slCurrentSpell.name,
+      level: _slCurrentSpell.level,
+      school: _slCurrentSpell.school_index,
+    });
+  }
+  slRenderSpell(_slCurrentSpell);
+  slUpdateSelectedDisplay();
+}
+
+function slRemoveSpell(idx) {
+  S.selectedSpells = S.selectedSpells.filter(x => x.index !== idx);
+  if (_slCurrentSpell && _slCurrentSpell.index === idx) slRenderSpell(_slCurrentSpell);
+  slUpdateSelectedDisplay();
+}
+
+// Spell slot progression tables (mirrors app.py SLOTS)
+const SPELL_SLOTS = {
+  full: {1:[2],2:[3],3:[4,2],4:[4,3],5:[4,3,2],6:[4,3,3],7:[4,3,3,1],
+         8:[4,3,3,2],9:[4,3,3,3,1],10:[4,3,3,3,2],11:[4,3,3,3,2,1],
+         12:[4,3,3,3,2,1],13:[4,3,3,3,2,1,1],14:[4,3,3,3,2,1,1],
+         15:[4,3,3,3,2,1,1,1],16:[4,3,3,3,2,1,1,1],17:[4,3,3,3,2,1,1,1,1],
+         18:[4,3,3,3,3,1,1,1,1],19:[4,3,3,3,3,2,1,1,1],20:[4,3,3,3,3,2,2,1,1]},
+  half: {1:[],2:[2],3:[3],4:[3],5:[4,2],6:[4,2],7:[4,3],8:[4,3],9:[4,3,2],
+         10:[4,3,2],11:[4,3,3],12:[4,3,3],13:[4,3,3,1],14:[4,3,3,1],
+         15:[4,3,3,2],16:[4,3,3,2],17:[4,3,3,3,1],18:[4,3,3,3,1],
+         19:[4,3,3,3,2],20:[4,3,3,3,2]},
+};
+const SL_ORDINALS = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+
+function slGetSlotsInfo() {
+  if (!S.clData) return '';
+  const ct    = (S.clData.caster_type || 'NONE').toLowerCase();
+  const level = parseInt(document.getElementById('level')?.value) || 1;
+
+  const cantrips  = slTableValue(S.clData, 'Cantrips');
+  const prepared  = slTableValue(S.clData, 'Prepared Spells');
+  const parts     = [];
+
+  if (cantrips)  parts.push(`${cantrips} cantrip${cantrips == 1 ? '' : 's'}`);
+
+  if (ct === 'pact') {
+    const slotLvl = slTableValue(S.clData, 'Slot Level');   // e.g. "3rd"
+    const slotCnt = slTableValue(S.clData, 'Spell Slots');  // e.g. "2"
+    if (prepared) parts.push(`${prepared} prepared`);
+    if (slotLvl && slotCnt) parts.push(`${slotLvl}: ${slotCnt} pact`);
+  } else {
+    const slotList = (SPELL_SLOTS[ct] || {})[level] || [];
+    const slotStr  = slotList
+      .map((n, i) => n > 0 ? `${SL_ORDINALS[i]}: ${n}` : null)
+      .filter(Boolean).join(' · ');
+    if (prepared && slotStr) parts.push(`${prepared} prepared: ${slotStr}`);
+    else if (prepared)       parts.push(`${prepared} prepared`);
+    else if (slotStr)        parts.push(slotStr);
+  }
+
+  return parts.join(' · ');
+}
+
+function slUpdateSelectedDisplay() {
+  const chips    = document.getElementById('sl-selected-chips');
+  const count    = document.getElementById('sl-count');
+  const slotsEl  = document.getElementById('sl-slots-info');
+
+  if (count)   count.textContent = `(${S.selectedSpells.length})`;
+  if (slotsEl) slotsEl.textContent = slGetSlotsInfo();
+
+  if (!S.selectedSpells.length) {
+    chips.innerHTML = '<em style="font-size:.78rem;color:var(--text-dim)">None yet — search and click ✦ to Add the Spell to your Spellbook.</em>';
+    return;
+  }
+  chips.innerHTML = S.selectedSpells.map(sp => `
+    <span class="sl-spell-chip">
+      ${sp.name}<span style="font-size:.68rem;opacity:.6;margin:0 2px">${sp.level === 0 ? '✦' : `L${sp.level}`}</span>
+      <button onclick="slRemoveSpell('${sp.index}')" title="Remove">×</button>
+    </span>`).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sl-search-btn').addEventListener('click', slSearch);
+  document.getElementById('sl-name').addEventListener('keydown', e => { if (e.key === 'Enter') slSearch(); });
+  // Refresh spell slot counts and HP whenever level changes
+  document.getElementById('level').addEventListener('change', () => {
+    if (document.getElementById('s4').classList.contains('active')) slUpdateSelectedDisplay();
+    hpCalcUpdate();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BOOT — load all data (Open5e + homebrew) in parallel then render
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HP CALCULATOR
+// ═══════════════════════════════════════════════════════════════════════════
+const HPC = {
+  die:      8,          // currently selected hit die face value
+  classDie: null,       // die set by the class picker — drives the hint
+  method:   'standard', // 'standard' | 'roll'
+  rolls:    [],         // stored roll results for the 'roll' method (level-1 values)
+};
+
+function hpCalcSetDie(die, fromClass = false) {
+  HPC.die   = die;
+  HPC.rolls = [];   // invalidate old rolls whenever die changes
+  if (fromClass) HPC.classDie = die;   // remember what the class wants
+  document.querySelectorAll('.hp-die-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.die) === die);
+  });
+  // Always show which die the class specifies, independent of current selection
+  const hint = document.getElementById('hp-class-hint');
+  if (hint) hint.textContent = HPC.classDie
+    ? `${S.clName || 'Class'} default: d${HPC.classDie}` : '';
+  hpCalcUpdate();
+}
+
+function hpCalcUpdate() {
+  const level  = parseInt(document.getElementById('level')?.value) || 1;
+  const conVal = parseInt(document.querySelector('[data-ab="con"] input')?.value) || 10;
+  const conMod = Math.floor((conVal - 10) / 2);
+  const die    = HPC.die;
+  const method = document.querySelector('input[name="hp-method"]:checked')?.value || 'standard';
+  HPC.method   = method;
+
+  const rerollBtn = document.getElementById('hp-reroll-btn');
+  if (rerollBtn) rerollBtn.style.display = method === 'roll' ? 'inline-block' : 'none';
+
+  let total, breakdown;
+
+  if (method === 'standard') {
+    const avgPerLvl = Math.floor(die / 2) + 1;
+    total = die + conMod + (level - 1) * (avgPerLvl + conMod);
+    total = Math.max(1, total);
+
+    const conPart = conMod * level;
+    const parts   = [`${die} <span class="hp-lbl">(max)</span>`];
+    if (level > 1) parts.push(`${level - 1}×${avgPerLvl} <span class="hp-lbl">(avg/lvl)</span>`);
+    parts.push(`${conPart >= 0 ? '+' : ''}${conPart} <span class="hp-lbl">(CON×${level})</span>`);
+    breakdown = parts.join(' + ');
+
+  } else {
+    // Ensure we have exactly level-1 stored rolls; add new ones if level increased
+    while (HPC.rolls.length < level - 1) HPC.rolls.push(Math.ceil(Math.random() * die));
+    HPC.rolls = HPC.rolls.slice(0, level - 1);   // trim if level decreased
+
+    const rollSum = HPC.rolls.reduce((a, b) => a + b, 0);
+    const conPart = conMod * level;
+    total = Math.max(1, die + rollSum + conPart);
+
+    const rollSpans = HPC.rolls.map(r => {
+      const cls = r === die ? 'hp-nat-max' : r === 1 ? 'hp-nat-min' : '';
+      return cls ? `<span class="${cls}">${r}</span>` : `${r}`;
+    }).join('+');
+
+    const parts = [`${die} <span class="hp-lbl">(max)</span>`];
+    if (HPC.rolls.length) parts.push(`${rollSpans} <span class="hp-lbl">(rolled)</span>`);
+    parts.push(`${conPart >= 0 ? '+' : ''}${conPart} <span class="hp-lbl">(CON×${level})</span>`);
+    breakdown = parts.join(' + ');
+  }
+
+  const totalEl = document.getElementById('hp-total');
+  const brkEl   = document.getElementById('hp-breakdown');
+  if (totalEl) totalEl.textContent = `${total} HP`;
+  if (brkEl)   brkEl.innerHTML     = breakdown;
+}
+
+function hpCalcRoll() {
+  const level = parseInt(document.getElementById('level')?.value) || 1;
+  HPC.rolls   = [];
+  for (let i = 0; i < level - 1; i++) HPC.rolls.push(Math.ceil(Math.random() * HPC.die));
+  // Switch radio to roll if not already (handles the onchange="hpCalcRoll()" path too)
+  const rollRadio = document.querySelector('input[name="hp-method"][value="roll"]');
+  if (rollRadio) rollRadio.checked = true;
+  HPC.method = 'roll';
+  hpCalcUpdate();
+}
+
+function hpCalcTotal() {
+  const level  = parseInt(document.getElementById('level')?.value) || 1;
+  const conVal = parseInt(document.querySelector('[data-ab="con"] input')?.value) || 10;
+  const conMod = Math.floor((conVal - 10) / 2);
+  return Math.max(1, HPC.die + HPC.rolls.reduce((a, b) => a + b, 0) + conMod * level);
+}
+
+buildSkillGrid(); // static — doesn't depend on API data, safe to run immediately
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PREFILL — restore builder state from a saved raw payload (edit mode)
+// Must be called after loadAll() so all card data is already in S.allSp etc.
+// ═══════════════════════════════════════════════════════════════════════════
+function prefill(raw) {
+  // ── Step 1: text fields ──────────────────────────────────────────────────
+  document.getElementById('name').value        = raw.name        || '';
+  document.getElementById('player_name').value = raw.player_name || '';
+  document.getElementById('backstory').value   = raw.backstory   || '';
+  document.getElementById('notes').value       = raw.notes       || '';
+  document.getElementById('gold').value        = raw.gold        != null ? raw.gold : 50;
+
+  const levelEl = document.getElementById('level');
+  if (raw.level) levelEl.value = String(raw.level);
+
+  const alignEl = document.getElementById('alignment');
+  if (raw.alignment) alignEl.value = raw.alignment;
+
+  // ── Step 2: species — key match first, then name fallback ────────────────
+  const spKey = raw.species_key && S.allSp.some(s => s.key === raw.species_key)
+    ? raw.species_key
+    : S.allSp.find(s => s.name.toLowerCase() === (raw.species_name || '').toLowerCase())?.key;
+  if (spKey) pickSpecies(spKey);
+
+  // ── Step 3: class + subclass — key match first, then name fallback ───────
+  const clKey = raw.class_key && S.allCl.some(c => c.key === raw.class_key)
+    ? raw.class_key
+    : S.allCl.find(c => c.name.toLowerCase() === (raw.class_name || '').toLowerCase())?.key;
+  if (clKey) {
+    pickClass(clKey);
+    // subclass — key match first, then name fallback within the now-filtered subclass list
+    const subKey = raw.subclass_key && S.allSub.some(s => s.key === raw.subclass_key)
+      ? raw.subclass_key
+      : S.allSub.find(s => s.name.toLowerCase() === (raw.subclass_name || '').toLowerCase())?.key;
+    if (subKey) pickSubclass(subKey, raw.subclass_homebrew || false);
+  }
+
+  // ── Step 5: background — key match first, then name fallback ─────────────
+  const bgKey = raw.background_key && S.allBg.some(b => b.key === raw.background_key)
+    ? raw.background_key
+    : S.allBg.find(b => b.name.toLowerCase() === (raw.background_name || '').toLowerCase())?.key;
+  if (bgKey) pickBg(bgKey);
+
+  // ── Step 6: ability scores ───────────────────────────────────────────────
+  ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ab => {
+    if (raw[ab] == null) return;
+    const inp = document.querySelector(`[data-ab="${ab}"] input`);
+    if (inp) { inp.value = raw[ab]; recalcMod(inp, ab + '-mod'); }
+  });
+
+  // ── Step 6: skill checkboxes ─────────────────────────────────────────────
+  if (Array.isArray(raw.skills)) {
+    const lower = raw.skills.map(s => s.toLowerCase());
+    document.querySelectorAll('input[name="skill"]').forEach(cb => {
+      cb.checked = lower.includes(cb.value.toLowerCase());
+    });
+  }
+
+  // ── Step 4: spells ────────────────────────────────────────────────────────
+  if (Array.isArray(raw.spells) && raw.spells.length) {
+    S.selectedSpells = raw.spells.map(s => ({
+      index:  s.index  || '',
+      name:   s.name   || '',
+      level:  s.level  ?? 0,
+      school: s.school || '',
+    }));
+    slUpdateSelectedDisplay();
+  }
+
+  // ── Edit mode banner ──────────────────────────────────────────────────────
+  const sub = document.querySelector('.builder-sub');
+  if (sub && raw.name) sub.textContent = `Editing: ${raw.name}`;
+}
+
+async function loadAll() {
+  const isEdit = new URLSearchParams(window.location.search).get('edit') === '1';
+  try {
+    const fetches = [
+      fetchAll('species'),
+      fetchAll('classes'),
+      fetchAll('backgrounds'),
+      fetch('/api/homebrew').then(r => r.json()),
+    ];
+    if (isEdit) fetches.push(fetch('/api/character/builder-data').then(r => r.json()));
+
+    const results = await Promise.all(fetches);
+    const [spRaw, clRaw, bgRaw, hbRaw] = results;
+    const editRaw = isEdit ? (results[4] || {}) : null;
+
+    S.allSp  = spRaw;
+    // Open5e v2 /classes returns both base classes and subclasses (subclasses have subclass_of set)
+    S.allCl  = clRaw.filter(c => !c.subclass_of);
+    S.allSub = clRaw.filter(c => !!c.subclass_of);
+    S.allBg  = bgRaw;
+
+    // merge homebrew classes
+    (hbRaw.classes || []).forEach(hb => {
+      // Build the pipe-delimited CORE_TRAITS_TABLE desc that app.py parses for
+      // equipment, armor training, and weapon proficiencies
+      const coreDesc = [
+        `||`,
+        `|---|---|`,
+        `|Primary Ability|${(hb.saving_throws || []).join(' and ')}|`,
+        `|Hit Point Die|${hb.hit_dice || 'D8'} per ${hb.name} level|`,
+        `|Saving Throw Proficiencies|${(hb.saving_throws || []).join(' and ')}|`,
+        `|Skill Proficiencies|${hb.skill_proficiencies || ''}|`,
+        `|Weapon Proficiencies|${hb.weapon_proficiencies || ''}|`,
+        `|Armor Training|${hb.armor_training || ''}|`,
+        `|Starting Equipment|${hb.starting_equipment || ''}|`,
+      ].join('\n');
+
+      // Convert the simple feature list into the Open5e shape
+      const features = [
+        { name: `Core ${hb.name} Traits`, feature_type: 'CORE_TRAITS_TABLE',
+          desc: coreDesc, gained_at: [], data_for_class_table: [] },
+        ...(hb.features || []).map(f => ({
+          name:         f.name,
+          desc:         f.description || '',
+          feature_type: 'CLASS_LEVEL_FEATURE',
+          gained_at:    [{ level: f.level || 1 }],
+        })),
+      ];
+
+      // Auto-generate the Spellcasting feature if a spellcasting ability is set —
+      // app.py uses a regex on this description to derive spell attack / save DC
+      if (hb.spellcasting_ability && (hb.caster_type || 'NONE') !== 'NONE') {
+        const featName = hb.caster_type === 'PACT' ? 'Pact Magic' : 'Spellcasting';
+        features.push({
+          name:         featName,
+          desc:         `${hb.spellcasting_ability} is your spellcasting ability for your ${hb.name} spells. Your spell save DC equals 8 + your proficiency bonus + your ${hb.spellcasting_ability} modifier.`,
+          feature_type: 'CLASS_LEVEL_FEATURE',
+          gained_at:    [{ level: 1 }],
+        });
+      }
+
+      S.allCl.push({
+        key:           hb.id,
+        name:          hb.name,
+        hit_dice:      hb.hit_dice || 'D8',
+        caster_type:   hb.caster_type || 'NONE',
+        saving_throws: (hb.saving_throws || []).map(s => ({ name: s })),
+        desc:          hb.description || '',
+        features,
+        document: {
+          display_name: hb.source || 'Homebrew',
+          key:          'homebrew',
+          gamesystem:   { key: 'homebrew' },
+        },
+        _homebrew: hb.homebrew === true,
+        _hbData:   hb,
+      });
+    });
+
+    // merge homebrew subclasses
+    (hbRaw.subclasses || []).forEach(hb => {
+      S.allSub.push({
+        key:         hb.id,
+        name:        hb.name,
+        subclass_of: { key: hb.parent_class_id, name: hb.parent_class_id },
+        document:    { display_name: hb.source || 'Homebrew', key: 'homebrew',
+                       gamesystem: { key: 'homebrew' } },
+        _homebrew:   hb.homebrew === true,
+        _hbData:     hb,
+      });
+    });
+
+    // merge homebrew backgrounds
+    (hbRaw.backgrounds || []).forEach(hb => {
+      S.allBg.push({
+        key:                 hb.id,
+        name:                hb.name,
+        description:         hb.description || '',
+        benefits:            hb.benefits    || [],
+        skill_proficiencies: hb.skill_proficiencies || [],
+        tool_proficiency:    hb.tool_proficiency    || null,
+        origin_feat:         hb.origin_feat_id ? { name: hb.origin_feat_id } : null,
+        languages:           hb.languages || [],
+        starting_equipment:  hb.starting_equipment  || [],
+        document:            { display_name: hb.source || 'Homebrew', key: 'homebrew',
+                               gamesystem: { key: 'homebrew' } },
+        _homebrew:           hb.homebrew === true,
+      });
+    });
+
+    // merge homebrew species
+    (hbRaw.species || []).forEach(hb => {
+      S.allSp.push({
+        key:      hb.id,
+        name:     hb.name,
+        traits:   (hb.traits || []).map(t =>
+          typeof t === 'string'
+            ? { name: t, desc: '' }
+            : { name: t.name || '', desc: t.description || t.desc || '' }
+        ),
+        document: { display_name: hb.source || 'Homebrew', key: 'homebrew',
+                    gamesystem: { key: 'homebrew' } },
+        _homebrew: hb.homebrew === true,
+      });
+    });
+
+    renderSpecies();
+    renderClasses();
+    renderBg();
+
+    // Edit mode: pre-fill all steps with the saved character's data
+    if (editRaw && editRaw.name) prefill(editRaw);
+
+  } catch (e) {
+    console.error('Data load error:', e);
+    const msg = `<div class="empty-msg" style="color:var(--crimson)">Failed to load data: ${e.message}</div>`;
+    ['sp-grid', 'cl-grid', 'bg-grid'].forEach(id => document.getElementById(id).innerHTML = msg);
+  }
+}
+
+loadAll();
+</script>
+</body>
+</html>

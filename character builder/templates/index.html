@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Character Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sheet.css') }}">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4rem 2rem 3rem;
+    }
+
+    /* ── Header ── */
+    .vault-header { text-align: center; margin-bottom: 3rem; }
+    .vault-ornament { font-size: 1.4rem; color: var(--gold); opacity: .55;
+                      letter-spacing: .5em; display: block; margin-bottom: .8rem; }
+    .vault-title { font-family: var(--font-display); font-size: 2rem; font-weight: 700;
+                   color: var(--gold); letter-spacing: .12em;
+                   text-shadow: 0 0 32px var(--gold-glow), 0 0 8px rgba(185,155,80,.2);
+                   margin: 0 0 .4rem; }
+    .vault-sub { font-size: .82rem; color: var(--text-dim); font-style: italic;
+                 font-family: var(--font-body); }
+
+    /* ── Grid ── */
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.1rem;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    /* ── Saved character card ── */
+    .char-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem 1.3rem .85rem;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+      transition: border-color .2s, box-shadow .2s, transform .15s;
+    }
+    .char-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 18px var(--gold-glow), 0 4px 20px rgba(0,0,0,.18);
+      transform: translateY(-2px);
+    }
+    .card-name {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: .04em;
+      align-self: center;
+    }
+    .card-identity {
+      font-size: .80rem;
+      color: var(--text-dim);
+      font-style: italic;
+      align-self: center;
+    }
+    .card-subclass {
+      font-size: .70rem;
+      font-family: var(--font-heading);
+      color: var(--gold);
+      letter-spacing: .07em;
+      align-self: center;
+    }
+    .card-bg {
+      font-size: .70rem;
+      color: var(--text-dim);
+      opacity: .7;
+      align-self: center;
+    }
+
+    /* ── Card action buttons ── */
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: .75rem;
+      border-top: 1px solid var(--border-dim);
+      gap: .4rem;
+    }
+    .card-btn {
+      font-family: var(--font-heading);
+      font-size: .55rem;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: .28rem .75rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      background: rgba(255,250,248,.55);
+      transition: border-color .18s, color .18s, box-shadow .18s;
+    }
+    .card-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold-dim);
+      box-shadow: 0 0 8px var(--gold-glow);
+    }
+
+    /* ── New character card ── */
+    .new-card {
+      background: transparent;
+      border: 2px dashed rgba(185,155,80,.30);
+      border-radius: 10px;
+      padding: 1.2rem 1.3rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      text-decoration: none;
+      min-height: 130px;
+      transition: border-color .2s, box-shadow .2s, transform .15s;
+      cursor: pointer;
+    }
+    .new-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 18px var(--gold-glow);
+      transform: translateY(-2px);
+    }
+    .new-card-icon {
+      font-size: 1.6rem;
+      color: rgba(185,155,80,.40);
+      line-height: 1;
+      transition: color .2s;
+    }
+    .new-card:hover .new-card-icon { color: var(--gold); }
+    .new-card-label {
+      font-family: var(--font-heading);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .new-card:hover .new-card-label { color: var(--gold-dim); }
+
+    /* ── Empty state ── */
+    .empty-hint {
+      color: var(--text-dim);
+      font-style: italic;
+      font-size: .85rem;
+      text-align: center;
+      margin-top: .4rem;
+      opacity: .7;
+    }
+  </style>
+</head>
+<body>
+<div class="page-texture"></div>
+
+<header class="vault-header">
+  <span class="vault-ornament">✦ ── ✦ ── ✦</span>
+  <h1 class="vault-title">Character Vault</h1>
+  <p class="vault-sub">Select a character to continue your adventure, or forge a new hero</p>
+</header>
+
+<div class="char-grid">
+
+  <!-- Saved characters -->
+  {% for c in characters %}
+  <div class="char-card">
+    <div class="card-name">{{ c.char_name }}</div>
+    <div class="card-identity">
+      {{ c.species_name or '—' }} &nbsp;·&nbsp;
+      {{ c.class_name or '—' }}
+    </div>
+    <div class="card-identity">{% if c.level %}Level {{ c.level }}{% endif %}</div>
+    {% if c.subclass_name %}
+    <div class="card-subclass">{{ c.subclass_name }}</div>
+    {% endif %}
+    {% if c.background_name %}
+    <div class="card-bg">{{ c.background_name }}</div>
+    {% endif %}
+    <div class="card-actions">
+      <a class="card-btn" href="{{ url_for('edit_character', filename=c.filename) }}">✏ Edit</a>
+      <a class="card-btn" href="{{ url_for('load_character', filename=c.filename) }}">Open Sheet →</a>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- New character button — always last -->
+  <a class="new-card" href="{{ url_for('builder') }}">
+    <div class="new-card-icon">✦</div>
+    <div class="new-card-label">New Character</div>
+    {% if not characters %}
+    <div class="empty-hint">No saved characters yet</div>
+    {% endif %}
+  </a>
+
+</div>
+</body>
+</html>

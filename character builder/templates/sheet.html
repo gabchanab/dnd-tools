@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ char_name }} — Character Sheet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=IM+Fell+English:ital@0;1&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sheet.css') }}">
+  <style>
+    .back-btn{position:fixed;top:1.2rem;left:1.2rem;z-index:100;
+      font-family:var(--font-heading);font-size:.60rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+      padding:.45rem 1.1rem;background:rgba(255,250,248,.90);border:1px solid var(--border);
+      border-radius:20px;color:var(--text-dim);text-decoration:none;transition:all .2s;
+      backdrop-filter:blur(6px)}
+    .edit-btn{position:fixed;top:1.2rem;right:1.2rem;z-index:100;
+      font-family:var(--font-heading);font-size:.60rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+      padding:.45rem 1.1rem;background:rgba(255,250,248,.90);border:1px solid var(--border);
+      border-radius:20px;color:var(--text-dim);text-decoration:none;transition:all .2s;
+      backdrop-filter:blur(6px)}
+    .back-btn:hover{border-color:var(--gold);color:var(--gold-dim);box-shadow:0 0 12px var(--gold-glow)}
+    .edit-btn:hover{border-color:var(--gold);color:var(--gold-dim);box-shadow:0 0 12px var(--gold-glow)}
+    .trait-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+    .trait-item{font-size:.90rem;color:var(--text-mid);padding:.3rem 0;
+      border-bottom:1px dotted var(--border-dim)}
+    .trait-item:last-child{border-bottom:none}
+    .trait-name{font-family:var(--font-heading);font-size:.68rem;font-weight:700;
+      color:var(--text);display:block;margin-bottom:1px;letter-spacing:.05em}
+    .feat-desc{font-size:.84rem;color:var(--text-dim);font-style:italic}
+    .spell-lvl-tag{font-family:var(--font-heading);font-size:.60rem;font-weight:600;
+      letter-spacing:.05em;color:var(--text-dim);opacity:.70;margin-left:.35rem}
+    .spell-lvl-tag.cantrip{color:var(--purple-dim);opacity:.85}
+    /* ── Prepared-spell accordion ── */
+    .spe-item{display:flex;align-items:center;gap:.45rem;padding:.3rem .1rem;
+      border-bottom:1px dotted var(--border-dim);font-size:.88rem;color:var(--text-mid)}
+    .spe-item:last-child{border-bottom:none}
+    .spe-name{flex:1}
+    .spe-chevron{font-size:1rem;color:var(--gold);opacity:.5;margin-left:auto;
+      transition:transform .22s ease;line-height:1;flex-shrink:0}
+    .spe-item.spe-clickable{cursor:pointer;transition:color .15s}
+    .spe-item.spe-clickable:hover .spe-name{color:var(--text)}
+    .spe-item.spe-clickable:hover .spe-chevron{opacity:.9}
+    .spe-item.spe-open .spe-chevron{transform:rotate(90deg)}
+    .spe-detail{overflow:hidden;border:1px solid var(--border-mid);border-radius:4px;
+      margin:.25rem 0 .4rem;background:rgba(255,250,248,.97);
+      animation:spe-in .2s ease both}
+    @keyframes spe-in{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+    /* Spell card internals (ported from builder) */
+    .sl-card-head{padding:.85rem 1rem;display:flex;align-items:center;gap:11px;border-bottom:2px solid}
+    .sl-card-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;flex-shrink:0;background:rgba(255,255,255,.55)}
+    .sl-card-icon svg{width:19px;height:19px}
+    .sl-card-name{font-family:var(--font-heading);font-size:.95rem;font-weight:600;
+      letter-spacing:.03em;margin:0;color:inherit}
+    .sl-card-sub{font-style:italic;font-size:.74rem;opacity:.8;margin-top:1px}
+    .sl-card-tags{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
+    .sl-tag{font-size:.52rem;letter-spacing:.10em;text-transform:uppercase;padding:2px 6px;
+      border-radius:2px;background:rgba(255,255,255,.55);font-weight:600;font-family:var(--font-heading)}
+    .sl-card-body{padding:.85rem 1rem}
+    .sl-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px;
+      padding:.6rem 0 .85rem;border-bottom:1px dashed var(--border);margin-bottom:.75rem}
+    .sl-meta-cell{display:flex;gap:7px;align-items:flex-start}
+    .sl-meta-cell svg{width:16px;height:16px;flex-shrink:0;opacity:.4;margin-top:1px}
+    .sl-meta-label{font-size:.56rem;color:var(--text-dim);text-transform:uppercase;
+      letter-spacing:.10em;font-family:var(--font-heading)}
+    .sl-meta-val{font-size:.83rem;color:var(--text)}
+    .sl-desc{font-size:.85rem;line-height:1.72;color:var(--text-mid)}
+    .sl-desc p{margin:0 0 .6em}.sl-desc p:last-child{margin-bottom:0}
+    .sl-higher{margin-top:.75rem;padding:.5rem .8rem;background:var(--gold-glow);
+      border-left:3px solid var(--gold);font-size:.81rem;color:var(--text-mid);border-radius:0 3px 3px 0}
+    .sl-classes-row{margin-top:.75rem;padding-top:.65rem;border-top:1px dashed var(--border);
+      display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+    .sl-classes-label{font-size:.55rem;color:var(--text-dim);text-transform:uppercase;
+      letter-spacing:.10em;margin-right:4px;font-family:var(--font-heading)}
+    .sl-class-chip{font-size:.70rem;padding:2px 7px;background:rgba(217,191,119,.15);
+      border:1px solid var(--border-dim);border-radius:2px;color:var(--text-mid)}
+    /* School colour bands */
+    .sl-abjuration  {background-color:rgba(90,126,163,.15);border-color:rgba(90,126,163,.65);color:#1e3a5f}
+    .sl-conjuration {background-color:rgba(107,95,184,.15);border-color:rgba(107,95,184,.65);color:#2e2766}
+    .sl-divination  {background-color:rgba(74,138,110,.15);border-color:rgba(74,138,110,.65);color:#1f4a35}
+    .sl-enchantment {background-color:rgba(168,83,122,.15);border-color:rgba(168,83,122,.65);color:#5a1e3a}
+    .sl-evocation   {background-color:rgba(181,96,53,.15); border-color:rgba(181,96,53,.65); color:#5a2410}
+    .sl-illusion    {background-color:rgba(122,95,168,.15);border-color:rgba(122,95,168,.65);color:#2a1f5a}
+    .sl-necromancy  {background-color:rgba(90,86,78,.15);  border-color:rgba(90,86,78,.65);  color:#2a2620}
+    .sl-transmutation{background-color:rgba(168,130,58,.15);border-color:rgba(168,130,58,.65);color:#5a3f10}
+    /* Sigil + description two-column layout */
+    .spe-body-row{display:flex;gap:.85rem;align-items:flex-start}
+    .spe-sigil-col{flex:0 0 calc(50% - .425rem)}
+    .spe-sigil-placeholder{width:100%;aspect-ratio:1/1;background:#1a2535;border-radius:6px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.70rem;color:#8a90b0;font-style:italic;letter-spacing:.05em;
+      box-shadow:0 0 0 1px rgba(185,155,80,.22)}
+    .spe-sigil-img{width:100%;border-radius:6px;display:block;
+      box-shadow:0 0 0 1px rgba(185,155,80,.30),0 4px 18px rgba(0,0,0,.28)}
+    .spe-desc-col{flex:1;min-width:0}
+    /* ── Dice rolling ── */
+    [data-roll-mod]{cursor:pointer;transition:filter .15s,opacity .15s}
+    [data-roll-mod]:hover{filter:brightness(1.25);opacity:.85}
+    .roll-popup{
+      position:fixed;z-index:9999;pointer-events:none;white-space:nowrap;
+      background:#1a2535;border:1px solid rgba(185,155,80,.55);border-radius:9px;
+      padding:.38rem .9rem;
+      box-shadow:0 6px 28px rgba(0,0,0,.45),0 0 0 1px rgba(185,155,80,.10);
+      animation:rpop-in .2s cubic-bezier(.34,1.4,.64,1) both}
+    .roll-popup.roll-out{animation:rpop-out .28s ease both}
+    .rp-label{display:block;font-family:var(--font-heading);font-size:.52rem;letter-spacing:.14em;
+      text-transform:uppercase;color:#8a90b0;margin-bottom:3px}
+    .rp-body{display:flex;align-items:baseline;gap:.35rem}
+    .rp-die{font-family:var(--font-heading);font-size:.72rem;color:#8a90b0}
+    .rp-raw{font-weight:700}
+    .rp-sep{color:#4a5272;font-size:.72rem}
+    .rp-total{font-family:var(--font-heading);font-size:1.15rem;font-weight:700;color:#e8dfc0}
+    .rp-nat20 .rp-raw{color:#d9bf77}
+    .rp-nat20 .rp-total{color:#d9bf77;text-shadow:0 0 12px rgba(217,191,119,.6)}
+    .rp-nat1  .rp-raw{color:#c0392b}
+    .rp-nat1  .rp-total{color:#c0392b}
+    @keyframes rpop-in{from{opacity:0;transform:translateY(7px) scale(.87)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes rpop-out{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-9px)}}
+    /* ── HP adjuster ── */
+    .hp-adjust-row{display:flex;gap:.4rem;margin-top:.55rem}
+    .hp-adjust-input{flex:1;font-family:var(--font-heading);font-size:.80rem;font-weight:700;
+      text-align:center;padding:.28rem .4rem;border-radius:6px;
+      background:rgba(255,250,248,.80);border:1px solid var(--border-mid);color:var(--text);
+      min-width:0}
+    .hp-adjust-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-glow)}
+    /* hide the browser spin arrows */
+    .hp-adjust-input::-webkit-inner-spin-button,
+    .hp-adjust-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    .hp-adjust-input[type=number]{-moz-appearance:textfield}
+    .hp-adjust-btn{font-family:var(--font-heading);font-size:.62rem;font-weight:700;
+      letter-spacing:.08em;padding:.28rem .7rem;border-radius:6px;cursor:pointer;
+      background:rgba(185,155,80,.12);border:1px solid var(--border-mid);
+      color:var(--text-dim);transition:all .18s;white-space:nowrap}
+    .hp-adjust-btn:hover{border-color:var(--gold);color:var(--gold-dim);
+      box-shadow:0 0 8px var(--gold-glow)}
+    /* ── Skill dot toggle ── */
+    .skill-dot-btn{cursor:pointer;transition:transform .12s,filter .12s;display:inline-block}
+    .skill-dot-btn:hover{transform:scale(1.35);filter:brightness(1.5)}
+    .skill-dot-btn:active{transform:scale(.95)}
+    /* ── Advantage / disadvantage toggle ── */
+    .adv-toggle{display:block;width:1rem;text-align:center;font-family:var(--font-heading);
+      font-size:.60rem;font-weight:800;letter-spacing:0;cursor:pointer;
+      border-radius:3px;line-height:1.4;transition:all .15s;user-select:none}
+    .adv-toggle[data-adv-state="none"]{color:rgba(128,128,128,.0)}
+    .adv-toggle[data-adv-state="none"]:hover{color:rgba(128,128,128,.35);background:rgba(128,128,128,.10)}
+    .adv-toggle[data-adv-state="adv"]{color:#2d7a3a;background:rgba(45,122,58,.15);
+      box-shadow:0 0 0 1px rgba(45,122,58,.40)}
+    .adv-toggle[data-adv-state="dis"]{color:#b03030;background:rgba(176,48,48,.13);
+      box-shadow:0 0 0 1px rgba(176,48,48,.38)}
+    /* ── Death saves ── */
+    .death-saves { margin-top: .75rem; padding-top: .65rem; border-top: 1px dashed var(--border); }
+    .ds-row      { display: flex; align-items: center; justify-content: space-between; margin-bottom: .3rem; }
+    .ds-label    { font-family: var(--font-heading); font-size: .95rem; font-weight: 700;
+      letter-spacing: .14em; color: var(--text-dim); width: 200px; }
+    .ds-pips     { display: flex; gap: .3rem; }
+    /* the pip button — reset browser defaults first */
+    .ds-pip { background: none; border: none; padding: 0; cursor: pointer;
+      font-size: 1.5rem; line-height: 1; text-align: right; transition: transform .12s, color .18s; }
+    .ds-pip:hover { transform: scale(1.25); }
+    /* off = hollow ring (transparent/dim) */
+    .ds-pip[data-state="off"] { color: rgba(185,155,80,.25); }
+    /* success = filled green circle */
+    #ds-successes .ds-pip[data-state="on"] { color: #2d7a3a; }
+    /* failure = filled red circle */
+    #ds-failures  .ds-pip[data-state="on"] { color: #b03030; }
+    /* the roll button */
+    .ds-roll-btn { margin-top: .5rem; width: 100%; font-family: var(--font-heading);
+      font-size: .62rem; font-weight: 700; letter-spacing: .10em;
+      padding: .28rem .5rem; border-radius: 20px; cursor: pointer;
+      background: rgba(185,155,80,.08); border: 1px solid var(--border-mid);
+      color: var(--text-dim); transition: all .18s; }
+    .ds-roll-btn:hover { border-color: var(--gold); color: var(--gold-dim);
+      box-shadow: 0 0 10px var(--gold-glow); }
+  </style>
+</head>
+<body>
+<div id="sheet-data"
+     data-prof-bonus="{{ proficiency_bonus }}"
+     style="display:none" aria-hidden="true"></div>
+<a class="back-btn" href="/">← My Characters</a>
+<a class="edit-btn" href="/build?edit=1">✏ Edit Character</a>
+<div class="page-texture"></div>
+
+<main class="sheet">
+  <!-- HEADER -->
+  <header class="sheet-header">
+    <div class="header-ornament">✦</div>
+    <div class="char-identity">
+      <h1 class="char-name">{{ char_name }}</h1>
+      <p class="char-sub">
+        {{ species_name or '—' }} &nbsp;·&nbsp;
+        {{ class_name or '—' }}{% if subclass_name %} <span class="subclass-pill{% if subclass_homebrew %} homebrew{% endif %}">{{ subclass_name }}</span>{% endif %}
+        &nbsp;·&nbsp; Level {{ level }}
+        &nbsp;·&nbsp; {{ alignment }}
+      </p>
+      <p class="char-meta">
+        {% if background_name %}<span>Background: <em>{{ background_name }}</em></span>{% endif %}
+        {% if player_name %}<span>Player: <em>{{ player_name }}</em></span>{% endif %}
+        <span>Proficiency: <strong>+{{ proficiency_bonus }}</strong></span>
+        <span>Hit Dice: <strong>{{ hit_dice_display }}</strong></span>
+        <span>Passive Perception: <strong>{{ passive_perception }}</strong></span>
+      </p>
+    </div>
+    <div class="header-ornament">✦</div>
+  </header>
+
+  <div class="divider-rune">⟡ ── ── ── ⟡ ── ── ── ⟡</div>
+
+  <div class="sheet-body">
+
+    <div class="sheet-columns">
+
+      <!-- Left column (1/3): Combat → Skills → Languages → Species → Wealth -->
+      <div class="sheet-col-side">
+
+        <section class="panel">
+          <h2 class="panel-title">Combat</h2>
+          
+          <button class="inspiration-btn"
+                  data-inspired="{{ 'true' if inspiration else 'false' }}"
+                  title="Click to toggle inspiration">
+            ♛ Inspiration
+          </button>
+
+          <div class="combat-row">
+            <div class="stat-badge"><div class="stat-val">{{ armor_class }}</div><div class="stat-lbl">Armour Class</div></div>
+            <div class="stat-badge" data-roll-mod="{{ initiative }}" data-roll-label="Initiative"><div class="stat-val">{{ initiative }}</div><div class="stat-lbl">Initiative</div></div>
+            <div class="stat-badge"><div class="stat-val">{{ speed }}ft</div><div class="stat-lbl">Speed</div></div>
+          </div>
+          {% if spell_save_dc %}
+          <div class="combat-row" style="margin-top:.45rem">
+            <div class="stat-badge"><div class="stat-val">{{ spell_mod }}</div><div class="stat-lbl">Spell Mod ({{ spell_ability }})</div></div>
+            <div class="stat-badge" data-roll-mod="{{ spell_attack }}" data-roll-label="Spell Attack"><div class="stat-val">{{ spell_attack }}</div><div class="stat-lbl">Spell Attack</div></div>
+            <div class="stat-badge"><div class="stat-val">{{ spell_save_dc }}</div><div class="stat-lbl">Spell Save DC</div></div>
+          </div>
+          {% endif %}
+          <div class="combat-row" style="margin-top:.45rem">
+            <div class="stat-badge"><div class="stat-val" id="hp-max-val">{{ hp_max }}</div><div class="stat-lbl"> Maximum Hit Points</div></div>
+            <div class="stat-badge"><div class="stat-val" id="hp-current-val">{{ hp_current }}</div><div class="stat-lbl"> Current Hit Points</div></div>
+            <div class="stat-badge"><div class="stat-val" id="hp-temp-val">{{ hp_temp }}</div><div class="stat-lbl"> Temporary Hit Points</div></div>
+          </div>
+
+          <div class="hp-adjust-row">
+            <input id="hp-adjust-input" class="hp-adjust-input" type="number"
+                   placeholder="± HP" step="1" title="Adjust current HP">
+            <input id="hp-temp-input" class="hp-adjust-input" type="number"
+                   placeholder="± Temp" step="1" title="Adjust temporary HP">
+            <button id="hp-adjust-btn" class="hp-adjust-btn">Apply</button>
+          </div>
+
+          <div class="death-saves">
+            <h3 class="ds-title">Death Saves</h3>
+            <div class="ds-row">
+              <span class="ds-label">Successes</span>
+              <div class="ds-pips" id="ds-successes">
+                <button class="ds-pip ds-pip-success" data-state="off">◇</button>
+                <button class="ds-pip ds-pip-success" data-state="off">◇</button>
+                <button class="ds-pip ds-pip-success" data-state="off">◇</button>
+              </div>
+            </div>
+            <div class="ds-row">
+              <span class="ds-label">Failures</span>
+              <div class="ds-pips" id="ds-failures">
+                <button class="ds-pip ds-pip-failure" data-state="off">☠</button>
+                <button class="ds-pip ds-pip-failure" data-state="off">☠</button>
+                <button class="ds-pip ds-pip-failure" data-state="off">☠</button>
+              </div>
+            </div>
+            <button class="ds-roll-btn" id="ds-roll">Roll Death Save</button>
+          </div>
+        </section>
+
+        <div class="panel">
+          <h2 class="panel-title">Skills</h2>
+          <ul class="skill-list">
+            {% for sk in skills %}
+            <li class="skill-row prof-{{ sk.proficiency }}"
+                data-roll-mod="{{ sk.bonus }}" data-roll-label="{{ sk.name }}"
+                data-base-mod="{{ sk.base_mod }}" data-prof-state="{{ sk.proficiency }}">
+              <span class="skill-dot skill-dot-btn" title="Click to cycle proficiency">{% if sk.proficiency == 'expert' %}◆{% elif sk.proficiency == 'proficient' %}●{% elif sk.proficiency == 'half' %}◐{% else %}○{% endif %}</span>
+              <span class="skill-name">{{ sk.name }}</span><span class="adv-toggle" data-adv-state="none" title="Click to set advantage / disadvantage">A</span>
+              <span class="skill-ability">{{ sk.ability }}</span>
+              <span class="skill-bonus {{ 'pos' if sk.bonus >= 0 else 'neg' }}">{{ '%+d' % sk.bonus }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        {% if armor_proficiencies or weapon_proficiencies or bg_tool_proficiency or bg_languages %}
+        <section class="panel">
+          <h2 class="panel-title">Languages &amp; Proficiencies</h2>
+          {% if armor_proficiencies %}
+          <div style="margin-bottom:.5rem">
+            <span class="trait-name">Armour</span>
+            <span class="feat-desc">{{ armor_proficiencies }}</span>
+          </div>
+          {% endif %}
+          {% if weapon_proficiencies %}
+          <div style="margin-bottom:.5rem">
+            <span class="trait-name">Weapons</span>
+            <span class="feat-desc">{{ weapon_proficiencies }}</span>
+          </div>
+          {% endif %}
+          {% if bg_tool_proficiency %}
+          <div style="margin-bottom:.5rem">
+            <span class="trait-name">Tools</span>
+            <span class="feat-desc">{{ bg_tool_proficiency }}</span>
+          </div>
+          {% endif %}
+          {% if bg_languages %}
+          <div>
+            <span class="trait-name">Languages</span>
+            <span class="feat-desc">{{ bg_languages }}</span>
+          </div>
+          {% endif %}
+        </section>
+        {% endif %}
+
+        {% if traits or bg_trait_name or bg_ofeat_name %}
+        <section class="panel">
+          <h2 class="panel-title">{{ species_name }} and {{ background_name }} Traits</h2>
+          <ul class="trait-list">
+            <h3 class="sptrait-title">Species Traits</h3>
+              {% for t in traits %}
+              <li class="trait-item">
+                <span class="trait-name">{{ t.name }}</span>
+                <span class="feat-desc">{{ t.desc }}</span>
+              </li>
+              {% endfor %}
+              {% if bg_trait_name or bg_ofeat_name %}
+                <h3 class="sptrait-title">Background Traits</h3>
+                {% if bg_trait_name %}
+                  <li class="trait-item">
+                    <span class="trait-name">{{ bg_trait_name }}</span>
+                    {% if bg_trait_desc %}<span class="feat-desc">{{ bg_trait_desc }}</span>{% endif %}
+                  </li>
+                {% endif %}
+                {% if bg_ofeat_name %}
+                  <li class="trait-item">
+                    <span class="trait-name">{{ bg_ofeat_name }}</span>
+                    {% if bg_ofeat_desc %}<span class="feat-desc">{{ bg_ofeat_desc }}</span>{% endif %}
+                  </li>
+                {% endif %}
+              {% endif %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% if gold > 0 or class_equipment or bg_equipment %}
+        <section class="panel">
+          <h2 class="panel-title">Wealth &amp; Equipment</h2>
+          {% if gold > 0 %}
+          <div style="font-family:var(--font-heading);font-size:1.1rem;color:var(--gold);margin-bottom:.6rem">{{ gold | int }} gp</div>
+          {% endif %}
+          {% if class_equipment %}
+          <div style="margin-bottom:.5rem">
+            <span class="trait-name">Class Equipment</span>
+            <span class="feat-desc">{{ class_equipment }}</span>
+          </div>
+          {% endif %}
+          {% if bg_equipment %}
+          <div>
+            <span class="trait-name">Background Equipment</span>
+            <span class="feat-desc">{{ bg_equipment }}</span>
+          </div>
+          {% endif %}
+        </section>
+        {% endif %}
+
+      </div>
+
+      <!-- Right column (2/3): Ability Scores → Class Features → Subclass → Resources → Notes -->
+      <div class="sheet-col-main">
+
+        <section class="panel">
+          <h2 class="panel-title">Ability Scores</h2>
+          <div class="ability-grid">
+            {% for ab in abilities %}
+            <div class="ability-block">
+              <div class="ability-label">{{ ab.label }}</div>
+              <div class="ability-score">{{ ab.score }}</div>
+              <div class="ability-mod {{ 'pos' if ab.modifier >= 0 else 'neg' }}"
+                   data-roll-mod="{{ ab.modifier }}" data-roll-label="{{ ab.label }} Check">{{ '%+d' % ab.modifier }}</div>
+              <div class="ability-save"
+                   data-roll-mod="{{ ab.save }}" data-roll-label="{{ ab.label }} Save">
+                <span class="save-dot {{ 'filled' if ab.save_prof else '' }}">●</span>
+                Save {{ '%+d' % ab.save }}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        {% if spell_slots %}
+        <section class="panel">
+          <h2 class="panel-title">Spell Slots</h2>
+          {% set ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'] %}
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem .75rem">
+            {% for col_min, col_max in [(1,3),(4,6),(7,9)] %}
+            <div class="slot-grid">
+              {% for sl in spell_slots if col_min <= sl.level <= col_max %}
+              <div class="slot-row">
+                <span class="slot-level">{{ ordinals[sl.level - 1] }}</span>
+                <div class="slot-pips">
+                  {% for i in range(sl.max) %}
+                  <button class="slot-pip {{ 'avail' if i < sl.available else 'used' }}"
+                          data-state="{{ 'avail' if i < sl.available else 'used' }}">{% if i < sl.available %}◆{% else %}◇{% endif %}</button>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
+
+        {% if prepared_spells %}
+        <section class="panel">
+          <h2 class="panel-title">Prepared Spells</h2>
+          <div id="prepared-spell-list">
+            {% for sp in prepared_spells %}
+            {% set sp_name  = sp.name  if sp is mapping else sp %}
+            {% set sp_level = sp.level if sp is mapping else none %}
+            {% set sp_index = sp.index if sp is mapping else none %}
+            <div class="spe-item{% if sp_index %} spe-clickable{% endif %}"{% if sp_index %} data-spell-index="{{ sp_index }}"{% endif %}>
+              <span class="spe-name">{{ sp_name }}</span>
+              {% if sp_level is not none %}
+                {% if sp_level == 0 %}<span class="spell-lvl-tag cantrip">cantrip</span>
+                {% elif sp_level == 1 %}<span class="spell-lvl-tag">1st</span>
+                {% elif sp_level == 2 %}<span class="spell-lvl-tag">2nd</span>
+                {% elif sp_level == 3 %}<span class="spell-lvl-tag">3rd</span>
+                {% else %}<span class="spell-lvl-tag">{{ sp_level }}th</span>
+                {% endif %}
+              {% endif %}
+              {% if sp_index %}<span class="spe-chevron">›</span>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
+
+        {% if class_features %}
+        <section class="panel">
+          <h2 class="panel-title">{{ class_name }} Features</h2>
+          <ul class="trait-list">
+            {% for f in class_features %}
+            <li class="trait-item">
+              <span class="trait-name">{{ f.name }}</span>
+              <span class="feat-desc">{{ f.desc }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% if subclass_features %}
+        <section class="panel">
+          <h2 class="panel-title">{{ subclass_name }} Features</h2>
+          <ul class="trait-list">
+            {% for f in subclass_features %}
+            <li class="trait-item">
+              <span class="trait-name">{{ f.name }}</span>
+              <span class="feat-desc">{{ f.desc }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% if resources %}
+        <section class="panel">
+          <h2 class="panel-title">Resources</h2>
+          {% for res in resources %}
+          <div class="resource-row">
+            <div class="resource-name">{{ res.name }}</div>
+            <div class="resource-pips">
+              {% for i in range(res.max_uses) %}
+              <span class="pip {{ 'active' if i < res.current_uses else 'spent' }}">◆</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </section>
+        {% endif %}
+
+        {% if backstory or notes %}
+        <section class="panel">
+          <h2 class="panel-title">Character Notes</h2>
+          {% if backstory %}<p class="notes-text" style="margin-bottom:.5rem">{{ backstory }}</p>{% endif %}
+          {% if notes %}<p class="notes-text">{{ notes }}</p>{% endif %}
+        </section>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="sheet-footer">
+    <span>D&amp;D 2024 · Open5e API · Homebrew Enabled</span>
+    <span>·</span>
+      <button id="save-char-btn" onclick="saveCharacter()" style="background:none;border:none;cursor:pointer;font:inherit;font-size:inherit;color:var(--gold);padding:0;text-decoration:underline">Save Character</button>
+    <span id="save-char-msg" style="font-size:.72rem;display:none"></span>
+    <span>·</span>
+    <a href="/">My Characters</a>
+    <span>·</span>
+    <a href="/build?edit=1">✏ Edit Character</a>
+    <span>·</span>
+    <a href="/build">New Character</a>
+  </footer>
+</main>
+
+<script>
+(function () {
+  function doRoll(modAttr, label, anchor) {
+    var mod = parseInt(modAttr, 10);
+    if (isNaN(mod)) return;
+
+    var die   = Math.floor(Math.random() * 20) + 1;
+    var total = die + mod;
+    var nat20 = die === 20, nat1 = die === 1;
+    var modStr = mod >= 0 ? '+' + mod : '' + mod;
+
+    var el = document.createElement('div');
+    el.className = 'roll-popup' + (nat20 ? ' rp-nat20' : nat1 ? ' rp-nat1' : '');
+    el.innerHTML =
+      '<span class="rp-label">' + label + '</span>' +
+      '<span class="rp-body">' +
+        '<span class="rp-die">d20&thinsp;<span class="rp-raw">(' + die + ')</span>&thinsp;' + modStr + '</span>' +
+        '<span class="rp-sep">→</span>' +
+        '<span class="rp-total">' + total + '</span>' +
+      '</span>';
+
+    document.body.appendChild(el);
+
+    /* Position: centred above the anchor, flip below if no room */
+    var r  = anchor.getBoundingClientRect();
+    var pw = el.offsetWidth, ph = el.offsetHeight;
+    var cx = r.left + r.width  / 2;
+    var topY = r.top  - ph - 10;
+    var botY = r.bottom + 10;
+    el.style.left = Math.max(8, Math.min(cx - pw / 2, window.innerWidth - pw - 8)) + 'px';
+    el.style.top  = (topY >= 8 ? topY : botY) + 'px';
+
+    setTimeout(function () {
+      el.classList.add('roll-out');
+      setTimeout(function () { el.remove(); }, 280);
+    }, 1900);
+  }
+
+  /* Single delegated listener — works for all current and future rollable elements */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-roll-mod]');
+    if (t) doRoll(t.dataset.rollMod, t.dataset.rollLabel || 'Roll', t);
+  });
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   Prepared-spell accordion
+───────────────────────────────────────────────────────────── */
+(function () {
+  var speSchoolIcons = {
+    abjuration:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 5 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V5 Z"/></svg>',
+    conjuration:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/><circle cx="12" cy="12" r="10" stroke-dasharray="1 4"/></svg>',
+    divination:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 6 8 4 12 4 C16 4 19 6 22 12 C19 18 16 20 12 20 C8 20 5 18 2 12 Z"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>',
+    enchantment:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 6.6 A5 5 0 0 0 12 6 A5 5 0 0 0 3.2 6.6 C2.5 9.5 4.5 12.5 12 19 C19.5 12.5 21.5 9.5 20.8 6.6 Z"/></svg>',
+    evocation:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L5 13 H11 L9 22 L19 10 H13 Z"/></svg>',
+    illusion:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 7 8 5 12 5 C16 5 19 7 22 12 C19 17 16 19 12 19 C8 19 5 17 2 12 Z"/><circle cx="12" cy="12" r="3"/></svg>',
+    necromancy:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 C7.5 3 5 6 5 10 V14 L7 16 V19 H10 V17 H14 V19 H17 V16 L19 14 V10 C19 6 16.5 3 12 3 Z"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/></svg>',
+    transmutation:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 H16 L13 6 M20 15 H8 L11 18"/></svg>',
+  };
+  var speGlyphs = {
+    time:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15 14"/></svg>',
+    range:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 C8 8 8 16 12 22 C16 16 16 8 12 2 Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    comp:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L21 8 V16 L12 21 L3 16 V8 Z"/><path d="M12 3 V21 M3 8 L21 16 M21 8 L3 16"/></svg>',
+    duration:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4 H19 M5 20 H19 M7 4 C7 9 17 11 17 12 C17 13 7 15 7 20 M17 4 C17 9 7 11 7 12 C7 13 17 15 17 20"/></svg>',
+  };
+
+  function speRenderCard(s) {
+    var school    = s.school_index || 'evocation';
+    var icon      = speSchoolIcons[school] || '';
+    var subtitle  = s.level === 0 ? (s.school_name + ' cantrip') : ('Level ' + s.level + ' ' + (s.school_name || '').toLowerCase());
+    var tags      = [s.ritual && 'Ritual', s.concentration && 'Concentration'].filter(Boolean);
+    var desc      = (s.desc || []).map(function(p){ return '<p>' + p + '</p>'; }).join('');
+    var higher    = (s.higher_level && s.higher_level.length)
+      ? '<div class="sl-higher"><strong>At higher levels.</strong> ' + s.higher_level.join(' ') + '</div>' : '';
+    var compsText = s.material ? (s.components + ' <em>(' + s.material + ')</em>') : s.components;
+    var classes   = (s.classes || []).length
+      ? '<div class="sl-classes-row"><span class="sl-classes-label">Classes</span>' +
+        s.classes.map(function(c){ return '<span class="sl-class-chip">' + c + '</span>'; }).join('') + '</div>' : '';
+
+    return '<div class="sl-card-head sl-' + school + '">' +
+             '<div class="sl-card-icon sl-' + school + '">' + icon + '</div>' +
+             '<div><h3 class="sl-card-name">' + s.name + '</h3>' +
+             '<div class="sl-card-sub">' + subtitle + '</div></div>' +
+             '<div class="sl-card-tags">' + tags.map(function(t){ return '<span class="sl-tag">' + t + '</span>'; }).join('') + '</div>' +
+           '</div>' +
+           '<div class="sl-card-body">' +
+             '<div class="sl-meta">' +
+               '<div class="sl-meta-cell">' + speGlyphs.time + '<div><div class="sl-meta-label">Casting Time</div><div class="sl-meta-val">' + s.casting_time + '</div></div></div>' +
+               '<div class="sl-meta-cell">' + speGlyphs.range + '<div><div class="sl-meta-label">Range</div><div class="sl-meta-val">' + s.range + '</div></div></div>' +
+               '<div class="sl-meta-cell">' + speGlyphs.comp + '<div><div class="sl-meta-label">Components</div><div class="sl-meta-val">' + compsText + '</div></div></div>' +
+               '<div class="sl-meta-cell">' + speGlyphs.duration + '<div><div class="sl-meta-label">Duration</div><div class="sl-meta-val">' + s.duration + '</div></div></div>' +
+             '</div>' +
+             '<div class="spe-body-row">' +
+               '<div class="spe-sigil-col">' +
+                 '<div class="spe-sigil-placeholder">✦</div>' +
+               '</div>' +
+               '<div class="spe-desc-col">' +
+                 '<div class="sl-desc">' + desc + higher + '</div>' +
+                 classes +
+               '</div>' +
+             '</div>' +
+           '</div>';
+  }
+
+  function speLoadSigil(name, school, panel) {
+    var col = panel.querySelector('.spe-sigil-col');
+    if (!col) return;
+    var url = '/api/sigil?name=' + encodeURIComponent(name.toUpperCase())
+                         + '&school=' + encodeURIComponent((school || 'evocation').toUpperCase());
+    var img = new Image();
+    img.className = 'spe-sigil-img';
+    img.onload = function () {
+      col.innerHTML = '';
+      col.appendChild(img);
+    };
+    img.onerror = function () {
+      col.style.display = 'none';
+    };
+    img.src = url;
+  }
+
+  /* Close whichever detail panel is currently open (if any) */
+  function speClose() {
+    var open = document.querySelector('.spe-item.spe-open');
+    if (!open) return;
+    open.classList.remove('spe-open');
+    var detail = open.nextElementSibling;
+    if (detail && detail.classList.contains('spe-detail')) detail.remove();
+  }
+
+  document.addEventListener('click', function (e) {
+    var item = e.target.closest('.spe-clickable');
+    if (!item) return;
+
+    /* Toggle: clicking the open item closes it */
+    if (item.classList.contains('spe-open')) {
+      speClose();
+      return;
+    }
+
+    /* Close any other open panel first */
+    speClose();
+
+    var idx = item.dataset.spellIndex;
+    item.classList.add('spe-open');
+
+    /* Insert a loading placeholder immediately */
+    var panel = document.createElement('div');
+    panel.className = 'spe-detail';
+    panel.innerHTML = '<div class="sl-card-body" style="font-size:.82rem;color:var(--text-dim);font-style:italic">Unfurling the scroll…</div>';
+    item.insertAdjacentElement('afterend', panel);
+
+    fetch('/api/spells/' + idx)
+      .then(function(r){ return r.json(); })
+      .then(function(s){
+        /* Only update if this panel is still the one attached to this item */
+        if (item.classList.contains('spe-open') && item.nextElementSibling === panel) {
+          panel.innerHTML = speRenderCard(s);
+          speLoadSigil(s.name, s.school_index, panel);
+        }
+      })
+      .catch(function(err){
+        if (item.nextElementSibling === panel)
+          panel.innerHTML = '<div class="sl-card-body" style="font-size:.82rem;color:var(--text-dim)">Could not load spell details.</div>';
+      });
+  });
+})();
+
+
+/* ─────────────────────────────────────────────────────────────
+   HP adjuster
+───────────────────────────────────────────────────────────── */
+(function () {
+  var hpInput   = document.getElementById('hp-adjust-input');
+  var tempInput = document.getElementById('hp-temp-input');
+  var btn       = document.getElementById('hp-adjust-btn');
+  var hpDisplay   = document.getElementById('hp-current-val');
+  var tempDisplay = document.getElementById('hp-temp-val');
+  var maxEl       = document.getElementById('hp-max-val');
+
+  function applyAdjust() {
+    var hpDelta   = parseInt(hpInput.value,   10);
+    var tempDelta = parseInt(tempInput.value, 10);
+    var didSomething = false;
+
+    if (!isNaN(hpDelta) && hpDelta !== 0) {
+      var current = parseInt(hpDisplay.textContent, 10);
+      var max     = parseInt(maxEl.textContent,     10);
+      hpDisplay.textContent = Math.min(max, Math.max(0, current + hpDelta));
+      hpInput.value = '';
+      didSomething = true;
+    }
+
+    if (!isNaN(tempDelta) && tempDelta !== 0) {
+      var temp = parseInt(tempDisplay.textContent, 10);
+      tempDisplay.textContent = Math.max(0, temp + tempDelta);
+      tempInput.value = '';
+      didSomething = true;
+    }
+
+    if (didSomething) hpInput.focus();
+  }
+
+  btn.addEventListener('click', applyAdjust);
+
+  // Enter key fires Apply from either input
+  [hpInput, tempInput].forEach(function (el) {
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') applyAdjust();
+    });
+  });
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   Inspiration toggle
+───────────────────────────────────────────────────────────── */
+(function () {
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.inspiration-btn');
+    if (!btn) return;
+    btn.dataset.inspired = btn.dataset.inspired === 'true' ? 'false' : 'true';
+  });
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   Death save rolls
+───────────────────────────────────────────────────────────── */
+(function () {
+
+  // ── Helper: light up N pips in a container, starting from the left ──
+  var PIP_SYMBOLS = {
+    on:  { success: '♥', failure: '☠' },
+    off: { success: '◇', failure: '☠' },
+  };
+
+  function pipType(pip) {
+    return pip.classList.contains('ds-pip-success') ? 'success' : 'failure';
+  }
+
+  function fillPips(containerId, count) {
+    var pips = document.querySelectorAll('#' + containerId + ' .ds-pip');
+    var filled = 0;
+    pips.forEach(function (pip) {
+      if (pip.dataset.state === 'on') filled++;
+    });
+    var toFill = Math.min(count, 3 - filled);
+    var added = 0;
+    pips.forEach(function (pip) {
+      if (added < toFill && pip.dataset.state === 'off') {
+        pip.dataset.state = 'on';
+        pip.textContent   = PIP_SYMBOLS.on[pipType(pip)];
+        added++;
+      }
+    });
+  }
+
+  // ── Self-contained popup (Option B — no shared state with doRoll) ──
+  function showDsPopup(die, label, anchor) {
+    var nat20 = die === 20, nat1 = die === 1;
+
+    var el = document.createElement('div');
+    // reuse the existing roll-popup CSS classes for consistent look
+    el.className = 'roll-popup' + (nat20 ? ' rp-nat20' : nat1 ? ' rp-nat1' : '');
+    el.innerHTML =
+      '<span class="rp-label">' + label + '</span>' +
+      '<span class="rp-body">' +
+        '<span class="rp-die">d20&thinsp;<span class="rp-raw">(' + die + ')</span></span>' +
+        '<span class="rp-sep">→</span>' +
+        '<span class="rp-total">' + die + '</span>' +
+      '</span>';
+
+    document.body.appendChild(el);
+
+    // centre above the anchor button, flip below if not enough room
+    var r  = anchor.getBoundingClientRect();
+    var pw = el.offsetWidth, ph = el.offsetHeight;
+    var cx = r.left + r.width / 2;
+    el.style.left = Math.max(8, Math.min(cx - pw / 2, window.innerWidth - pw - 8)) + 'px';
+    el.style.top  = (r.top - ph - 10 >= 8 ? r.top - ph - 10 : r.bottom + 10) + 'px';
+
+    // fade out after 1.9 s, then remove from DOM
+    setTimeout(function () {
+      el.classList.add('roll-out');
+      setTimeout(function () { el.remove(); }, 280);
+    }, 500);
+  }
+
+  // ── Roll button ──
+  document.getElementById('ds-roll').addEventListener('click', function () {
+    var die   = Math.floor(Math.random() * 20) + 1;
+    var label, count, target;
+
+    if      (die === 1)  { label = 'Critical Fail!';    count = 2; target = 'ds-failures';  }
+    else if (die === 20) { label = 'Critical Success!'; count = 2; target = 'ds-successes'; }
+    else if (die >= 10)  { label = 'Success';           count = 1; target = 'ds-successes'; }
+    else                 { label = 'Failure';            count = 1; target = 'ds-failures';  }
+
+    fillPips(target, count);
+    showDsPopup(die, label, this);   // `this` is the button that was clicked
+  });
+
+  // ── Manual pip click — lets players correct mistakes ──
+  document.addEventListener('click', function (e) {
+    var pip = e.target.closest('.ds-pip');
+    if (!pip) return;
+    var type = pipType(pip);
+    if (pip.dataset.state === 'on') {
+      pip.dataset.state = 'off';
+      pip.textContent   = PIP_SYMBOLS.off[type];
+    } else {
+      pip.dataset.state = 'on';
+      pip.textContent   = PIP_SYMBOLS.on[type];
+    }
+  });
+
+})();
+
+
+/* ─────────────────────────────────────────────────────────────
+   Spell slot pip toggle  (◆ available ↔ ◇ used)
+───────────────────────────────────────────────────────────── */
+(function () {
+  document.addEventListener('click', function (e) {
+    // Step 1 — find the nearest .slot-pip ancestor of whatever was clicked
+    var pip = e.target.closest('.slot-pip');
+    if (!pip) return;                        // click was elsewhere, ignore
+
+    // Step 2 — read the current state from the data attribute
+    var used = pip.dataset.state === 'used';
+
+    // Step 3 — flip to the opposite state
+    if (used) {
+      pip.dataset.state = 'avail';
+      pip.className     = 'slot-pip avail';
+      pip.textContent   = '◆';              // filled diamond
+    } else {
+      pip.dataset.state = 'used';
+      pip.className     = 'slot-pip used';
+      pip.textContent   = '◇';              // outline diamond
+    }
+  });
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   Advantage / disadvantage toggle on skill ability label
+───────────────────────────────────────────────────────────── */
+(function () {
+  var ADV_STATES = ['none', 'adv', 'dis'];
+  var ADV_LABELS = { none: 'A', adv: 'A', dis: 'D' };
+
+  document.addEventListener('click', function (e) {
+    var tog = e.target.closest('.adv-toggle');
+    if (!tog) return;
+    e.stopPropagation();
+    var cur  = tog.dataset.advState || 'none';
+    var next = ADV_STATES[(ADV_STATES.indexOf(cur) + 1) % ADV_STATES.length];
+    tog.dataset.advState = next;
+    tog.textContent      = ADV_LABELS[next];
+  });
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   Skill proficiency dot toggles
+   Cycles: none ○ → half ◐ → proficient ● → expert ◆ → none …
+   Recalculates skill bonus each time and updates the display.
+───────────────────────────────────────────────────────────── */
+(function () {
+  var PROF_BONUS = parseInt(document.getElementById('sheet-data').dataset.profBonus, 10);
+  var STATES     = ['none', 'half', 'proficient', 'expert'];
+  var DOTS       = { none: '○', half: '◐', proficient: '●', expert: '◆' };
+
+  function calcBonus(baseMod, state) {
+    if (state === 'half')       return baseMod + Math.floor(PROF_BONUS / 2);
+    if (state === 'proficient') return baseMod + PROF_BONUS;
+    if (state === 'expert')     return baseMod + PROF_BONUS * 2;
+    return baseMod;  /* none */
+  }
+
+  document.addEventListener('click', function (e) {
+    var dot = e.target.closest('.skill-dot-btn');
+    if (!dot) return;
+
+    /* Stop the roll listener from firing too */
+    e.stopPropagation();
+
+    var row = dot.closest('.skill-row');
+    if (!row) return;
+
+    var baseMod = parseInt(row.dataset.baseMod, 10);
+    var state   = row.dataset.profState || 'none';
+    var nextIdx = (STATES.indexOf(state) + 1) % STATES.length;
+    var next    = STATES[nextIdx];
+
+    /* Persist new state */
+    row.dataset.profState = next;
+
+    /* Update dot glyph */
+    dot.textContent = DOTS[next];
+
+    /* Swap prof-* class on the row (drives CSS colour) */
+    STATES.forEach(function (s) { row.classList.remove('prof-' + s); });
+    row.classList.add('prof-' + next);
+
+    /* Recalculate and push new bonus */
+    var bonus = calcBonus(baseMod, next);
+    row.dataset.rollMod = bonus;
+
+    var bonusEl = row.querySelector('.skill-bonus');
+    if (bonusEl) {
+      bonusEl.textContent = (bonus >= 0 ? '+' : '') + bonus;
+      bonusEl.className   = 'skill-bonus ' + (bonus >= 0 ? 'pos' : 'neg');
+    }
+  });
+})();
+
+/* ── Save character to my_characters/ folder ── */
+function saveCharacter() {
+  var btn = document.getElementById('save-char-btn');
+  var msg = document.getElementById('save-char-msg');
+  btn.disabled = true;
+  fetch('/api/character/save', { method: 'POST' })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      msg.style.display  = 'inline';
+      if (data.ok) {
+        msg.style.color  = '#2d7a3a';
+        msg.textContent  = '✓ Saved as ' + data.filename;
+      } else {
+        msg.style.color  = '#b03030';
+        msg.textContent  = '✗ ' + (data.error || 'Error saving');
+      }
+      btn.disabled = false;
+      setTimeout(function () { msg.style.display = 'none'; }, 3000);
+    })
+    .catch(function () {
+      msg.style.display = 'inline';
+      msg.style.color   = '#b03030';
+      msg.textContent   = '✗ Request failed';
+      btn.disabled = false;
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+=== D&D 5e ENCOUNTER ===
+
+PARTY:
+  Fighter (Level 5)
+  Cleric (Level 5)
+  Rogue (Level 5)
+  Total Level: 15
+
+DIFFICULTY: Moderate
+CR THRESHOLD: 7.5
+
+MONSTERS:
+  Chasme (CR 6) ×1  [6.00 CR]
+  Bronze Dragon Wyrmling (CR 2) ×1  [2.00 CR]
+
+TOTAL CR: 8 / 7.5
+ASSESSMENT: Balanced — 107% of budget

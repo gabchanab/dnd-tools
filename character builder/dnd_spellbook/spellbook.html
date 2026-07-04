@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>D&D Spell Lookup</title>
+  <style>
+    :root {
+      --bg: #f2ead9;
+      --card: #fffdf7;
+      --ink: #241a10;
+      --muted: #6b5d4a;
+      --border: #d8c9a3;
+      --accent: #4a0e0e;
+      --accent-dark: #2e0808;
+      --gold: #b8862a;
+      --gold-light: #d9b768;
+      --gold-dark: #8a6a2a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: Georgia, "Iowan Old Style", serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+    .layout {
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .right-col { position: sticky; top: 2rem; }
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+      .right-col { position: static; }
+    }
+    h1 {
+      font-family: "Cinzel", "Trajan Pro", Georgia, serif;
+      font-size: 28px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      margin: 0 0 0.25rem;
+      color: var(--accent);
+      text-shadow: 0 1px 0 rgba(184, 134, 42, 0.35);
+    }
+    .subtitle {
+      text-align: center;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      font-size: 14px;
+    }
+    .ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 1.5rem; }
+    .ornament .line { flex: 1; max-width: 120px; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); }
+    .ornament .diamond { width: 7px; height: 7px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }
+
+    .filters {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--gold);
+      border-radius: 4px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    .filters button { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
+    label { font-size: 12px; color: var(--gold-dark); text-transform: uppercase; letter-spacing: 0.08em; min-width: 60px; }
+    select, input[type=text] {
+      flex: 1;
+      min-width: 140px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      background: #fffdf7;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      border-radius: 3px;
+    }
+    button {
+      padding: 9px 24px;
+      background: radial-gradient(circle at 35% 30%, #8a2020, var(--accent) 60%, var(--accent-dark) 100%);
+      color: #f0d9a8;
+      border: 2px solid var(--gold-dark);
+      border-radius: 50px;
+      font-family: "Cinzel", Georgia, serif;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+      box-shadow: inset 0 1px 2px rgba(217, 183, 104, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    button:hover { background: radial-gradient(circle at 35% 30%, #9a2a2a, #6c1414 60%, var(--accent-dark) 100%); }
+    button:active { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5); transform: translateY(1px); }
+
+    .results {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--gold);
+      border-radius: 4px;
+      max-height: 294px;
+      overflow-y: auto;
+    }
+    .result-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .result-item:last-child { border-bottom: none; }
+    .result-item:hover { background: #f5e6c0; }
+    .result-left { display: flex; align-items: center; gap: 12px; }
+    .school-badge {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      border: 2px solid;
+      box-shadow: 0 0 0 1px var(--gold-light);
+    }
+    .lvl { font-size: 12px; color: var(--muted); font-style: italic; }
+
+    .status { padding: 1.5rem; text-align: center; color: var(--muted); font-style: italic; }
+
+    .spell-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--gold);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(60, 40, 20, 0.15), 0 0 0 1px rgba(184, 134, 42, 0.15);
+    }
+    .spell-head {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 2px solid;
+    }
+    .spell-icon {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.5);
+      border: 2px solid var(--gold-light);
+    }
+    .spell-name { font-size: 22px; margin: 0; font-family: "Cinzel", Georgia, serif; letter-spacing: 0.04em; }
+    .spell-sub { font-style: italic; font-size: 13px; opacity: 0.85; margin-top: 2px; }
+    .tags { display: flex; gap: 6px; margin-left: auto; flex-shrink: 0; }
+    .tag {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid var(--gold-dark);
+      font-weight: 600;
+    }
+
+    .spell-body { padding: 1.25rem 1.5rem; }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 14px;
+      padding: 12px 0 16px;
+      border-bottom: 1px dashed var(--border);
+      margin-bottom: 16px;
+    }
+    .meta-cell { display: flex; gap: 10px; }
+    .meta-cell svg { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.55; margin-top: 1px; }
+    .meta-label { font-size: 10px; color: var(--gold-dark); text-transform: uppercase; letter-spacing: 0.1em; }
+    .meta-val { font-size: 14px; }
+    .desc { font-size: 14px; line-height: 1.7; }
+    .desc p { margin: 0 0 0.8em; }
+    .desc p:last-child { margin-bottom: 0; }
+    .higher {
+      margin-top: 1em;
+      padding: 10px 14px;
+      background: #f3e7c9;
+      border-left: 3px solid var(--gold);
+      font-size: 13px;
+    }
+    .classes-row {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .classes-label { font-size: 10px; color: var(--gold-dark); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 6px; }
+    .chip { font-size: 12px; padding: 3px 9px; background: #f3e7c9; border: 1px solid var(--gold-dark); border-radius: 2px; }
+
+    .edition-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+    .edition-label {
+      font-size: 13px;
+      font-family: Georgia, serif;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .edition-label.active { color: var(--accent); font-weight: bold; }
+
+    .toggle-switch { position: relative; cursor: pointer; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      display: block;
+      width: 44px; height: 24px;
+      background: var(--border);
+      border: 1px solid var(--gold-dark);
+      border-radius: 12px;
+      position: relative;
+      transition: background 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-track { background: linear-gradient(135deg, var(--gold), var(--accent)); }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-switch input:checked + .toggle-track .toggle-thumb { transform: translateX(20px); }
+
+    .school-abjuration    { background-color: #d4e3f0; border-color: #5a7ea3; color: #1e3a5f; }
+    .school-conjuration   { background-color: #ddd9f5; border-color: #6b5fb8; color: #2e2766; }
+    .school-divination    { background-color: #d4ebdf; border-color: #4a8a6e; color: #1f4a35; }
+    .school-enchantment   { background-color: #f0d4e1; border-color: #a8537a; color: #5a1e3a; }
+    .school-evocation     { background-color: #f0d4c4; border-color: #b56035; color: #5a2410; }
+    .school-illusion      { background-color: #e0d4f0; border-color: #7a5fa8; color: #2a1f5a; }
+    .school-necromancy    { background-color: #d4d2cc; border-color: #5a564e; color: #2a2620; }
+    .school-transmutation { background-color: #f0e0c4; border-color: #a8823a; color: #5a3f10; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Grimoire</h1>
+    <p class="subtitle">A lookup of arcane and divine workings</p>
+    <div class="ornament"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+    <p class="edition-label" style="text-align: center;">Choose Edition:</p>
+    
+    <div class="edition-toggle">
+      <span class="edition-label" id="label-2014">2014</span>
+      <label class="toggle-switch" title="Switch edition">
+        <input type="checkbox" id="edition-check" checked>
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      </label>
+      <span class="edition-label" id="label-2024">2024</span>
+    </div>
+
+    <div class="layout">
+      <div class="left-col">
+        <div class="filters">
+          <label>Level:</label>
+          <select id="f-level">
+            <option value="">Any</option>
+            <option value="0">Cantrip</option>
+            <option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option>
+            <option value="4">4th</option><option value="5">5th</option><option value="6">6th</option>
+            <option value="7">7th</option><option value="8">8th</option><option value="9">9th</option>
+          </select>
+          <label>School:</label>
+          <select id="f-school">
+            <option value="">Any</option>
+            <option value="abjuration">Abjuration</option>
+            <option value="conjuration">Conjuration</option>
+            <option value="divination">Divination</option>
+            <option value="enchantment">Enchantment</option>
+            <option value="evocation">Evocation</option>
+            <option value="illusion">Illusion</option>
+            <option value="necromancy">Necromancy</option>
+            <option value="transmutation">Transmutation</option>
+          </select>
+
+          <label>Class:</label>
+          <select id="f-class">
+            <option value="">Any</option>
+            <option value="bard">Bard</option><option value="cleric">Cleric</option>
+            <option value="druid">Druid</option><option value="paladin">Paladin</option>
+            <option value="ranger">Ranger</option><option value="sorcerer">Sorcerer</option>
+            <option value="warlock">Warlock</option><option value="wizard">Wizard</option>
+          </select>
+          <label>Name:</label>
+          <input type="text" id="f-name" placeholder="e.g. fireball" />
+
+          <button id="btn-search">Search</button>
+        </div>
+
+        <div id="results"></div>
+      </div>
+      <div class="right-col">
+        <div id="detail"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const API_BASE = 'https://api.open5e.com/v2';
+
+// ── Edition toggle ────────────────────────────────────────────────
+function getDocumentKey() {
+  return $('edition-check').checked ? 'srd-2024' : 'srd-2014';
+}
+
+function updateEditionLabels() {
+  const is2024 = $('edition-check').checked;
+  $('label-2024').classList.toggle('active',  is2024);
+  $('label-2014').classList.toggle('active', !is2024);
+}
+
+$('edition-check').addEventListener('change', () => {
+  updateEditionLabels();
+  $('detail').innerHTML = '';
+  search();
+});
+
+const schoolIcons = {
+  abjuration:    '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 5 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V5 Z"/></svg>',
+  conjuration:   '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/><circle cx="12" cy="12" r="10" stroke-dasharray="1 4"/></svg>',
+  divination:    '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 6 8 4 12 4 C16 4 19 6 22 12 C19 18 16 20 12 20 C8 20 5 18 2 12 Z"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>',
+  enchantment:   '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 6.6 A5 5 0 0 0 12 6 A5 5 0 0 0 3.2 6.6 C2.5 9.5 4.5 12.5 12 19 C19.5 12.5 21.5 9.5 20.8 6.6 Z"/></svg>',
+  evocation:     '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L5 13 H11 L9 22 L19 10 H13 Z"/></svg>',
+  illusion:      '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 7 8 5 12 5 C16 5 19 7 22 12 C19 17 16 19 12 19 C8 19 5 17 2 12 Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  necromancy:    '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 C7.5 3 5 6 5 10 V14 L7 16 V19 H10 V17 H14 V19 H17 V16 L19 14 V10 C19 6 16.5 3 12 3 Z"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/></svg>',
+  transmutation: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 H16 L13 6 M20 15 H8 L11 18"/></svg>',
+};
+
+const glyphs = {
+  time:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15 14"/></svg>',
+  range:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 C8 8 8 16 12 22 C16 16 16 8 12 2 Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  comp:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L21 8 V16 L12 21 L3 16 V8 Z"/><path d="M12 3 V21 M3 8 L21 16 M21 8 L3 16"/></svg>',
+  duration: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4 H19 M5 20 H19 M7 4 C7 9 17 11 17 12 C17 13 7 15 7 20 M17 4 C17 9 7 11 7 12 C7 13 17 15 17 20"/></svg>',
+};
+
+// ── Search ────────────────────────────────────────────────────────
+async function search() {
+  const resultsEl = $('results');
+  $('detail').innerHTML = '';
+  resultsEl.innerHTML = '<div class="status">Consulting the archives…</div>';
+
+  const lvl = $('f-level').value;
+  const sch = $('f-school').value;
+  const cls = $('f-class').value;
+  const nm  = $('f-name').value.trim().toLowerCase();
+
+  // Build query — only level can be filtered server-side reliably
+  const params = new URLSearchParams({ document__key: getDocumentKey(), limit: 1000 });
+  if (lvl !== '') params.append('level', lvl);
+
+  try {
+    const res  = await fetch(`${API_BASE}/spells/?${params}`);
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const data = await res.json();
+
+    let spells = (data.results || []).map(s => ({
+      ...s,
+      index:  s.index || s.key || '',
+      school: s.school?.key || s.school || '',
+    }));
+
+    // Apply remaining filters in JS (same logic Python was doing)
+    if (sch) spells = spells.filter(s => s.school === sch);
+    if (cls) spells = spells.filter(s =>
+      (s.classes || []).some(c =>
+        c.name?.toLowerCase() === cls || c.key?.toLowerCase().split('_').pop() === cls
+      )
+    );
+    if (nm) spells = spells.filter(s => s.name.toLowerCase().includes(nm));
+
+    renderList(spells, sch);
+  } catch (err) {
+    resultsEl.innerHTML = `<div class="status">Search failed: ${err.message}</div>`;
+  }
+}
+
+function renderList(list, knownSchool) {
+  const resultsEl = $('results');
+  if (!list.length) {
+    resultsEl.innerHTML = '<div class="status">No spells match those filters.</div>';
+    return;
+  }
+  const rows = list.slice(0, 100).map(s => {
+    const lvlLabel = s.level === 0 ? 'Cantrip' : `Level ${s.level}`;
+    const school   = s.school || knownSchool || 'evocation';
+    return `<div class="result-item" data-idx="${s.index}">
+      <div class="result-left">
+        <span class="school-badge school-${school}">${schoolIcons[school] || ''}</span>
+        <span>${s.name}</span>
+      </div>
+      <span class="lvl">${lvlLabel}</span>
+    </div>`;
+  }).join('');
+  const note = list.length > 100
+    ? `<div class="status">Showing 100 of ${list.length}. Add filters to narrow.</div>` : '';
+  resultsEl.innerHTML = `<div class="results">${rows}</div>${note}`;
+  resultsEl.querySelectorAll('.result-item').forEach(el =>
+    el.addEventListener('click', () => loadSpell(el.dataset.idx))
+  );
+}
+
+// ── Spell detail ──────────────────────────────────────────────────
+async function loadSpell(idx) {
+  const detail = $('detail');
+  detail.innerHTML = '<div class="status">Unfurling the scroll…</div>';
+  try {
+    const res = await fetch(`${API_BASE}/spells/${idx}/`);
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const raw = await res.json();
+    renderSpell(normaliseSpell(idx, raw));
+  } catch (err) {
+    detail.innerHTML = `<div class="status">Failed to load: ${err.message}</div>`;
+  }
+}
+
+// Reformat the raw open5e response into the shape renderSpell expects.
+// This is exactly what app.py's api_spell() route was doing in Python.
+function normaliseSpell(idx, raw) {
+  const components = [
+    raw.verbal   && 'V',
+    raw.somatic  && 'S',
+    raw.material && 'M',
+  ].filter(Boolean).join(', ');
+
+  const desc = Array.isArray(raw.desc)
+    ? raw.desc
+    : (raw.desc ? [raw.desc] : []);
+
+  const higher_level = Array.isArray(raw.higher_level)
+    ? raw.higher_level
+    : (raw.higher_level ? [raw.higher_level] : []);
+
+  return {
+    index:        idx,
+    name:         raw.name || 'Unknown',
+    level:        raw.level ?? 0,
+    school_index: raw.school?.key  || '',
+    school_name:  raw.school?.name || '',
+    casting_time: raw.casting_time || '',
+    range:        raw.range_text || raw.range || '',
+    duration:     raw.duration || '',
+    components,
+    material:     raw.material_specified || '',
+    ritual:       raw.ritual       || false,
+    concentration:raw.concentration || false,
+    desc,
+    higher_level,
+    classes:      (raw.classes || []).map(c => c.name || ''),
+  };
+}
+
+function renderSpell(s) {
+  const school    = s.school_index || 'evocation';
+  const desc      = s.desc.map(p => `<p>${p}</p>`).join('');
+  const higher    = s.higher_level.length
+    ? `<div class="higher"><strong>At higher levels.</strong> ${s.higher_level.join(' ')}</div>` : '';
+  const compsText = s.material ? `${s.components} <em>(${s.material})</em>` : s.components;
+  const subtitle  = s.level === 0
+    ? `${s.school_name} cantrip`
+    : `Level ${s.level} ${s.school_name.toLowerCase()}`;
+  const tags = [s.ritual && 'Ritual', s.concentration && 'Concentration'].filter(Boolean);
+
+  $('detail').innerHTML = `
+    <div class="spell-card">
+      <div class="spell-head school-${school}">
+        <div class="spell-icon">${schoolIcons[school] || ''}</div>
+        <div>
+          <h2 class="spell-name">${s.name}</h2>
+          <div class="spell-sub">${subtitle}</div>
+        </div>
+        <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="spell-body">
+        <div class="meta">
+          <div class="meta-cell">${glyphs.time}<div><div class="meta-label">Casting time</div><div class="meta-val">${s.casting_time}</div></div></div>
+          <div class="meta-cell">${glyphs.range}<div><div class="meta-label">Range</div><div class="meta-val">${s.range}</div></div></div>
+          <div class="meta-cell">${glyphs.comp}<div><div class="meta-label">Components</div><div class="meta-val">${compsText}</div></div></div>
+          <div class="meta-cell">${glyphs.duration}<div><div class="meta-label">Duration</div><div class="meta-val">${s.duration}</div></div></div>
+        </div>
+        <div class="desc">${desc}${higher}</div>
+        ${s.classes.length ? `<div class="classes-row"><span class="classes-label">Classes</span>${s.classes.map(c => `<span class="chip">${c}</span>`).join('')}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+$('btn-search').addEventListener('click', search);
+$('f-name').addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
+updateEditionLabels();
+search();
+</script>
+</body>
+</html>

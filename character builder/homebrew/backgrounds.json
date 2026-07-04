@@ -1,0 +1,506 @@
+[
+  {
+    "id": "planar_refugee",
+    "name": "Planar Refugee",
+    "source": "Homebrew",
+    "homebrew": true,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2 to one ability score of your choice, +1 to another.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Arcana and Survival.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Cartographer's Tools.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Traveler's clothes, a fragment of a star map from your home plane, and 50 gp.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Magic Initiate (Druid).",
+        "type": "feat"
+      },
+      {
+        "name": "Planar Instinct",
+        "desc": "You were displaced from your home plane by a catastrophic event and found yourself stranded on the Material Plane with nothing but your wits. You have advantage on Intelligence (Arcana) checks made to recall information about other planes of existence.",
+        "type": "trait"
+      }
+    ]
+  },
+  {
+    "id": "void_scholar",
+    "name": "Void Scholar",
+    "source": "Homebrew",
+    "homebrew": true,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2 to Intelligence, +1 to Wisdom.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Arcana and History.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Calligrapher's Supplies.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "Two of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Scholar's pack, a journal of planar observations, and 25 gp.",
+        "type": "equipment"
+      },
+      {
+        "name": "Void Lore",
+        "desc": "You have dedicated your life to studying the spaces between planes. When you make an Intelligence check to recall lore about extraplanar entities or interplanar travel, you are considered proficient and add double your proficiency bonus.",
+        "type": "trait"
+      }
+    ]
+  },
+  {
+    "id": "street_prophet",
+    "name": "Street Prophet",
+    "source": "Homebrew Example",
+    "homebrew": true,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2 to Charisma, +1 to Wisdom.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Insight and Persuasion.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Forgery Kit.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Common clothes, a worn holy symbol, a tin cup, and 10 gp.",
+        "type": "equipment"
+      },
+      {
+        "name": "Voice of the Gutters",
+        "desc": "Common folk treat you as a curiosity rather than a threat. You can always find a crowd willing to listen, and once per day you may ask a city crowd a simple question and receive a rumour in return.",
+        "type": "trait"
+      }
+    ]
+  },
+  {
+    "id": "solgate_scholar",
+    "name": "Solgate Scholar",
+    "source": "Nebulan",
+    "homebrew": true,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2 to Wisdom, +1 to Intelligence.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Arcana and Insight.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Playing Card Set.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Scholar's pack, a set of Solgate cards, and 25 gp.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Lucky.",
+        "type": "feat"
+      },
+      {
+        "name": "Reading the Solgate",
+        "desc": "You are an invested scholar of the Solgate, the mystic deck of cards used by the Solgate Seers to predict the future and divine the will of the gods. During a short rest you may draw a card and ask the DM for a vague omen about the immediate future.",
+        "type": "trait"
+      }
+    ]
+  },
+  {
+    "id": "astral_arcanist",
+    "name": "Astral Arcanist",
+    "source": "Nebulan",
+    "homebrew": true,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2 to Intelligence, +1 to Dexterity.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Arcana and Sleight of Hand.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Wood Carver's Tools.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "Two of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Scholar's pack, a carved astral figurine, and 25 gp.",
+        "type": "equipment"
+      },
+      {
+        "name": "Astral Insight",
+        "desc": "Your studies of the astral plane have granted you insight into the nature of magic. You can cast Detect Magic at will, (without expending a spell slot once per day).",
+        "type": "trait"
+      }
+    ]
+  },
+  {
+    "id": "artisan",
+    "name": "Artisan",
+    "source": "5e 2024 Rules",
+    "homebrew": false,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2+1/+1+1+1 to Strength, Dexterity or Constitution.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Investigation and Persuasion.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Choose one type of artisan's tools.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Choose A or B: (A) Artisan's Tools, 2 Pouches, Traveler's Clothes, 32 GP; or (B) 50 GP.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Crafter.",
+        "type": "feat"
+      }
+    ]
+  },
+  {
+    "id": "charlatan",
+    "name": "Charlatan",
+    "source": "5e 2024 Rules",
+    "homebrew": false,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2+1/+1+1+1 to Dexterity, Constitution or Charisma.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Deception and Sleight of Hand.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Forgery Kit.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Choose A or B: (A) Forgery Kit, Costume, Fine Clothes, 15 GP; or (B) 50 GP.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Skilled.",
+        "type": "feat"
+      }
+    ]
+  },
+  {
+    "id": "entertainer",
+    "name": "Entertainer",
+    "source": "5e 2024 Rules",
+    "homebrew": false,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2+1/+1+1+1 to Strength, Dexterity or Charisma.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Acrobatics and Performance.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Choose one type of musical instrument.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Choose A or B: (A) Musical Instrument, 2 Costumes, Mirror, Perfume, Traveler's Clothes, 11 GP; or (B) 50 GP.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Musician.",
+        "type": "feat"
+      }
+    ]
+  },
+  {
+    "id": "farmer",
+    "name": "Farmer",
+    "source": "5e 2024 Rules",
+    "homebrew": false,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2+1/+1+1+1 to Strength, Constitution or Wisdom.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Animal Handling and Nature.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Carpenter's Tools.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Choose A or B: (A) Carpenter's Tools, Healer's Kit, Iron Pot Sickle, Shovel, Traveler's Clothes, 30 GP; or (B) 50 GP.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Tough.",
+        "type": "feat"
+      }
+    ]
+  },
+  {
+    "id": "guard",
+    "name": "Guard",
+    "source": "5e 2024 Rules",
+    "homebrew": false,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2+1/+1+1+1 to Strength, Intelligence or Wisdom.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Athletics and Perception.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Choose one type of gaming set.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Choose A or B: (A) Gaming Set, Spear, Light Crossbow, 20 Bolts, Hooded Lantern, Manacles, Quiver, Traveler's Clothes, 12 GP; or (B) 50 GP.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Alert.",
+        "type": "feat"
+      }
+    ]
+  },
+  {
+    "id": "guide",
+    "name": "Guide",
+    "source": "5e 2024 Rules",
+    "homebrew": false,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2+1/+1+1+1 to Dexterity, Constitution or Charisma.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "Stealth and Survival.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Choose one type of musical instrument.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "Cartographer's Tools.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "Choose A or B: (A) Cartographer's Tools, Shortbow, 20 Arrows, Bedroll, Quiver, Tent, Traveler's Clothes, 3 GP; or (B) 50 GP.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Magic Initiate (Druid).",
+        "type": "feat"
+      }
+    ]
+  },
+  {
+    "id": "noble",
+    "name": "Noble",
+    "source": "5e 2024 Rules",
+    "homebrew": false,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2+1/+1+1+1 to Strength, Intelligence or Charisma.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "History and Persuasion.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "One type of gaming set.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "(A) Gaming Set, Fine Clothes, Perfume, 8 GP; or (B) 50 GP.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Skilled.",
+        "type": "feat"
+      }
+    ]
+  },
+  {
+    "id": "monastic",
+    "name": "Monastic",
+    "source": "Nebulan",
+    "homebrew": true,
+    "benefits": [
+      {
+        "name": "Ability Score Increases",
+        "desc": "+2+1/+1+1+1 to Intelligence, Wisdom or Charisma.",
+        "type": "ability_score"
+      },
+      {
+        "name": "Skill Proficiencies",
+        "desc": "History and Religion.",
+        "type": "skill_proficiency"
+      },
+      {
+        "name": "Tool Proficiency",
+        "desc": "Choose one type of artisan's tools.",
+        "type": "tool_proficiency"
+      },
+      {
+        "name": "Languages",
+        "desc": "One of your choice.",
+        "type": "language"
+      },
+      {
+        "name": "Equipment",
+        "desc": "(A) Artisan's Tools, Monastic symbol (e.g. beads, ring, necklace), Traveler's Clothes, 10 GP; or (B) 50 GP.",
+        "type": "equipment"
+      },
+      {
+        "name": "Origin Feat",
+        "desc": "Magic Initiate (Cleric).",
+        "type": "feat"
+      }
+    ]
+  }
+]

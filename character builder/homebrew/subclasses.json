@@ -1,0 +1,488 @@
+[
+  {
+    "id": "storm_herald",
+    "name": "Path of the Storm Herald",
+    "parent_class_id": "barbarian",
+    "description": "Barbarians who channel primal storms.",
+    "source": "XGtE",
+    "homebrew": false,
+    "features": {
+      "3": [
+        {
+          "id": "storm_aura",
+          "name": "Storm Aura",
+          "description": "While raging, you emanate a 10-foot aura of storm energy.",
+          "mechanics": {"type": "aura", "radius": 10, "trigger": "raging"}
+        }
+      ],
+      "6": [
+        {
+          "id": "storm_soul",
+          "name": "Storm Soul",
+          "description": "Resistance to a damage type based on your chosen storm.",
+          "mechanics": {"type": "resistance", "damage_type": "varies"}
+        }
+      ]
+    }
+  },
+  {
+    "id": "void_blade",
+    "name": "Oath of the Void Blade",
+    "parent_class_id": "paladin",
+    "description": "A paladin sworn to seal rifts between planes.",
+    "source": "homebrew",
+    "homebrew": true,
+    "subclass_spell_list": ["blink", "misty_step", "plane_shift"],
+    "features": {
+      "3": [
+        {
+          "id": "void_smite",
+          "name": "Void Smite",
+          "description": "Your Divine Smite deals force damage instead of radiant.",
+          "mechanics": {
+            "type": "damage_override",
+            "from": "radiant",
+            "to": "force"
+          }
+        },
+        {
+          "id": "planar_sense",
+          "name": "Planar Sense",
+          "description": "You always know if a portal or planar rift is within 60 feet of you.",
+          "mechanics": {}
+        }
+      ],
+      "7": [
+        {
+          "id": "planar_ward",
+          "name": "Planar Ward",
+          "description": "Allies within 10ft have advantage on saves vs. teleportation effects.",
+          "mechanics": {
+            "type": "aura",
+            "radius": 10,
+            "effect": "advantage_teleport_saves"
+          }
+        }
+      ],
+      "15": [
+        {
+          "id": "rift_walker",
+          "name": "Rift Walker",
+          "description": "You can cast Misty Step as a bonus action without expending a spell slot. Once used, you can't do so again until a short rest.",
+          "mechanics": {
+            "type": "free_cast",
+            "spell": "misty_step",
+            "restore_on": "short_rest"
+          }
+        }
+      ],
+      "20": [
+        {
+          "id": "avatar_of_the_void",
+          "name": "Avatar of the Void",
+          "description": "You can cast Plane Shift on yourself only as a bonus action, without using a spell slot, once per long rest.",
+          "mechanics": {
+            "type": "free_cast",
+            "spell": "plane_shift",
+            "restore_on": "long_rest"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "seeker_patron",
+    "name": "The Seeker",
+    "parent_class_id": "warlock",
+    "description": "A warlock who serves a mysterious entity seeking knowledge.",
+    "source": "nebulan",
+    "homebrew": true,
+    "subclass_spell_list": ["feather_fall", "jump", "levitate", "locate_object", "clairvoyance",
+      "sending", "arcane_eye", "locate_creature", "legend_lore", "passwall"],
+    "features": {
+      "1": [
+        {
+          "id": "shielding_aurora",
+          "name": "Shielding Aurora",
+          "description": "As a bonus action, you create a whirling aurora of brilliant energy that swirls around you. Until the end of your next turn, you gain resistance to all damage, and if a hostile creature ends its turn within 10 feet of you, it takes radiant damage equal to your warlock level + your Charisma modifier. Once you use this feature, you can't use it again until you finish a short or long rest.",
+          "mechanics": {
+            "type": "resistance",
+            "damage_type": "varies"
+          }
+        },
+        {
+          "id": "spells_gained",
+          "name": "Spells Gained",
+          "description": "You gain access to the following spells: Feather Fall, Jump",
+          "mechanics": {
+            "type": "spell_list"
+          }
+        }
+      ],
+      "3": [
+        {
+          "id": "pact_boon",
+          "name": "Pact of the stars",
+          "description": "The Seeker grants you a chain forged from starlight, decorated with seven gleaming motes of brightness. While the chain is on your person, you know the augury spell and can cast it as a ritual. The spell doesn't count against your number of spells known. Additionally, you can invoke the Seeker’s power to gain advantage on an Intelligence check while you carry this item. Once you use this ability, you cannot use it again until you complete a short or long rest. If you lose your Star Chain, you can perform a 1-hour ceremony to receive a replacement from the Seeker. The ceremony can be performed during a short or long rest, and it destroys the previous chain. The chain disappears in a flash of light when you die.",
+          "mechanics": {
+            "type": "pact_boon",
+            "name": "Pact of the Stars",
+            "grants_spell": "augury",
+            "spell_casting": "ritual",
+            "spell_known_override": true,
+            "ability_grant": {
+              "type": "advantage_check",
+              "ability": "intelligence"
+            },
+            "restore_on": "short_or_long_rest"
+          }
+        },
+        {
+          "id": "spells_gained",
+          "name": "Spells Gained",
+          "description": "You gain access to the following spells: Levitate, Locate Object",
+          "mechanics": {
+            "type": "spell_list"
+          }
+        }
+      ],
+      "5": [
+        {
+          "id": "spells_gained",
+          "name": "Spells Gained",
+          "description": "You gain access to the following spells: Clairvoyance, Sending",
+          "mechanics": {
+            "type": "spell_list"
+          }
+        }
+      ],
+      "6": [
+        {
+          "id": "astral_refuge",
+          "name": "Astral Refuge",
+          "description": "As an action, you disappear from the world for a brief moment and enter the Astral Plane, taking advantage of its timeless nature. While in your astral refuge, you can take two actions to cast spells that target only you. After using those two actions, you return to the space you occupied and your turn ends.",
+          "mechanics": {
+            "type": "astral_projection"
+          }
+        }
+      ],
+      "7": [
+        {
+          "id": "spells_gained",
+          "name": "Spells Gained",
+          "description": "You gain access to the following spells: Arcane Eye, Locate Creature",
+          "mechanics": {
+            "type": "spell_list"
+          }
+        }
+      ],
+      "9": [
+        {
+          "id": "spells_gained",
+          "name": "Spells Gained",
+          "description": "You gain access to the following spells: Legend Lore, Passwall",
+          "mechanics": {
+            "type": "spell_list"
+          }
+        }
+      ],
+      "10": [
+        {
+          "id": "far_wanderer",
+          "name": "Far Wanderer",
+          "description": "you no longer need to breathe, and you gain resistance to fire damage and cold damage.",
+          "mechanics": {
+            "type": "resistance",
+            "damage_type": ["fire", "cold"]
+          }
+        }
+      ],
+      "14": [
+        {
+          "id": "astral_sequestration",
+          "name":"Astral Sequestration",
+          "description": "By performing a special ritual over the course of 5 minutes, you shift yourself and up to ten willing creatures you can see to the Astral Plane. You and those creatures gain the benefits of a short rest while sequestered on the Astral Plane. You then return to the spaces you all occupied when you used this ability, with no time having passed in the world. During this short rest, you and the creatures you sequester can make use of any options available during a rest that affect only you and the creatures you sequester. Once you use this ability, you cannot use it again until you complete a long rest.",
+          "mechanics": {
+            "type": "astral_projection",
+            "area_of_effect": "10 willing creatures",
+            "duration": "5 minutes",
+            "restore_on": "long_rest"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "aqua_adaptation",
+    "name": "Aqua Adaptation",
+    "parent_class_id": "assimilator",
+    "description": "Your calming and free flowing manner resonates with the ever-flowing rivers and oceans. You begin to connect with water and understand its properties and nature allowing you to manipulate it as you please. Eventually becoming the assimilation itself.",
+    "source": "nebulan",
+    "homebrew": true,
+    "features": {
+      "1": [
+        {
+          "id": "brutal_connection",
+          "name": "Brutal Connection",
+          "description": "You channel the surrounding water into your strikes. This increases your attack range by 5ft which now deals 1d8 Piercing damage, utilising Dexterity for the attack and damage rolls.",
+          "mechanics": {"type": "damage_override", "damage_dice": "1d8", "damage_type": "Piercing"}
+        },
+        {
+          "id": "water_waltz",
+          "name": "Waltzing with Water",
+          "description": "The nature of water is ever changing, calm as can be one minute, or a swirling vortex the next. To control this assimilation, you must dance with the ever-changing tempo of the waters, to do so flexibility and swift movement are key.Your Aqua save DC is 8 + your Dexterity Modifier + your Proficiency Bonus"
+        },
+        {
+          "id": "forming_flumes1",
+          "name": "Forming Flumes",
+          "description": "At 1st level you gain the ability to channel water to some extent. Abilities gained at 1st and 6th level may be used a total number of times per short rest equal to double your Proficiency Bonus. As an Action you may target an area of Water up to 10 x 10ft within 30ft of you and subsequently move or manipulate it in one of the following ways: -Wave: You manifest a wave of water 10ft tall to crash down. Any creatures caught within the wave must make a Strength/Dexterity (DMs choice) saving throw against your Aqua save DC, else they are knocked prone. -Part: You slice a body of water in two, carving a dry path to travel along, freeing someone from a current or revealing that beneath the waves. It requires concentration to maintain this splitting, lasting a number of minutes up to your Constitution Modifier or your Concentration ends. On subsequent turns while Concentrating, you may use this action again, included in the Concentration of the first both/all active maintained together. -Wash: You spray water upon an area, creating a stream of running water that can remove tracks, scents and makes anyone caught in the spray wet and vulnerable to lightning damage."
+        }
+      ],
+      "2": [
+        {
+          "id": "creative_propulsion1b",
+          "name": "Creative Propulsion Ib",
+          "description": "Your swimming speed becomes your walking speed, because of your understanding and manipulation of water."
+        }
+      ],
+      "3": [
+        {
+          "id": "source_of_life",
+          "name": "Source of Life",
+          "description": "At 3rd level ,you begin to understand the giving nature of water and the life it has brought to the world. When you would deal damage with an Attack action that would be dealt with water you can instead heal the target for the original damage amount rolled. Up to a number of times equal to half of your proficiency bonus (Rounded Down) per long rest. Additionally, your ability to sense and control water around you has increased. You can now extract water from non-sentient plant life within your current limits, set by Forming Flumes, to be used for your water-based attacks."
+        }
+      ],
+      "6": [
+        {
+          "id": "forming_flumes2",
+          "name": "Forming Flumes II",
+          "description": "At 6th level the size of water you can manipulate becomes 20 x 20ft and the range extends to 60ft. Choose one of the following features: -Wring: You cause streams of water to flow across the ground towards a target in range to envelop them in a casket of water. The target must make a Dexterity saving throw to evade these streams. On a failure, the target is caught, as the water crawls up their body, encasing them and they are magically grappled as the water squeezes their chest and takes a number of d6's equal to your Dexterity Modifier. At the end of their turn, the target can make a Strength saving throw to break free from these constraints. On a failure, the target remains grappled and is squeezed taking a number of d6's equal to half your Dexterity Modifier (Rounded Down, minimum 0). On a success, the target takes a number of d6's equal to half your Dexterity Modifier (Rounded down, minimum 0). -Chill: You blast out a cold mist all around you. You create a sphere of icy mist equal to the current size of water you can manipulate (e.g 20 x 20ft at level 6) in diameter centred on you. Creatures within this sphere must make a Constitution saving throw to fight the cold. On a failure, the creature gains 1 level of exhaustion, if the creature already has 3 levels of exhaustion they cannot gain anymore from this feature. On a success, nothing happens. "
+        },
+        {
+          "id": "encroaching_force",
+          "name": "Encroaching Force",
+          "description": "At 6th level, your understanding of your assimilation has increased, and you are able to understand its other state of matter. From now on, when you do damage with water (DM’s discretion) it becomes Cold damage."
+        }
+      ],
+      "7": [
+        {
+          "id": "The Frozen Knight",
+          "name": "The Frozen Knight",
+          "description": "At 7th level, you have learnt a way to solidify your assimilation, giving it a defensive property it did not originally have. It may not be perfect, but it'll do. You encase yourself in a suit of armour made of ice. Your AC becomes 10 + your Dexterity Modifier + your Constitution Modifier. As long as you are not wearing armour."
+        }
+      ],
+      "9": [
+        {
+          "id": "forming_flumes3",
+          "name": "Forming Flumes III",
+          "description": "At 9th level the size of water you can manipulate becomes 30 x 30ft and the range extends to 90ft. Additionally, your 1st level options from this feature now cost only a bonus action. The following feature may be used a number of times per Long Rest equal to your Constitution modifier. -Surge: You are able to control the water within your bloodstream and enhance the speed at which it flows around your body, granting you a burst of energy. As a bonus action, you can come under the effects of the Haste spell and can use features of Forming Flumes with the additional action you get. When it ends you gain the normal effects that ending Haste gives, as well as 1 point of exhaustion, this will go away after a short rest."
+        }
+      ],
+      "10": [
+        {
+          "id": "understanding_of_water",
+          "name": "Understanding of Water",
+          "description": "You also gain advantage on perception checks when a creature is in a liquid.",
+          "mechanics": {"type": "advantage", "check": "perception", "condition": "creature_in_liquid"}
+        }
+      ],
+      "14": [
+        {
+          "id": "forming_flumes4",
+          "name": "Forming Flumes IV",
+          "description": "At 14th level select one of your 1st level options. This feature no longer costs a use from this abilities pool. Furthermore you gain the following Reaction which you may use a number of times per Long Rest equal to half your Proficiency bonus (rounded down). -Clone: Your ability to control water is becoming an art form. When an attack is made against you or an ally, you create a copy of the target out of ice or water. The copy acts as a blockade, reducing the damage taken by 1d10 + Proficiency Bonus, then exploding, dealing 2d8 cold damage to the attacker."
+        }
+      ],
+      "15": [
+        {
+          "id": "sanguine_affinity",
+          "name": "Sanguine Affinity",
+          "description": "At 15th level, your ability to sense water is heightened, and you begin to feel its flow with the bloodstreams of others. Using this ability you gain 1 of the following features: -Bloodsense: You are able to sense the blood of creatures within 90ft of you. -Puppet: You can control the blood within another creature (Provided they have any) and command their actions. The target must make a Constitution saving throw, on a failure they come under the effects of the Dominate Monster spell with the only difference being the Wisdom saving throws to break free become Constitution saving throws. On a success, nothing happens. You are considered Concentrating when you use this feature. -Minions/Sacrifice: You may now use the Surge feature on creatures other than yourself."
+        }
+      ],
+      "18": [
+        {
+          "id": "forming_flumes5",
+          "name": "Forming Flumes V",
+          "description": "From 18th level you may use the Chill feature as a Bonus Action and should select another of the 1st level options to no longer cost a use. "
+        },
+        {
+          "id": "true_connection",
+          "name": "True Connection",
+          "description": "At 18th level, your assimilation to water is nigh and you are practically water itself. The crystallisation of the water you wield is denser as well. The damage of Clone increases to 4d8. Furthermore, you can, as a bonus action, perform Icy Step, in which you teleport 60ft to somewhere of your choice leaving behind a Clone. Creatures who were looking at you or attacking you must make a Wisdom saving throw to determine if they recognise that it is a clone. On a success, they realise it is a fake, and on failure they believe you are the clone. You can use this Icy Step feature twice per long rest."
+        }
+      ]
+    }
+  },
+  {
+    "id": "terra_adaptation",
+    "name": "Terra Adaptation",
+    "parent_class_id": "assimilator",
+    "description": "Your sturdy body, and stubborn mind resonate with the immovable earth. You begin to connect with the earth and understand its properties allowing you to manipulate it as you please, eventually becoming the assimilation itself.",
+    "source": "nebulan",
+    "homebrew": true,
+    "features": {
+      "1": [
+        {
+          "id": "earthen_tango",
+          "name": "Earthen Tango",
+          "description": "The earth is rough and stubborn in nature, thus, to move it you yourself must be rough and stubborn with it. Moving the earth requires an unbounded strength, thus your Terra save DC equals 8 + your Strength Modifier + your Proficiency Bonus. This DC is used for all features in this Subclass."
+        },
+        {
+          "id": "moulduing_earth1",
+          "name": "Moulding Earth I",
+          "description": "At 1st level you gain the ability to manipulate the earth to some extent. Abilities gained at 1st and 6th level may be used a total of times per short rest equal to double your Proficiency Bonus. As an Action you may target an area of Earth up to 10 x 10ft within 30ft of you and subsequently move or manipulate it in one of the following ways: -Rise: You drag up the dirt, forming a 1 foot thick 10 by 10ft wall of solid earth. This has as many hit points as your Strength modifier multiplied by your proficiency bonus and an Armour Class of 10 plus your Strength modifier. It provides full cover and when destroyed, explodes into gravel and mud. -Hollow: You create a hole in a surface up to the size of a 10ft cube. This applies only to natural earth, not stone walls or other such constructs. Doing this in such a way that could cause a creature to fall allows them a Dexterity saving throw against your Terra save DC, else they tumble within. -Carve: You write a message in the ground, leaving it behind for those yet to come. You may write a number of words per use of this Action up to your Strength Modifier multiplied by your Intelligence modifier (minimum your Strength modifier). Depending on the surface (stone, mud or dried earth) the message will remain for a period of time determined by the DM."
+        }
+      ],
+      "2": [
+        {
+          "id": "immovable_grip",
+          "name": "Immovable Grip",
+          "description": "At 2nd level, you are able to cause earth to spread from your hand to a creature you grapple, fusing them to you if they stay too long. If a creature ends its turn grappled by you or Earth you have conjured, they become considered Restrained as rock grows around them."
+        },
+        {
+          "id": "creative_propulsion1b",
+          "name": "Creative Propulsion Ib",
+          "description": "At 2nd level your movement, while heightened, is also unimpeded. You ignore difficult terrain caused by Earth or Plantlife and gain a 'Climb' speed equal to your Walking speed, when on the surface of Earth or Stone."
+        }
+       ],
+       "3": [
+        {
+          "id": "terran_smith",
+          "name": "Terran Smith",
+          "description": "At 3rd level, you learn to coat yourself in an earthen set of armour that never yields nor breaks. Your AC becomes 10 + Strength Modifier + Constitution Modifier."
+        }
+       ],
+       "6": [
+        {
+          "id": "moulduing_earth2",
+          "name": "Moulding Earth II",
+          "description": "At 6th level the size of earth you can manipulate becomes 20 x 20ft and the range extends to 60ft. Choose one of the following features: -Mire: You convert the smooth stone to quicksand or the humble path to a vine filled nightmare. You cover a surface within range in an earth adjacent material or effect of your choosing, causing it to instantly become difficult terrain, until undone by a similar power to your own. Creatures in the area when it is summoned or who end their turn in the space must make a Strength saving throw or become Grappled within. -Barrage: You stamp the earth, becoming one with its roughness and manipulating it like paint on canvas. Choose a number of points within range up to your Proficiency bonus. From deep within the ground (provided it is Earth) sharp spikes emerge with ferocity forcing Dexterity saving throws from 1 creature per spike. The spikes are 5ft diameter at their base and 10ft long. On a failure they are impaled, taking 2d8 Piercing damage and being moved to where the spike ends (10ft in its direction). If this results in the target being placed against a wall the spike melds with it going through them and they are grappled in place. Attempts to break the grapple require the impaled creature or another within 5ft of them, to make an Athletics check as an action, attempting still to beat your Terra save DC as they snap the spike or crumble away at the wall itself. If they end their turn grappled they are considered under the effects of your Immovable Grip and all Athletics checks to aid them are rolled at disadvantage. Creatures who succeed the initial Dexterity saving throw take half damage as they are merely scratched by the sharp stone. All spikes made in this way crumble after 1 minute due to the unstable structure within."
+        }
+       ],
+       "7": [
+        {
+          "id": "tremor_sense",
+          "name": "Tremor Sense",
+          "description": "At 7th level, due to your growing connection to the earth, you are more keenly aware of the vibrations within it. You gain Tremorsense to a range of 30ft while you are standing on Earth or Stone. You also are now able to sense the heartbeats of those affected by your Tremorsense. Subsequently you can tell when living creatures enter around you and when they lie, granting you advantage on Insight checks against such creatures. This increases to 60ft at 14th level and 120ft at 19th level."
+        }
+       ],
+       "9": [
+        {
+          "id": "moulduing_earth3",
+          "name": "Moulding Earth III",
+          "description": "At 9th level the size of earth you can manipulate becomes 30 x 30ft and the range extends to 90ft. Additionally, your 1st level options from this feature now cost only a bonus action. The following Action may be used a number of times per Long Rest equal to your Constitution modifier. -Strike: You conjure a boulder of size up to 5ft x 5ft in front of you. (provided there is enough earth to allow for this). With a kick, punch or headbutt, you send the rock flying at high speed in a direction you choose. The first target within the path of the boulder must make a Dexterity saving throw or take a number of d10s of bludgeoning damage equal to double your Strength modifier, minus 1 for every 10ft it flies before hitting something. The boulder then loses a number of momentum damage die by half the target hit’s Strength Modifier (rounded down, minimum 0), reducing the damage die to 0 causes the boulder to stop/be caught. From there, the boulder continues now losing 1 damage die per 5ft travelled, causing a saving throw for whatever is next in line. If it would hit something else, and still have momentum to deal damage it now loses 2 die per 5ft travelled, stopping after hitting the 3rd thing. When the boulder ceases moving, targets hit by it are left prone beside where it ends up. On a successful save, targets take no damage and dodge the boulder, leaving its momentum the same."
+        }
+       ],
+       "14": [
+        {
+          "id": "moulduing_earth4",
+          "name": "Moulding Earth IV",
+          "description": "At 14th level select one of your 1st level options. This feature no longer costs a use from this abilities pool. Furthermore you gain the following Reaction which you may use a number of times per Long Rest equal to half your Proficiency bonus (rounded down). -Warden: As a reaction when a creature within 15ft of you (including yourself) is struck by an attack, you create a barrier of earth encasing them in a fortified set of stone armour. While this armour is active the target is granted a bonus to their AC equal to your proficiency bonus and temporary hit points equal to your level in this class multiplied by your Constitution modifier. Once these hit points dissipate the armour is destroyed. To maintain the armour is also a Concentration ability, requiring your focus, the protection being lost early if it is broken."
+        }
+       ],
+       "15": [
+        {
+          "id": "metallic_manifestation",
+          "name": "Metallic Manifestation",
+          "description": "At 15th level, your assimilation is nearing completion and you realise further what the earth truly means, leading to your understanding of metal manipulation. All features previously mentioned may now be used regarding Metal and constructed places or things as well as other options. This refers to stationary elements of the world, rather than held items or things in motion (weapons in combat, carts etc) although now you progress past such restrictions. You gain 1 of the following abilities: -Smith: Once per long rest over the course of a 10 minute ritual you enhance the inner workings of a simple object you are in contact with (A Shield, a sword, a padlock etc). You double its hit points, increase its Armour Class or grant it various bonuses. If the item is a non magical Weapon or Shield it becomes +1. If you expend a use from your 3 uses of your Moulding Earth ability this becomes +2 or +3 for another 3 uses spent. An item enhanced in this way remains this way until it is similarly unmade or destroyed. -Dismantle: As a bonus action you target one simple non magical metal object you can see within 30ft of you (a sword, a screw/nail, an iron bar of a prison window). Roll a number of d4 equal to your Strength modifier. The object takes this amount of damage and physically withers, if reduced to 0 hp it is destroyed. DMs should refer to the Objects tab to decide what values certain items should have in this regard. You may do this a number of times per Short Rest equal to your Constitution modifier. -Halt: As a bonus action once per long rest you enrich your power and ready yourself for the storm. For the next minute, if a creature is sufficiently covered in metal or stone (enchanted or otherwise), you may use an action to Grapple (things in pockets, belt shoe buckle), Restrain (Studded Leather, Medium Armour) or Paralyse (Heavy Armour e.g Plate mail, Iron/Stone Golem) them depending on how much they bear. This requires you to remain stationary and take no other actions and concentrate to hold. At the end of each of their turns, the target may make a Strength saving throw to push past this effect however you may use another action to reactivate it. Additionally you may use a reaction to stop the motion of flying metal/stone/earth objects (arrows, boulders etc) that fly within your usual range."
+        }
+       ],
+       "18": [
+        {
+          "id": "moulduing_earth5",
+          "name": "Moulding Earth V",
+          "description": "From 18th level you may use the Mire feature as a Bonus Action and should select another of the 1st level options to no longer cost a use."
+        },
+        {
+          "id": "true_connection",
+          "name": "True Connection",
+          "description": "At 18th level, your assimilation to the earth is nigh and you are practically the earth itself. You can increase the width of your Brutal Connection feature by 20ft, allowing you to hit multiple targets. You use the same attack roll for each target. Furthermore, upon connection the target(s) must make a Strength saving throw and on a failure be pushed back 10ft or knocked prone."
+        }
+      ]
+    }
+  },
+  {
+    "id": "ignis_adaptation",
+    "name": "Ignis Adaptation",
+    "parent_class_id": "assimilator",
+    "description": "Your kind and caring nature hides a well of anger waiting to explode that resonates with the warmth of a small flame that can become a raging fire with a little prompting. You begin to connect with fire and understand its properties and nature allowing you to manipulate it as you please. Eventually becoming the assimilation itself.",
+    "source": "nebulan",
+    "homebrew": true,
+    "features": {
+      "1": [
+        {
+          "id": "flaming_famenco",
+          "name": "Flaming Famenco",
+          "description": "Dancing with flames is an arduous task, whether it be through brute force you tame its rage, or guide it elegantly until it presents with calm. To control this element the confidence to face the sun or quell the flames beneath the surface are required. Your Ignis save DC is either 8 + your Charisma Modifier + your Proficiency bonus."
+        },
+        {
+          "id": "dance_of_embers1",
+          "name": "Dance of Embers I",
+          "description": "At 1st level you gain the ability to manipulate the fire to some extent. Abilities gained at 1st and 6th level may be used a total of times per short rest equal to double your Proficiency Bonus. As an Action you may target and manipulate a flame to a size of up to 10 x 10ft within 30ft of you and subsequently move or manipulate it in one of the following ways: -Sear: Fire can be a sanctuary to some but pain to others. You can throw flames at the hands of a creature. They must make a Dexterity saving throw to evade this flame, else it burns their hands and they drop whatever they are holding and take 1d4 fire damage. -Kindling: You can create a constant heat that exudes from your palms, it provides light in the dark, heat in the cold and a hob to cook some bacon upon. You can maintain this heat for 1 hour. -Ribbons: You can dance with the flames, as you move they flow with elegance around you. When you use this feature you gain advantage on your next Charisma ability check of any type, provided you incorporate the existence of the ribbons into your check."
+        }
+      ],
+      "2": [
+        {
+          "id": "creative_propulsion1b",
+          "name": "Creative Propulsion Ib",
+          "description": "At 2nd level, as an additional, One with Fire exclusive part of this feature. Your connection with that which produces heat, you can walk upon lava, gaining swimming speed equal to walking speed in it as well."
+        }
+      ],
+      "3": [
+        {
+          "id": "mirage",
+          "name": "Mirage",
+          "description": "At 3rd level, you acquaint yourself with the sheer heat and realise the hallucinations that it can cause. As a Bonus Action, you can increase the heat radiating from you, creating mirages of yourself. You can now cast the spell Mirror Image as a Bonus Action a number of times per long rest equal to half of your Proficiency Bonus (Rounded Down)."
+        }
+      ],
+      "6": [
+        {
+          "id": "dance_of_embers2",
+          "name": "Dance of Embers II",
+          "description": "At 6th level the amount of fire you can manipulate becomes 20 x 20ft and the range extends to 60ft. Choose one of the following features: -Entrance: You move the flames around you with such elegance and ferocity it entrances your foes filling them with fear of one that could wield such pure destruction so beautifully. Any creature that sees the flame within range must make a Wisdom or Constitution saving throw (your choice but universal to all targets). On a fail they become Frightened until the end of their next turn (Wisdom) or Blinded for up to a minute, remaking the save at the start of their turns (Constitution).  -Engulf: You are able to tap into the destructive properties of fire. When you use this feature you effectively cast the spell Fireball with the difference being the range and size scales with Dance of Embers."
+        }
+      ],
+      "7": [
+        {
+          "id": "artistes_majesty",
+          "name": "The Artistes Majesty",
+          "description": "At 7th level, your connection with the flames is becoming stronger and its reverence is seeping out from you. You gain a bonus to all Charisma ability checks equal to your current Charisma Modifier."
+        }
+      ],
+      "9": [
+        {
+          "id": "dance_of_embers3",
+          "name": "Dance of Embers III",
+          "description": "At 9th level the amount of fire you can manipulate becomes 30 x 30ft and the range extends to 90ft. Additionally, your 1st level options from this feature now cost only a bonus action. The following feature may be used a number of times per Long Rest equal to your Charisma modifier. -Lahar: You slam your palms upon the ground and imbue an area within range with overwhelming heat creating a pool of magma. Creatures within the area must make a Dexterity saving throw or else fall in this molten puddle taking 5d6 fire damage and becoming restrained as the rocks within the puddle weigh them down. This area is considered difficult terrain. At the start of a creature's turn they may make a Strength saving throw to break free from being restrained. If a creature ends their turn within Lahar they take another 3d6 fire damage. You are considered Concentrating while using this feature. Lahar lasts for 1 minute."
+        }
+      ],
+      "14": [
+        {
+          "id": "dance_of_embers4",
+          "name": "Dance of Embers IV",
+          "description": "At 14th level select one of your 1st level options. This feature no longer costs a use from this abilities pool. Furthermore you gain the following Reaction which you may use a number of times per Long Rest equal to half your Proficiency bonus (rounded down). -Cacophony: When a creature within range makes an ability check, saving throw or attack roll, you may use a Reaction after seeing their total to summon the Cacophony. You encircle the target with flaming figures of you laughing and cackling at the creature, they must roll again and if the total would be lower it replaces their prior roll."
+        }
+      ],
+      "15": [
+        {
+          "id": "beauty_of_lightning",
+          "name": "The Beauty of Lightning",
+          "description": "At 15th level, you realise that lightning carries the beauty of flames and are now able to channel it in varying ways. Using this ability you gain 1 of the following features: -Bolt: You understand the swiftness of lightning striking and are able to use it to your will. You can as a bonus action teleport in a flash of light to a place you can see within 90ft of you. -Channel: You imbue your nerves with lightning, allowing them to function at greater speeds. You gain an additional Extra Attack. -Static: You are able to transmute the form of flames and unleash their true potential. Whenever you deal Fire damage, add an additional d6 of Lightning damage to the roll."
+        }
+      ],
+      "18": [
+        {
+          "id": "dance_of_embers5",
+          "name": "Dance of Embers V",
+          "description": "From 18th level you may use the Entrance feature as a Bonus Action and should select another of the 1st level options to no longer cost a use."
+        },
+        {
+          "id": "true_connection",
+          "name": "True Connection",
+          "description": "At 18th level, your assimilation is nigh, and you are practically Fire itself. You may choose an additional feature from The Beauty of Lightning."
+        }
+      ]
+    }
+  }
+]

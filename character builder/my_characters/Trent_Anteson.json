@@ -1,0 +1,384 @@
+{
+  "char_name": "Trent Anteson",
+  "player_name": "",
+  "alignment": "True Neutral",
+  "species_name": "Orc",
+  "class_name": "Assimilator",
+  "subclass_name": "Ignis Adaptation",
+  "subclass_homebrew": true,
+  "background_name": "Criminal",
+  "level": 20,
+  "proficiency_bonus": 6,
+  "passive_perception": 10,
+  "hp_max": 102,
+  "hp_current": 102,
+  "hp_temp": 0,
+  "hp_pct": 100,
+  "hit_dice_display": "20d6",
+  "armor_class": 12,
+  "speed": 30,
+  "initiative": "+2",
+  "inspiration": true,
+  "spell_mod": null,
+  "spell_attack": null,
+  "spell_save_dc": null,
+  "spell_ability": "",
+  "abilities": [
+    {
+      "key": "strength",
+      "label": "STR",
+      "score": 10,
+      "modifier": 0,
+      "save": 0,
+      "save_prof": false
+    },
+    {
+      "key": "dexterity",
+      "label": "DEX",
+      "score": 14,
+      "modifier": 2,
+      "save": 8,
+      "save_prof": true
+    },
+    {
+      "key": "constitution",
+      "label": "CON",
+      "score": 12,
+      "modifier": 1,
+      "save": 7,
+      "save_prof": true
+    },
+    {
+      "key": "intelligence",
+      "label": "INT",
+      "score": 12,
+      "modifier": 1,
+      "save": 1,
+      "save_prof": false
+    },
+    {
+      "key": "wisdom",
+      "label": "WIS",
+      "score": 10,
+      "modifier": 0,
+      "save": 0,
+      "save_prof": false
+    },
+    {
+      "key": "charisma",
+      "label": "CHA",
+      "score": 16,
+      "modifier": 3,
+      "save": 3,
+      "save_prof": false
+    }
+  ],
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "DEX",
+      "base_mod": 2,
+      "bonus": 8,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "WIS",
+      "base_mod": 0,
+      "bonus": 0,
+      "proficiency": "none"
+    },
+    {
+      "name": "Arcana",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Athletics",
+      "ability": "STR",
+      "base_mod": 0,
+      "bonus": 0,
+      "proficiency": "none"
+    },
+    {
+      "name": "Deception",
+      "ability": "CHA",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "History",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Insight",
+      "ability": "WIS",
+      "base_mod": 0,
+      "bonus": 0,
+      "proficiency": "none"
+    },
+    {
+      "name": "Intimidation",
+      "ability": "CHA",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "Investigation",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Medicine",
+      "ability": "WIS",
+      "base_mod": 0,
+      "bonus": 0,
+      "proficiency": "none"
+    },
+    {
+      "name": "Nature",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 7,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Perception",
+      "ability": "WIS",
+      "base_mod": 0,
+      "bonus": 0,
+      "proficiency": "none"
+    },
+    {
+      "name": "Performance",
+      "ability": "CHA",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "Persuasion",
+      "ability": "CHA",
+      "base_mod": 3,
+      "bonus": 3,
+      "proficiency": "none"
+    },
+    {
+      "name": "Religion",
+      "ability": "INT",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "DEX",
+      "base_mod": 2,
+      "bonus": 8,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Stealth",
+      "ability": "DEX",
+      "base_mod": 2,
+      "bonus": 8,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Survival",
+      "ability": "WIS",
+      "base_mod": 0,
+      "bonus": 0,
+      "proficiency": "none"
+    }
+  ],
+  "spell_slots": [],
+  "traits": [
+    {
+      "name": "Size",
+      "desc": "Medium (about 6–7 feet tall)"
+    },
+    {
+      "name": "Speed",
+      "desc": "30 feet"
+    },
+    {
+      "name": "Adrenaline Rush",
+      "desc": "You can take the Dash action as a Bonus Action. When you do so, you gain a number of Temporary Hit Points equal to your Proficiency Bonus.\n\nYou can use this trait a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Short or Long Rest."
+    },
+    {
+      "name": "Darkvision",
+      "desc": "You have Darkvision with a range of 120 feet."
+    },
+    {
+      "name": "Relentless Endurance",
+      "desc": "When you are reduced to 0 Hit Points but not killed outright, you can drop to 1 Hit Point instead. Once you use this trait, you can't do so again until you finish a Long Rest."
+    }
+  ],
+  "class_features": [
+    {
+      "name": "Adaptation",
+      "desc": "At 1st level, you choose an Inclination that represents the type of assimilation you are undergoing. This choice grants you features at 1st level and again at 7th, 9th, and 15th level. The options for this feature are: Aqua Adaptation, Ignis Adaptation, Ventus Adaptation and Terra Adaptation."
+    },
+    {
+      "name": "Hit Die",
+      "desc": "(Default: D8- Change in save file) Your hit die depends on your chosen Inclination: 1d12 (Terra), 1d10 (Aqua), 1d8 (Ignis), 1d6 (Ventus) per Assimilator level"
+    },
+    {
+      "name": "Saving Throw Proficiencies",
+      "desc": "(Default: CON and DEX- Change in save file) Your saving throw proficiencies depend on your chosen Inclination: Constitution (All), Strength (Terra), Dexterity (Aqua), Charisma (Ignis) and Wisdom (Ventus)"
+    },
+    {
+      "name": "Skill Proficiencies",
+      "desc": "Each Subclass offers an additional proficiency added to this list of options: Athletics (Terra), Medicine (Aqua), Intimidation (Ignis) and Stealth (Ventus)"
+    },
+    {
+      "name": "Brutal Connection",
+      "desc": "Whenever you make an Unarmed Attack while wearing no armour/wielding no shield and that you are within the appropriate range (detailed in Subclasses) of your designated adaptation, you can enhance your unarmed strikes with the characteristics of your chosen adaptation. The range starts at 5 feet and increases by another 5 feet at levels 5, 9, 13 and 17."
+    },
+    {
+      "name": "Creative Propulsion I",
+      "desc": "At 2nd level, you start to become more accustomed to using your adaptation freely. Using your adaptation, you increase your speed by 10ft. This increases by 5 feet at levels 6, 10, 14 and 18."
+    },
+    {
+      "name": "Creative Propulsion II",
+      "desc": "At 9th level, you further this creativity and connection to your adaptation. You can now hover."
+    },
+    {
+      "name": "Creative Propulsion III",
+      "desc": "At 15th level, you truly are starting to assimilate to your chosen adaptation. You gain a flying speed equal to your walking speed."
+    },
+    {
+      "name": "Ability Score Improvement",
+      "desc": "When you reach 4th level, and again at 8th, 12th and 16th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal you can't increase an ability score above 20 using this feature, unless you are above level 20. You can also use this to gain a feat instead."
+    },
+    {
+      "name": "Extra Attack",
+      "desc": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."
+    },
+    {
+      "name": "Immutable Force",
+      "desc": "By 6th level the unification of your body, spirit and the world around you becomes channeled into your strikes and power. The damage type you deal with your Brutal Connection feature is considered Magical and resistance to this type can be ignored."
+    },
+    {
+      "name": "Understanding of the World",
+      "desc": "At 10th level, your insight into your adaptation has increased greatly since the start of your journey. The way you perceive the world is influenced greatly by the element you are assimilating with. You may choose two skill proficiencies. Your proficiency bonus is doubled for any ability check that uses either of the chosen proficiencies."
+    },
+    {
+      "name": "Everchanging Physiology",
+      "desc": "At 13th level, you are beginning to become one with your adaptation. You now no longer need a source of your assimilation to use it, as it is now coming from yourself. Additionally, as you are more a part of nature than creature, thus you are more resistant to regular ways of injury. You gain resistance to Bludgeoning, Piercing and Slashing damage."
+    },
+    {
+      "name": "As One",
+      "desc": "At 20th level, you have done it. You have completely assimilated with your adaptation. You are it; it is you. You gain Resistance to  Magical Bludgeoning, Piercing and Slashing damage and Immunity to Non-Magical Bludgeoning, Piercing and Slashing damage."
+    }
+  ],
+  "subclass_features": [
+    {
+      "name": "Flaming Famenco",
+      "desc": "Dancing with flames is an arduous task, whether it be through brute force you tame its rage, or guide it elegantly until it presents with calm. To control this element the confidence to face the sun or quell the flames beneath the surface are required. Your Ignis save DC is either 8 + your Charisma Modifier + your Proficiency bonus."
+    },
+    {
+      "name": "Dance of Embers I",
+      "desc": "At 1st level you gain the ability to manipulate the fire to some extent. Abilities gained at 1st and 6th level may be used a total of times per short rest equal to double your Proficiency Bonus. As an Action you may target and manipulate a flame to a size of up to 10 x 10ft within 30ft of you and subsequently move or manipulate it in one of the following ways: -Sear: Fire can be a sanctuary to some but pain to others. You can throw flames at the hands of a creature. They must make a Dexterity saving throw to evade this flame, else it burns their hands and they drop whatever they are holding and take 1d4 fire damage. -Kindling: You can create a constant heat that exudes from your palms, it provides light in the dark, heat in the cold and a hob to cook some bacon upon. You can maintain this heat for 1 hour. -Ribbons: You can dance with the flames, as you move they flow with elegance around you. When you use this feature you gain advantage on your next Charisma ability check of any type, provided you incorporate the existence of the ribbons into your check."
+    },
+    {
+      "name": "Creative Propulsion Ib",
+      "desc": "At 2nd level, as an additional, One with Fire exclusive part of this feature. Your connection with that which produces heat, you can walk upon lava, gaining swimming speed equal to walking speed in it as well."
+    },
+    {
+      "name": "Mirage",
+      "desc": "At 3rd level, you acquaint yourself with the sheer heat and realise the hallucinations that it can cause. As a Bonus Action, you can increase the heat radiating from you, creating mirages of yourself. You can now cast the spell Mirror Image as a Bonus Action a number of times per long rest equal to half of your Proficiency Bonus (Rounded Down)."
+    },
+    {
+      "name": "Dance of Embers II",
+      "desc": "At 6th level the amount of fire you can manipulate becomes 20 x 20ft and the range extends to 60ft. Choose one of the following features: -Entrance: You move the flames around you with such elegance and ferocity it entrances your foes filling them with fear of one that could wield such pure destruction so beautifully. Any creature that sees the flame within range must make a Wisdom or Constitution saving throw (your choice but universal to all targets). On a fail they become Frightened until the end of their next turn (Wisdom) or Blinded for up to a minute, remaking the save at the start of their turns (Constitution).  -Engulf: You are able to tap into the destructive properties of fire. When you use this feature you effectively cast the spell Fireball with the difference being the range and size scales with Dance of Embers."
+    },
+    {
+      "name": "The Artistes Majesty",
+      "desc": "At 7th level, your connection with the flames is becoming stronger and its reverence is seeping out from you. You gain a bonus to all Charisma ability checks equal to your current Charisma Modifier."
+    },
+    {
+      "name": "Dance of Embers III",
+      "desc": "At 9th level the amount of fire you can manipulate becomes 30 x 30ft and the range extends to 90ft. Additionally, your 1st level options from this feature now cost only a bonus action. The following feature may be used a number of times per Long Rest equal to your Charisma modifier. -Lahar: You slam your palms upon the ground and imbue an area within range with overwhelming heat creating a pool of magma. Creatures within the area must make a Dexterity saving throw or else fall in this molten puddle taking 5d6 fire damage and becoming restrained as the rocks within the puddle weigh them down. This area is considered difficult terrain. At the start of a creature's turn they may make a Strength saving throw to break free from being restrained. If a creature ends their turn within Lahar they take another 3d6 fire damage. You are considered Concentrating while using this feature. Lahar lasts for 1 minute."
+    },
+    {
+      "name": "Dance of Embers IV",
+      "desc": "At 14th level select one of your 1st level options. This feature no longer costs a use from this abilities pool. Furthermore you gain the following Reaction which you may use a number of times per Long Rest equal to half your Proficiency bonus (rounded down). -Cacophony: When a creature within range makes an ability check, saving throw or attack roll, you may use a Reaction after seeing their total to summon the Cacophony. You encircle the target with flaming figures of you laughing and cackling at the creature, they must roll again and if the total would be lower it replaces their prior roll."
+    },
+    {
+      "name": "The Beauty of Lightning",
+      "desc": "At 15th level, you realise that lightning carries the beauty of flames and are now able to channel it in varying ways. Using this ability you gain 1 of the following features: -Bolt: You understand the swiftness of lightning striking and are able to use it to your will. You can as a bonus action teleport in a flash of light to a place you can see within 90ft of you. -Channel: You imbue your nerves with lightning, allowing them to function at greater speeds. You gain an additional Extra Attack. -Static: You are able to transmute the form of flames and unleash their true potential. Whenever you deal Fire damage, add an additional d6 of Lightning damage to the roll."
+    },
+    {
+      "name": "Dance of Embers V",
+      "desc": "From 18th level you may use the Entrance feature as a Bonus Action and should select another of the 1st level options to no longer cost a use."
+    },
+    {
+      "name": "True Connection",
+      "desc": "At 18th level, your assimilation is nigh, and you are practically Fire itself. You may choose an additional feature from The Beauty of Lightning."
+    }
+  ],
+  "resources": [],
+  "prepared_spells": [],
+  "cantrips": [],
+  "notes": "",
+  "backstory": "",
+  "gold": 25.0,
+  "class_equipment": "A robe of colour and style attributed to the chosen Inclination; Choose A or B (A) a dungeoneer's pack or (B) an explorer's pack",
+  "bg_equipment": "*Choose A or B:* (A) 2 Daggers, Thieves' Tools, Crowbar, 2 Pouches, Traveler's Clothes, 16 GP; or (B) 50 GP",
+  "armor_proficiencies": "None",
+  "weapon_proficiencies": "None",
+  "bg_tool_proficiency": "Thieves' Tools",
+  "bg_languages": "",
+  "bg_trait_name": "",
+  "bg_trait_desc": "",
+  "bg_ofeat_name": "Feat",
+  "bg_ofeat_desc": "Alert",
+  "_raw": {
+    "name": "Trent Anteson",
+    "player_name": "",
+    "alignment": "True Neutral",
+    "level": "20",
+    "gold": "25",
+    "backstory": "",
+    "notes": "",
+    "species_key": "srd-2024_orc",
+    "species_name": "Orc",
+    "class_key": "assimilator",
+    "class_name": "Assimilator",
+    "background_key": "srd-2024_criminal",
+    "background_name": "Criminal",
+    "subclass_key": "ignis_adaptation",
+    "subclass_name": "Ignis Adaptation",
+    "subclass_homebrew": true,
+    "str": 10,
+    "dex": 14,
+    "con": 12,
+    "int": 12,
+    "wis": 10,
+    "cha": 16,
+    "skills": [
+      "Acrobatics",
+      "Nature",
+      "Sleight of Hand",
+      "Stealth"
+    ],
+    "spells": [],
+    "hit_die_override": 6,
+    "hp_rolled": null,
+    "species_data": "{\"key\":\"srd-2024_orc\",\"is_subspecies\":false,\"document\":{\"name\":\"System Reference Document 5.2\",\"key\":\"srd-2024\",\"type\":\"SOURCE\",\"display_name\":\"5e 2024 Rules\",\"publisher\":{\"name\":\"Wizards of the Coast\",\"key\":\"wizards-of-the-coast\"},\"gamesystem\":{\"name\":\"5th Edition 2024\",\"key\":\"5e-2024\"},\"permalink\":\"https://dnd.wizards.com/resources/systems-reference-document\"},\"traits\":[{\"name\":\"Size\",\"desc\":\"Medium (about 6–7 feet tall)\",\"type\":\"SIZE\",\"order\":1},{\"name\":\"Speed\",\"desc\":\"30 feet\",\"type\":\"SPEED\",\"order\":2},{\"name\":\"Adrenaline Rush\",\"desc\":\"You can take the Dash action as a Bonus Action. When you do so, you gain a number of Temporary Hit Points equal to your Proficiency Bonus.\\n\\nYou can use this trait a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Short or Long Rest.\",\"type\":null,\"order\":3},{\"name\":\"Darkvision\",\"desc\":\"You have Darkvision with a range of 120 feet.\",\"type\":null,\"order\":4},{\"name\":\"Relentless Endurance\",\"desc\":\"When you are reduced to 0 Hit Points but not killed outright, you can drop to 1 Hit Point instead. Once you use this trait, you can't do so again until you finish a Long Rest.\",\"type\":null,\"order\":5}],\"name\":\"Orc\",\"desc\":\"\",\"subspecies_of\":null}",
+    "class_data": "{\"key\":\"assimilator\",\"name\":\"Assimilator\",\"hit_dice\":\"D8\",\"caster_type\":\"NONE\",\"saving_throws\":[{\"name\":\"Dexterity\"},{\"name\":\"Constitution\"}],\"desc\":\"\",\"features\":[{\"name\":\"Core Assimilator Traits\",\"feature_type\":\"CORE_TRAITS_TABLE\",\"desc\":\"||\\n|---|---|\\n|Primary Ability|Dexterity and Constitution|\\n|Hit Point Die|D8 per Assimilator level|\\n|Saving Throw Proficiencies|Dexterity and Constitution|\\n|Skill Proficiencies|Choose 2 from  Acrobatics, History, Insight, Nature, Perception, Survival|\\n|Weapon Proficiencies|None|\\n|Armor Training|None|\\n|Starting Equipment|A robe of colour and style attributed to the chosen Inclination; Choose A or B (A) a dungeoneer's pack or (B) an explorer's pack|\",\"gained_at\":[],\"data_for_class_table\":[]},{\"name\":\"Adaptation\",\"desc\":\"At 1st level, you choose an Inclination that represents the type of assimilation you are undergoing. This choice grants you features at 1st level and again at 7th, 9th, and 15th level. The options for this feature are: Aqua Adaptation, Ignis Adaptation, Ventus Adaptation and Terra Adaptation.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1}]},{\"name\":\"Hit Die\",\"desc\":\"(Default: D8- Change in save file) Your hit die depends on your chosen Inclination: 1d12 (Terra), 1d10 (Aqua), 1d8 (Ignis), 1d6 (Ventus) per Assimilator level\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1}]},{\"name\":\"Saving Throw Proficiencies\",\"desc\":\"(Default: CON and DEX- Change in save file) Your saving throw proficiencies depend on your chosen Inclination: Constitution (All), Strength (Terra), Dexterity (Aqua), Charisma (Ignis) and Wisdom (Ventus)\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1}]},{\"name\":\"Skill Proficiencies\",\"desc\":\"Each Subclass offers an additional proficiency added to this list of options: Athletics (Terra), Medicine (Aqua), Intimidation (Ignis) and Stealth (Ventus)\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1}]},{\"name\":\"Brutal Connection\",\"desc\":\"Whenever you make an Unarmed Attack while wearing no armour/wielding no shield and that you are within the appropriate range (detailed in Subclasses) of your designated adaptation, you can enhance your unarmed strikes with the characteristics of your chosen adaptation. The range starts at 5 feet and increases by another 5 feet at levels 5, 9, 13 and 17.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":1}]},{\"name\":\"Creative Propulsion I\",\"desc\":\"At 2nd level, you start to become more accustomed to using your adaptation freely. Using your adaptation, you increase your speed by 10ft. This increases by 5 feet at levels 6, 10, 14 and 18.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":2}]},{\"name\":\"Creative Propulsion II\",\"desc\":\"At 9th level, you further this creativity and connection to your adaptation. You can now hover.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":9}]},{\"name\":\"Creative Propulsion III\",\"desc\":\"At 15th level, you truly are starting to assimilate to your chosen adaptation. You gain a flying speed equal to your walking speed.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":15}]},{\"name\":\"Ability Score Improvement\",\"desc\":\"When you reach 4th level, and again at 8th, 12th and 16th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal you can't increase an ability score above 20 using this feature, unless you are above level 20. You can also use this to gain a feat instead.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":4}]},{\"name\":\"Extra Attack\",\"desc\":\"Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":5}]},{\"name\":\"Immutable Force\",\"desc\":\"By 6th level the unification of your body, spirit and the world around you becomes channeled into your strikes and power. The damage type you deal with your Brutal Connection feature is considered Magical and resistance to this type can be ignored.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":6}]},{\"name\":\"Understanding of the World\",\"desc\":\"At 10th level, your insight into your adaptation has increased greatly since the start of your journey. The way you perceive the world is influenced greatly by the element you are assimilating with. You may choose two skill proficiencies. Your proficiency bonus is doubled for any ability check that uses either of the chosen proficiencies.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":10}]},{\"name\":\"Everchanging Physiology\",\"desc\":\"At 13th level, you are beginning to become one with your adaptation. You now no longer need a source of your assimilation to use it, as it is now coming from yourself. Additionally, as you are more a part of nature than creature, thus you are more resistant to regular ways of injury. You gain resistance to Bludgeoning, Piercing and Slashing damage.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":13}]},{\"name\":\"As One\",\"desc\":\"At 20th level, you have done it. You have completely assimilated with your adaptation. You are it; it is you. You gain Resistance to  Magical Bludgeoning, Piercing and Slashing damage and Immunity to Non-Magical Bludgeoning, Piercing and Slashing damage.\",\"feature_type\":\"CLASS_LEVEL_FEATURE\",\"gained_at\":[{\"level\":20}]}],\"document\":{\"display_name\":\"Nebulan\",\"key\":\"homebrew\",\"gamesystem\":{\"key\":\"homebrew\"}},\"_homebrew\":true,\"_hbData\":{\"armor_training\":\"None\",\"caster_type\":\"NONE\",\"features\":[{\"description\":\"At 1st level, you choose an Inclination that represents the type of assimilation you are undergoing. This choice grants you features at 1st level and again at 7th, 9th, and 15th level. The options for this feature are: Aqua Adaptation, Ignis Adaptation, Ventus Adaptation and Terra Adaptation.\",\"level\":1,\"name\":\"Adaptation\"},{\"description\":\"(Default: D8- Change in save file) Your hit die depends on your chosen Inclination: 1d12 (Terra), 1d10 (Aqua), 1d8 (Ignis), 1d6 (Ventus) per Assimilator level\",\"level\":1,\"name\":\"Hit Die\"},{\"description\":\"(Default: CON and DEX- Change in save file) Your saving throw proficiencies depend on your chosen Inclination: Constitution (All), Strength (Terra), Dexterity (Aqua), Charisma (Ignis) and Wisdom (Ventus)\",\"level\":1,\"name\":\"Saving Throw Proficiencies\"},{\"description\":\"Each Subclass offers an additional proficiency added to this list of options: Athletics (Terra), Medicine (Aqua), Intimidation (Ignis) and Stealth (Ventus)\",\"level\":1,\"name\":\"Skill Proficiencies\"},{\"description\":\"Whenever you make an Unarmed Attack while wearing no armour/wielding no shield and that you are within the appropriate range (detailed in Subclasses) of your designated adaptation, you can enhance your unarmed strikes with the characteristics of your chosen adaptation. The range starts at 5 feet and increases by another 5 feet at levels 5, 9, 13 and 17.\",\"level\":1,\"name\":\"Brutal Connection\"},{\"description\":\"At 2nd level, you start to become more accustomed to using your adaptation freely. Using your adaptation, you increase your speed by 10ft. This increases by 5 feet at levels 6, 10, 14 and 18.\",\"level\":2,\"name\":\"Creative Propulsion I\"},{\"description\":\"At 9th level, you further this creativity and connection to your adaptation. You can now hover.\",\"level\":9,\"name\":\"Creative Propulsion II\"},{\"description\":\"At 15th level, you truly are starting to assimilate to your chosen adaptation. You gain a flying speed equal to your walking speed.\",\"level\":15,\"name\":\"Creative Propulsion III\"},{\"description\":\"When you reach 4th level, and again at 8th, 12th and 16th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal you can't increase an ability score above 20 using this feature, unless you are above level 20. You can also use this to gain a feat instead.\",\"level\":4,\"name\":\"Ability Score Improvement\"},{\"description\":\"Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn.\",\"level\":5,\"name\":\"Extra Attack\"},{\"description\":\"By 6th level the unification of your body, spirit and the world around you becomes channeled into your strikes and power. The damage type you deal with your Brutal Connection feature is considered Magical and resistance to this type can be ignored.\",\"level\":6,\"name\":\"Immutable Force\"},{\"description\":\"At 10th level, your insight into your adaptation has increased greatly since the start of your journey. The way you perceive the world is influenced greatly by the element you are assimilating with. You may choose two skill proficiencies. Your proficiency bonus is doubled for any ability check that uses either of the chosen proficiencies.\",\"level\":10,\"name\":\"Understanding of the World\"},{\"description\":\"At 13th level, you are beginning to become one with your adaptation. You now no longer need a source of your assimilation to use it, as it is now coming from yourself. Additionally, as you are more a part of nature than creature, thus you are more resistant to regular ways of injury. You gain resistance to Bludgeoning, Piercing and Slashing damage.\",\"level\":13,\"name\":\"Everchanging Physiology\"},{\"description\":\"At 20th level, you have done it. You have completely assimilated with your adaptation. You are it; it is you. You gain Resistance to  Magical Bludgeoning, Piercing and Slashing damage and Immunity to Non-Magical Bludgeoning, Piercing and Slashing damage.\",\"level\":20,\"name\":\"As One\"}],\"hit_dice\":\"D8\",\"homebrew\":true,\"id\":\"assimilator\",\"name\":\"Assimilator\",\"saving_throws\":[\"Dexterity\",\"Constitution\"],\"skill_proficiencies\":\"Choose 2 from  Acrobatics, History, Insight, Nature, Perception, Survival\",\"source\":\"Nebulan\",\"starting_equipment\":\"A robe of colour and style attributed to the chosen Inclination; Choose A or B (A) a dungeoneer's pack or (B) an explorer's pack\",\"weapon_proficiencies\":\"None\"}}",
+    "bg_data": "{\"key\":\"srd-2024_criminal\",\"benefits\":[{\"name\":\"Ability Scores\",\"desc\":\"Dexterity, Constitution, Intelligence\",\"type\":\"ability_score\"},{\"name\":\"Equipment\",\"desc\":\"*Choose A or B:* (A) 2 Daggers, Thieves' Tools, Crowbar, 2 Pouches, Traveler's Clothes, 16 GP; or (B) 50 GP\",\"type\":\"equipment\"},{\"name\":\"Feat\",\"desc\":\"Alert\",\"type\":\"feat\"},{\"name\":\"Skill Proficiencies\",\"desc\":\"Sleight of Hand and Stealth\",\"type\":\"skill_proficiency\"},{\"name\":\"Tool Proficiency\",\"desc\":\"Thieves' Tools\",\"type\":\"tool_proficiency\"}],\"document\":{\"name\":\"System Reference Document 5.2\",\"key\":\"srd-2024\",\"type\":\"SOURCE\",\"display_name\":\"5e 2024 Rules\",\"publisher\":{\"name\":\"Wizards of the Coast\",\"key\":\"wizards-of-the-coast\"},\"gamesystem\":{\"name\":\"5th Edition 2024\",\"key\":\"5e-2024\"},\"permalink\":\"https://dnd.wizards.com/resources/systems-reference-document\"},\"name\":\"Criminal\",\"desc\":\"\"}",
+    "subclass_data": "{\"key\":\"ignis_adaptation\",\"name\":\"Ignis Adaptation\",\"subclass_of\":{\"key\":\"assimilator\",\"name\":\"assimilator\"},\"document\":{\"display_name\":\"nebulan\",\"key\":\"homebrew\",\"gamesystem\":{\"key\":\"homebrew\"}},\"_homebrew\":true,\"_hbData\":{\"description\":\"Your kind and caring nature hides a well of anger waiting to explode that resonates with the warmth of a small flame that can become a raging fire with a little prompting. You begin to connect with fire and understand its properties and nature allowing you to manipulate it as you please. Eventually becoming the assimilation itself.\",\"features\":{\"1\":[{\"description\":\"Dancing with flames is an arduous task, whether it be through brute force you tame its rage, or guide it elegantly until it presents with calm. To control this element the confidence to face the sun or quell the flames beneath the surface are required. Your Ignis save DC is either 8 + your Charisma Modifier + your Proficiency bonus.\",\"id\":\"flaming_famenco\",\"name\":\"Flaming Famenco\"},{\"description\":\"At 1st level you gain the ability to manipulate the fire to some extent. Abilities gained at 1st and 6th level may be used a total of times per short rest equal to double your Proficiency Bonus. As an Action you may target and manipulate a flame to a size of up to 10 x 10ft within 30ft of you and subsequently move or manipulate it in one of the following ways: -Sear: Fire can be a sanctuary to some but pain to others. You can throw flames at the hands of a creature. They must make a Dexterity saving throw to evade this flame, else it burns their hands and they drop whatever they are holding and take 1d4 fire damage. -Kindling: You can create a constant heat that exudes from your palms, it provides light in the dark, heat in the cold and a hob to cook some bacon upon. You can maintain this heat for 1 hour. -Ribbons: You can dance with the flames, as you move they flow with elegance around you. When you use this feature you gain advantage on your next Charisma ability check of any type, provided you incorporate the existence of the ribbons into your check.\",\"id\":\"dance_of_embers1\",\"name\":\"Dance of Embers I\"}],\"2\":[{\"description\":\"At 2nd level, as an additional, One with Fire exclusive part of this feature. Your connection with that which produces heat, you can walk upon lava, gaining swimming speed equal to walking speed in it as well.\",\"id\":\"creative_propulsion1b\",\"name\":\"Creative Propulsion Ib\"}],\"3\":[{\"description\":\"At 3rd level, you acquaint yourself with the sheer heat and realise the hallucinations that it can cause. As a Bonus Action, you can increase the heat radiating from you, creating mirages of yourself. You can now cast the spell Mirror Image as a Bonus Action a number of times per long rest equal to half of your Proficiency Bonus (Rounded Down).\",\"id\":\"mirage\",\"name\":\"Mirage\"}],\"6\":[{\"description\":\"At 6th level the amount of fire you can manipulate becomes 20 x 20ft and the range extends to 60ft. Choose one of the following features: -Entrance: You move the flames around you with such elegance and ferocity it entrances your foes filling them with fear of one that could wield such pure destruction so beautifully. Any creature that sees the flame within range must make a Wisdom or Constitution saving throw (your choice but universal to all targets). On a fail they become Frightened until the end of their next turn (Wisdom) or Blinded for up to a minute, remaking the save at the start of their turns (Constitution).  -Engulf: You are able to tap into the destructive properties of fire. When you use this feature you effectively cast the spell Fireball with the difference being the range and size scales with Dance of Embers.\",\"id\":\"dance_of_embers2\",\"name\":\"Dance of Embers II\"}],\"7\":[{\"description\":\"At 7th level, your connection with the flames is becoming stronger and its reverence is seeping out from you. You gain a bonus to all Charisma ability checks equal to your current Charisma Modifier.\",\"id\":\"artistes_majesty\",\"name\":\"The Artistes Majesty\"}],\"9\":[{\"description\":\"At 9th level the amount of fire you can manipulate becomes 30 x 30ft and the range extends to 90ft. Additionally, your 1st level options from this feature now cost only a bonus action. The following feature may be used a number of times per Long Rest equal to your Charisma modifier. -Lahar: You slam your palms upon the ground and imbue an area within range with overwhelming heat creating a pool of magma. Creatures within the area must make a Dexterity saving throw or else fall in this molten puddle taking 5d6 fire damage and becoming restrained as the rocks within the puddle weigh them down. This area is considered difficult terrain. At the start of a creature's turn they may make a Strength saving throw to break free from being restrained. If a creature ends their turn within Lahar they take another 3d6 fire damage. You are considered Concentrating while using this feature. Lahar lasts for 1 minute.\",\"id\":\"dance_of_embers3\",\"name\":\"Dance of Embers III\"}],\"14\":[{\"description\":\"At 14th level select one of your 1st level options. This feature no longer costs a use from this abilities pool. Furthermore you gain the following Reaction which you may use a number of times per Long Rest equal to half your Proficiency bonus (rounded down). -Cacophony: When a creature within range makes an ability check, saving throw or attack roll, you may use a Reaction after seeing their total to summon the Cacophony. You encircle the target with flaming figures of you laughing and cackling at the creature, they must roll again and if the total would be lower it replaces their prior roll.\",\"id\":\"dance_of_embers4\",\"name\":\"Dance of Embers IV\"}],\"15\":[{\"description\":\"At 15th level, you realise that lightning carries the beauty of flames and are now able to channel it in varying ways. Using this ability you gain 1 of the following features: -Bolt: You understand the swiftness of lightning striking and are able to use it to your will. You can as a bonus action teleport in a flash of light to a place you can see within 90ft of you. -Channel: You imbue your nerves with lightning, allowing them to function at greater speeds. You gain an additional Extra Attack. -Static: You are able to transmute the form of flames and unleash their true potential. Whenever you deal Fire damage, add an additional d6 of Lightning damage to the roll.\",\"id\":\"beauty_of_lightning\",\"name\":\"The Beauty of Lightning\"}],\"18\":[{\"description\":\"From 18th level you may use the Entrance feature as a Bonus Action and should select another of the 1st level options to no longer cost a use.\",\"id\":\"dance_of_embers5\",\"name\":\"Dance of Embers V\"},{\"description\":\"At 18th level, your assimilation is nigh, and you are practically Fire itself. You may choose an additional feature from The Beauty of Lightning.\",\"id\":\"true_connection\",\"name\":\"True Connection\"}]},\"homebrew\":true,\"id\":\"ignis_adaptation\",\"name\":\"Ignis Adaptation\",\"parent_class_id\":\"assimilator\",\"source\":\"nebulan\"}}"
+  }
+}

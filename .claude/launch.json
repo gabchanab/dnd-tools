@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "encounter-builder",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3456", "--directory", "encounter builder"],
+      "port": 3456
+    },
+    {
+      "name": "spellbook",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3457", "--directory", "character builder/dnd_spellbook"],
+      "port": 3457
+    }
+  ]
+}

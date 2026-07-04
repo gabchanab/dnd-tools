@@ -1,0 +1,381 @@
+{
+  "char_name": "benson",
+  "player_name": "gab",
+  "alignment": "True Neutral",
+  "species_name": "Dragonborn",
+  "class_name": "Ranger",
+  "subclass_name": "Haunted Warden",
+  "subclass_homebrew": false,
+  "background_name": "Solgate Scholar",
+  "level": 11,
+  "proficiency_bonus": 4,
+  "passive_perception": 11,
+  "hp_max": 70,
+  "hp_current": 70,
+  "hp_temp": 0,
+  "hp_pct": 100,
+  "hit_dice_display": "11d10",
+  "armor_class": 12,
+  "speed": 30,
+  "initiative": "+2",
+  "inspiration": true,
+  "spell_mod": "+1",
+  "spell_attack": "+5",
+  "spell_save_dc": 13,
+  "spell_ability": "WIS",
+  "abilities": [
+    {
+      "key": "strength",
+      "label": "STR",
+      "score": 10,
+      "modifier": 0,
+      "save": 4,
+      "save_prof": true
+    },
+    {
+      "key": "dexterity",
+      "label": "DEX",
+      "score": 14,
+      "modifier": 2,
+      "save": 6,
+      "save_prof": true
+    },
+    {
+      "key": "constitution",
+      "label": "CON",
+      "score": 10,
+      "modifier": 0,
+      "save": 0,
+      "save_prof": false
+    },
+    {
+      "key": "intelligence",
+      "label": "INT",
+      "score": 14,
+      "modifier": 2,
+      "save": 2,
+      "save_prof": false
+    },
+    {
+      "key": "wisdom",
+      "label": "WIS",
+      "score": 12,
+      "modifier": 1,
+      "save": 1,
+      "save_prof": false
+    },
+    {
+      "key": "charisma",
+      "label": "CHA",
+      "score": 9,
+      "modifier": -1,
+      "save": -1,
+      "save_prof": false
+    }
+  ],
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "DEX",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Arcana",
+      "ability": "INT",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Athletics",
+      "ability": "STR",
+      "base_mod": 0,
+      "bonus": 4,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Deception",
+      "ability": "CHA",
+      "base_mod": -1,
+      "bonus": -1,
+      "proficiency": "none"
+    },
+    {
+      "name": "History",
+      "ability": "INT",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Insight",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Intimidation",
+      "ability": "CHA",
+      "base_mod": -1,
+      "bonus": 3,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Investigation",
+      "ability": "INT",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Medicine",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Nature",
+      "ability": "INT",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Perception",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Performance",
+      "ability": "CHA",
+      "base_mod": -1,
+      "bonus": 3,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Persuasion",
+      "ability": "CHA",
+      "base_mod": -1,
+      "bonus": -1,
+      "proficiency": "none"
+    },
+    {
+      "name": "Religion",
+      "ability": "INT",
+      "base_mod": 2,
+      "bonus": 6,
+      "proficiency": "proficient"
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "DEX",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Stealth",
+      "ability": "DEX",
+      "base_mod": 2,
+      "bonus": 2,
+      "proficiency": "none"
+    },
+    {
+      "name": "Survival",
+      "ability": "WIS",
+      "base_mod": 1,
+      "bonus": 1,
+      "proficiency": "none"
+    }
+  ],
+  "spell_slots": [
+    {
+      "level": 1,
+      "max": 4,
+      "used": 0,
+      "available": 4
+    },
+    {
+      "level": 2,
+      "max": 3,
+      "used": 0,
+      "available": 3
+    },
+    {
+      "level": 3,
+      "max": 3,
+      "used": 0,
+      "available": 3
+    }
+  ],
+  "traits": [
+    {
+      "name": "Size",
+      "desc": "Medium (about 5–7 feet tall)"
+    },
+    {
+      "name": "Speed",
+      "desc": "30 feet"
+    },
+    {
+      "name": "Draconic Ancestry",
+      "desc": "Your lineage stems from a dragon progenitor. Choose the kind of dragon from the Draconic Ancestors table. Your choice affects your Breath Weapon and Damage Resistance traits as well as your appearance.\n\nTable: Draconic Ancestors\n\n| Dragon | Damage Type |\n|---|---|\n| Black | Acid |\n| Blue | Lightning |\n| Brass |Fire |\n| Bronze | Lightning |\n| Copper | Acid|\n|Gold|Fire|\n|Green|Poison|\n|Red|Fire|\n|Silver|Cold|\n|White|Cold|"
+    },
+    {
+      "name": "Breath Weapon",
+      "desc": "When you take the Attack action on your turn, you can replace one of your attacks with an exhalation of magical energy in either a 15-foot Cone or a 30-foot Line that is 5 feet wide (choose the shape each time). Each creature in that area must make a Dexterity saving throw (DC 8 plus your Constitution modifier and Proficiency Bonus). On a failed save, a creature takes 1d10 damage of the type determined by your Draconic Ancestry trait. On a successful save, a creature takes half as much damage. This damage increases by 1d10 when you reach character levels 5 (2d10), 11 (3d10), and 17 (4d10).\n\nYou can use this Breath Weapon a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest."
+    },
+    {
+      "name": "Damage Resistance",
+      "desc": "You have Resistance to the damage type determined by your Draconic Ancestry trait."
+    },
+    {
+      "name": "Darkvision",
+      "desc": "You have Darkvision with a range of 60 feet"
+    },
+    {
+      "name": "Draconic Flight",
+      "desc": "When you reach character level 5, you can channel draconic magic to give yourself temporary flight. As a Bonus Action, you sprout spectral wings on your back that last for 10 minutes or until you retract the wings (no action required) or have the Incapacitated condition. During that time, you have a Fly Speed equal to your Speed. Your wings appear to be made of the same energy as your Breath Weapon. Once you use this trait, you can't use it again until you finish a Long Rest."
+    }
+  ],
+  "class_features": [
+    {
+      "name": "Ability Score Improvement",
+      "desc": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Ranger levels 8, 12, and 16."
+    },
+    {
+      "name": "Deft Explorer",
+      "desc": "Thanks to your travels, you gain the following benefits.\n\n**Expertise.** Choose one of your skill proficiencies with which you lack Expertise. You gain Expertise in that skill.\n\n**Languages.** You know two languages of your choice from the language tables in \"Character Creation.\""
+    },
+    {
+      "name": "Expertise",
+      "desc": "Choose two of your skill proficiencies with which you lack Expertise. You gain Expertise in those skills."
+    },
+    {
+      "name": "Extra Attack",
+      "desc": "You can attack twice instead of once whenever you take the Attack action on your turn."
+    },
+    {
+      "name": "Favored Enemy",
+      "desc": "You always have the *Hunter's Mark* spell prepared. You can cast it twice without expending a spell slot, and you regain all expended uses of this ability when you finish a Long Rest.\n\nThe number of times you can cast the spell without a spell slot increases when you reach certain Ranger levels, as shown in the Favored Enemy column of the Ranger Features table."
+    },
+    {
+      "name": "Fighting Style",
+      "desc": "You gain a Fighting Style feat of your choice (see \"Feats\"). Instead of choosing one of those feats, you can choose the option below.\n\n**Druidic Warrior.** You learn two Druid cantrips of your choice (see the Druid class's section for a list of Druid spells). *Guidance* and *Starry Wisp* are recommended. The chosen cantrips count as Ranger spells for you, and Wisdom is your spellcasting ability for them. Whenever you gain a Ranger level, you can replace one of these cantrips with another Druid cantrip."
+    },
+    {
+      "name": "Ranger Subclass",
+      "desc": "You gain a Ranger subclass of your choice. The Hunter subclass is detailed after this class's description. A subclass is a specialization that grants you features at certain Ranger levels. For the rest of your career, you gain each of your subclass's features that are of your Ranger level or lower."
+    },
+    {
+      "name": "Roving",
+      "desc": "Your Speed increases by 10 feet while you aren't wearing Heavy armor. You also have a Climb Speed and a Swim Speed equal to your Speed."
+    },
+    {
+      "name": "Tireless",
+      "desc": "Primal forces now help fuel you on your journeys, granting you the following benefits.\n\n**Temporary Hit Points.** As a Magic action, you can give yourself a number of Temporary Hit Points equal to 1d8 plus your Wisdom modifier (minimum of 1). You can use this action a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.\n\n**Decrease Exhaustion.** Whenever you finish a Short Rest, your Exhaustion level, if any, decreases by 1."
+    },
+    {
+      "name": "Weapon Mastery",
+      "desc": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Longbows and Shortswords.\n\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Scimitars and Longswords."
+    }
+  ],
+  "subclass_features": [
+    {
+      "name": "Beyond the Pale",
+      "desc": "Starting when you choose this archetype at 3rd level, you can use a bonus action to see into the Ethereal Plane for 1 minute. Ethereal creatures and objects appear ghostly and translucent.\n  You can use this feature a number of times equal to your proficiency bonus. You regain all expended uses when you finish a long rest."
+    },
+    {
+      "name": "Guardian Geist",
+      "desc": "At 11th level, when you take damage that would reduce you to 0 hit points, you can use your reaction to call out to your spirit usher. If you do, your spirit usher teleports to an unoccupied space within 5 feet of you and takes half the damage dealt to you, potentially preventing your death.\n  In addition, when your spirit usher dies, you have advantage on attack rolls until the end of your next turn."
+    },
+    {
+      "name": "Merge Spirit",
+      "desc": "Starting at 7th level, you can use an action to cause your spirit usher to join its essence with you for 1 minute. While merged, you gain the spirit usher's Ethereal Sight trait and can interact with creatures and objects on both the Ethereal and Material Planes. In addition, while you are merged, you become less substantial and gain the spirit usher's damage resistances and damage immunities.\n  Once you use this feature, you shouldn't use it again until you finish a short or long rest. Each time you use it again, you suffer one level of exhaustion."
+    },
+    {
+      "name": "Spirit Usher",
+      "desc": "At 3rd level, you gain an undead spirit that anchors itself to you and accompanies you on your journeys. The spirit is friendly to you and your companions and obeys your commands. See the spirit's game statistics in the Spirit Usher stat block, which uses your proficiency bonus (PB) in several places.\n\nYou determine the spirit's appearance, name, and personality. You should choose a personality trait, ideal, bond, and flaw for it, and you should work with your GM to decide on a background story for the spirit that fits the campaign.\n  In combat, the spirit shares your initiative count, but it takes its turn immediately after yours. It can move and use its reaction on its own, but, if you don't issue any commands to it, the only action it takes is the Dodge action. You can use your bonus action to direct it to take the Attack, Dash, Disengage, Help, Hide, or Search action or an action listed in its statistics. If you are incapacitated, the spirit can take any action of its choice, not just Dodge.\n  When it joins with you, the spirit learns three cantrips it can cast at will, which you select from the following lists. At the end of a long rest, you can change which cantrips the spirit knows. \n* Choose one of *chill touch*, *ray of frost*, *sacred flame*, or *vicious mockery*. Use your level when determining the damage of the chosen cantrip. \n* Choose one of *druidcraft*, *prestidigitation*, or *thaumaturgy*. \n* Choose one of *dancing lights*, *message*, or *minor illusion*.\nThe spirit is bonded to you. It can't be turned or destroyed, such as with the cleric's Turn Undead feature. When the spirit usher dies, it retreats to the Ethereal Plane to restore itself and returns to an unoccupied space within 5 feet of you when you finish a long rest. If the spirit usher died within the last hour, you can use your action to expend a spell slot of 1st level or higher to return it to life after 1 minute with all its hit points restored."
+    }
+  ],
+  "resources": [],
+  "prepared_spells": [
+    {
+      "name": "Animal Friendship",
+      "level": 1,
+      "index": "srd-2024_animal-friendship"
+    },
+    {
+      "name": "Detect Magic",
+      "level": 1,
+      "index": "srd-2024_detect-magic"
+    },
+    {
+      "name": "Ensnaring Strike",
+      "level": 1,
+      "index": "srd-2024_ensnaring-strike"
+    },
+    {
+      "name": "Jump",
+      "level": 1,
+      "index": "srd-2024_jump"
+    },
+    {
+      "name": "Barkskin",
+      "level": 2,
+      "index": "srd-2024_barkskin"
+    },
+    {
+      "name": "Enhance Ability",
+      "level": 2,
+      "index": "srd-2024_enhance-ability"
+    },
+    {
+      "name": "Silence",
+      "level": 2,
+      "index": "srd-2024_silence"
+    },
+    {
+      "name": "Daylight",
+      "level": 3,
+      "index": "srd-2024_daylight"
+    },
+    {
+      "name": "Nondetection",
+      "level": 3,
+      "index": "srd-2024_nondetection"
+    },
+    {
+      "name": "Water Breathing",
+      "level": 3,
+      "index": "srd-2024_water-breathing"
+    }
+  ],
+  "cantrips": [],
+  "notes": "he likes bacon",
+  "backstory": "born from the ashes of ...",
+  "gold": 50.0,
+  "class_equipment": "Choose A or B: (A) Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Ar rows, Quiver, Druidic Focus (sprig of mistletoe), Explorer's Pack, and 7 GP; or (B) 150 GP",
+  "bg_equipment": "Scholar's pack, a set of Solgate cards, and 25 gp.",
+  "armor_proficiencies": "Light and Medium armor and Shields",
+  "weapon_proficiencies": "Simple and Martial weapons",
+  "bg_tool_proficiency": "Playing Card Set.",
+  "bg_languages": "One of your choice.",
+  "bg_trait_name": "Reading the Solgate",
+  "bg_trait_desc": "You are an invested scholar of the Solgate, the mystic deck of cards used by the Solgate Seers to predict the future and divine the will of the gods. During a short rest you may draw a card and ask the DM for a vague omen about the immediate future.",
+  "bg_ofeat_name": "Origin Feat",
+  "bg_ofeat_desc": "Lucky."
+}

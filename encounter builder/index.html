@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D&D 5e Encounter Builder</title>
+<link rel="stylesheet" href="styles.css?v=3">
+<script src="data/habitats.js"></script>
+<script src="data/party_members.js"></script>
+</head>
+<body>
+
+<h1>⚔ Encounter Builder</h1>
+<p class="subtitle">D&D 5e · Challenge Rating System</p>
+
+<div class="layout">
+  <!-- LEFT PANEL -->
+  <div>
+    <div class="card">
+      <div class="card-title">Party Setup</div>
+      <div id="party-list"></div>
+      <button class="add-member-btn" onclick="addPartyMember()">+ Add Party Member Manually</button>
+      <div class="import-characters">
+        <div class="import-label">Import from Characters</div>
+        <div id="character-roster"></div>
+      </div>
+      <div class="party-summary">
+        <div>Members: <span id="party-size">0</span></div>
+        <div>Total Level: <span id="total-level">0</span></div>
+      </div>
+      <button class="add-party-btn" onclick="addPartyToEncounter()">⚔ Add Party to Encounter</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Difficulty</div>
+      <div class="difficulty-grid">
+        <button class="diff-btn" data-diff="trivial"  onclick="setDifficulty('trivial')">Trivial<br><small>×⅓</small></button>
+        <button class="diff-btn" data-diff="easy"     onclick="setDifficulty('easy')">Easy<br><small>×½</small></button>
+        <button class="diff-btn active" data-diff="moderate" onclick="setDifficulty('moderate')">Moderate<br><small>×1</small></button>
+        <button class="diff-btn" data-diff="hard"     onclick="setDifficulty('hard')">Hard<br><small>×1.5</small></button>
+        <button class="diff-btn" data-diff="deadly"   onclick="setDifficulty('deadly')">Deadly<br><small>×2</small></button>
+      </div>
+      <div class="threshold-display">
+        <div class="threshold-value" id="threshold-val">0</div>
+        <div class="threshold-label">CR Threshold</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div>
+    <div class="card">
+      <div class="card-title">Encounter Progress</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-stats">
+        <div><span class="current" id="total-cr-display">0</span> CR used</div>
+        <div id="remaining-display">0 CR remaining</div>
+        <div>/ <span id="threshold-display2">0</span> CR</div>
+      </div>
+      <div id="assessment-wrap"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Add Monster</div>
+
+      <!-- Filters -->
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label class="filter-label">Name</label>
+          <input class="filter-input" id="f-name" type="text" placeholder="e.g. Dragon, Goblin…"
+            onkeydown="if(event.key==='Enter') runSearch()">
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Type</label>
+          <select class="filter-select" id="f-type">
+            <option value="">All</option>
+            <option>Aberration</option><option>Beast</option><option>Celestial</option>
+            <option>Construct</option><option>Dragon</option><option>Elemental</option>
+            <option>Fey</option><option>Fiend</option><option>Giant</option>
+            <option>Humanoid</option><option>Monstrosity</option><option>Ooze</option>
+            <option>Plant</option><option>Undead</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Habitat</label>
+          <select class="filter-select" id="f-habitat">
+            <option value="">All</option>
+            <option value="any">Any</option>
+            <option value="arctic">Arctic</option><option value="coastal">Coastal</option><option value="desert">Desert</option>
+            <option value="forest">Forest</option><option value="grassland">Grassland</option><option value="hill">Hill</option>
+            <option value="mountain">Mountain</option><option value="planar">Planar</option><option value="swamp">Swamp</option>
+            <option value="underdark">Underdark</option><option value="underwater">Underwater</option><option value="urban">Urban</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">CR Min</label>
+          <select class="filter-select" id="f-cr-min">
+            <option value="">All</option>
+            <option value="0">0</option><option value="0.125">1/8</option>
+            <option value="0.25">1/4</option><option value="0.5">1/2</option>
+            <option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option>
+            <option value="7">7</option><option value="8">8</option>
+            <option value="9">9</option><option value="10">10</option>
+            <option value="11">11</option><option value="12">12</option>
+            <option value="13">13</option><option value="14">14</option>
+            <option value="15">15</option><option value="16">16</option>
+            <option value="17">17</option><option value="19">19</option>
+            <option value="20">20</option><option value="21">21</option>
+            <option value="22">22</option><option value="23">23</option>
+            <option value="24">24</option><option value="30">30</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">CR Max</label>
+          <select class="filter-select" id="f-cr-max">
+            <option value="">All</option>
+            <option value="0">0</option><option value="0.125">1/8</option>
+            <option value="0.25">1/4</option><option value="0.5">1/2</option>
+            <option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option>
+            <option value="7">7</option><option value="8">8</option>
+            <option value="9">9</option><option value="10">10</option>
+            <option value="11">11</option><option value="12">12</option>
+            <option value="13">13</option><option value="14">14</option>
+            <option value="15">15</option><option value="16">16</option>
+            <option value="17">17</option><option value="19">19</option>
+            <option value="20">20</option><option value="21">21</option>
+            <option value="22">22</option><option value="23">23</option>
+            <option value="24">24</option><option value="30">30</option>
+          </select>
+        </div>
+      </div>
+      <button class="search-btn" onclick="runSearch()">Search Monsters</button>
+
+      <!-- Custom monster form -->
+      <div class="custom-monster-toggle" onclick="toggleCustomForm()">
+        <span id="custom-toggle-icon">▸</span> Add Custom Monster
+      </div>
+      <div id="custom-monster-form" style="display:none">
+        <div class="custom-form-grid">
+          <div class="filter-group custom-span-2">
+            <label class="filter-label">Name</label>
+            <input class="filter-input" id="cm-name" type="text" placeholder="e.g. Ancient Beholder">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">CR</label>
+            <input class="filter-input" id="cm-cr" type="number" placeholder="e.g. 13" min="0" step="0.125">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">HP</label>
+            <input class="filter-input" id="cm-hp" type="number" placeholder="e.g. 180" min="1">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">AC</label>
+            <input class="filter-input" id="cm-ac" type="number" placeholder="e.g. 18" min="1">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Init Bonus</label>
+            <input class="filter-input" id="cm-init" type="number" placeholder="e.g. +2" step="1">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Type</label>
+            <select class="filter-select" id="cm-type">
+              <option value="">Unknown</option>
+              <option>Aberration</option><option>Beast</option><option>Celestial</option>
+              <option>Construct</option><option>Dragon</option><option>Elemental</option>
+              <option>Fey</option><option>Fiend</option><option>Giant</option>
+              <option>Humanoid</option><option>Monstrosity</option><option>Ooze</option>
+              <option>Plant</option><option>Undead</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Size</label>
+            <select class="filter-select" id="cm-size">
+              <option value="">Unknown</option>
+              <option>Tiny</option><option>Small</option><option>Medium</option>
+              <option>Large</option><option>Huge</option><option>Gargantuan</option>
+            </select>
+          </div>
+        </div>
+        <button class="custom-add-btn" onclick="addCustomMonster()">+ Add to Encounter</button>
+        <div id="custom-error" class="custom-error" style="display:none"></div>
+      </div>
+
+      <!-- Results list -->
+      <div id="search-results"></div>
+
+      <!-- Detail card -->
+      <div id="monster-detail"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Monsters in Encounter</div>
+      <div id="monster-list"><div class="empty-state">No monsters added yet</div></div>
+      <div class="action-bar">
+        <button class="btn-clear" onclick="clearEncounter()">Clear All</button>
+        <button class="btn-export" onclick="exportEncounter()">Export</button>
+        <button class="btn-combat" onclick="startCombat()">⚔ Start Combat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Creature type icons & colours ───────────────────────────────────────────
+const creatureTypeIcons = {
+  aberration:  `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 7 19 7 22 12 C19 17 5 17 2 12 Z"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><path d="M7 7 Q5 4 7 2"/><path d="M17 7 Q19 4 17 2"/><path d="M4 10 Q2 8 3 6"/><path d="M20 10 Q22 8 21 6"/></svg>`,
+  beast:       `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 L7 14"/><path d="M12 2 L11.5 15"/><path d="M16 3 L17 14"/><path d="M7 14 Q12 20 17 14"/></svg>`,
+  celestial:   `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 14.5,9 22,9 16,13.5 18.5,21 12,17 5.5,21 8,13.5 2,9 9.5,9"/></svg>`,
+  construct:   `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><path d="M12 2 L12 7 M12 17 L12 22 M2 12 L7 12 M17 12 L22 12 M5.6 5.6 L9 9 M15 15 L18.4 18.4 M18.4 5.6 L15 9 M9 15 L5.6 18.4"/></svg>`,
+  dragon:      `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12 L3 4 Q1 2 3 6 L7 11"/><path d="M12 12 L21 4 Q23 2 21 6 L17 11"/><path d="M7 11 L9 20 L12 16 L15 20 L17 11"/></svg>`,
+  elemental:   `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22 C7 22 4 18 4 14 C4 9 8 7 8 3 C10 7 10 10 12 10 C11 7 13 4 14 2 C17 6 20 10 20 14 C20 18 17 22 12 22 Z"/></svg>`,
+  fey:         `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9 Q7 3 3 7 Q2 11 6 13 Q9 15 12 12"/><path d="M12 9 Q17 3 21 7 Q22 11 18 13 Q15 15 12 12"/><path d="M12 12 Q10 17 11 20 Q12 22 12 22"/><path d="M12 12 Q14 17 13 20 Q12 22 12 22"/></svg>`,
+  fiend:       `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20 Q5 13 7 7 Q8 3 11 5 Q10 9 11 12"/><path d="M17 20 Q19 13 17 7 Q16 3 13 5 Q14 9 13 12"/><path d="M11 12 Q12 15 13 12"/></svg>`,
+  giant:       `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20 L8 7 L12 13 L16 5 L22 20 Z"/></svg>`,
+  humanoid:    `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="3"/><path d="M9 10 L7 20 M15 10 L17 20 M9 10 L15 10 M8 15 L16 15"/></svg>`,
+  monstrosity: `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 Q12 4 20 9 L19 15 Q16 21 12 21 Q8 21 5 15 Z"/><circle cx="9" cy="11" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="11" r="1.5" fill="currentColor" stroke="none"/><path d="M8 16 L9 14 L11 16 L12 13 L13 16 L15 14 L16 16"/></svg>`,
+  ooze:        `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 Q14 1 18 4 Q22 6 22 11 Q23 17 19 20 Q16 23 12 22 Q8 23 5 20 Q1 17 2 11 Q2 5 8 3 Z"/><path d="M10 22 Q9 24 10 25"/><path d="M15 21 Q16 23 15 25"/></svg>`,
+  plant:       `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21 Q7 18 6 12 Q5 7 9 5 Q13 3 16 6 Q19 9 18 14 Q16 19 12 21 Z"/><path d="M12 21 L12 8"/><path d="M12 17 Q15 15 17 12"/><path d="M12 13 Q14 12 15 9"/></svg>`,
+  undead:      `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16 Q4 13 4 10 Q4 4 12 4 Q20 4 20 10 Q20 13 18 16 L18 19 L6 19 Z"/><path d="M8 19 L8 21 M12 19 L12 22 M16 19 L16 21"/><circle cx="9" cy="10" r="2" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="2" fill="currentColor" stroke="none"/></svg>`,
+};
+
+const creatureTypeColors = {
+  aberration:  '#9b59b6',
+  beast:       '#6aaa3a',
+  celestial:   '#f0c040',
+  construct:   '#7f8c8d',
+  dragon:      '#e74c3c',
+  elemental:   '#e67e22',
+  fey:         '#1abc9c',
+  fiend:       '#c0392b',
+  giant:       '#a0522d',
+  humanoid:    '#3498db',
+  monstrosity: '#8e6c3a',
+  ooze:        '#27ae60',
+  plant:       '#2ecc71',
+  undead:      '#7f9aaa',
+};
+// Cache of full monster data keyed by monster key — populated when a card is viewed
+const monsterCache = {};
+
+const habitatTypeColors = {
+  any: '#476a7d',
+  arctic: '#b2d6d9',
+  coastal: '#2980b9',
+  desert: '#d3af37',
+  forest: '#197841',
+  grassland: '#24d670',
+  hill: '#a0522d',
+  mountain: '#857e4a',
+  planar: '#fa8f14',
+  swamp: '#074a29',
+  underdark: '#64128c',
+  underwater: '#0900e9',
+  urban: '#7f8c8d',
+};
+
+// ─── Habitat data ─────────────────────────────────────────────────────────────
+// Loaded synchronously via <script src="data/habitats.js"> → window.HABITAT_DATA
+const habitatData = window.HABITAT_DATA || {};
+
+// ─── Character roster ─────────────────────────────────────────────────────────
+let savedCharacters = [];   // full character objects loaded from data/party_members.js
+
+function loadCharacterRoster() {
+  savedCharacters = window.SAVED_CHARACTERS || [];
+  if (!savedCharacters.length) {
+    document.getElementById('character-roster').innerHTML =
+      '<div class="roster-error">No characters found</div>';
+    return;
+  }
+  renderCharacterRoster();
+}
+
+function renderCharacterRoster() {
+  const el = document.getElementById('character-roster');
+  if (!savedCharacters.length) {
+    el.innerHTML = '<div class="roster-error">No characters found</div>';
+    return;
+  }
+  el.innerHTML = savedCharacters.map((c, i) => {
+    const alreadyAdded = state.party.some(p => p.name === c.char_name);
+    return `
+    <div class="roster-row ${alreadyAdded ? 'roster-added' : ''}" onclick="importCharacter(${i})">
+      <div class="roster-info">
+        <span class="roster-name">${c.char_name}</span>
+        <span class="roster-sub">Lvl ${c.level} ${c.class_name}</span>
+      </div>
+      <span class="roster-badge">${alreadyAdded ? '✓' : '+'}</span>
+    </div>`;
+  }).join('');
+}
+
+function importCharacter(i) {
+  const c = savedCharacters[i];
+  if (!c) return;
+  // Check if already in party
+  if (state.party.some(p => p.name === c.char_name)) return;
+  state.party.push({
+    id:        state.nextPartyId++,
+    name:      c.char_name,
+    level:     c.level,
+    // Store full char data for future use (initiative tracker etc.)
+    charData:  c,
+  });
+  render();
+  renderCharacterRoster();
+}
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let state = {
+  party: [
+    { id: 1, name: 'Fighter', level: 5 },
+    { id: 2, name: 'Cleric',  level: 5 },
+    { id: 3, name: 'Rogue',   level: 5 },
+  ],
+  difficulty: 'moderate',
+  monsters: [],
+  nextPartyId: 4,
+  nextMonsterId: 1,
+};
+
+const DIFFICULTY_MULTIPLIERS = {
+  trivial: 1/3, easy: 1/2, moderate: 1, hard: 1.5, deadly: 2,
+};
+
+// ─── Calculations ─────────────────────────────────────────────────────────────
+function totalPartyLevel() {
+  return state.party.reduce((s, m) => s + m.level, 0);
+}
+function crThreshold() {
+  return totalPartyLevel() / 2 * DIFFICULTY_MULTIPLIERS[state.difficulty];
+}
+function totalEncounterCR() {
+  return state.monsters.reduce((s, m) => s + m.cr * m.quantity, 0);
+}
+function formatCR(cr) {
+  if (cr === 0)    return '0';
+  if (cr < 0.2)   return '1/8';
+  if (cr < 0.3)   return '1/4';
+  if (cr < 0.6)   return '1/2';
+  return cr % 1 === 0 ? String(cr) : cr.toFixed(2);
+}
+function modStr(n) {
+  return n == null ? '' : (n >= 0 ? '+' : '') + n;
+}
+function assessDifficulty(used, threshold) {
+  if (threshold === 0) return { label: 'No Party',  note: 'Add party members',                        color: 'balanced' };
+  const r = used / threshold;
+  if (used === 0)  return { label: 'Empty',    note: 'No monsters added',                        color: 'trivial'  };
+  if (r <= 0.4)    return { label: 'Trivial',  note: `${Math.round(r*100)}% of budget`,          color: 'trivial'  };
+  if (r <= 0.75)   return { label: 'Easy',     note: `${Math.round(r*100)}% of budget`,          color: 'easy'     };
+  if (r <= 1.1)    return { label: 'Balanced', note: `${Math.round(r*100)}% of budget`,          color: 'balanced' };
+  if (r <= 1.5)    return { label: 'Hard',     note: `${Math.round(r*100)}% of budget — over!`,  color: 'hard'     };
+  return                   { label: 'Deadly',  note: `${Math.round(r*100)}% of budget — very over!`, color: 'deadly' };
+}
+function calcPB(cr) {
+  if (cr < 1)   return 2;
+  return Math.ceil(cr/4) + 1;
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  renderParty();
+  renderDifficulty();
+  renderProgress();
+  renderMonsterList();
+}
+
+function renderParty() {
+  document.getElementById('party-list').innerHTML = state.party.map(m => `
+    <div class="party-member">
+      <input type="text" value="${m.name}" placeholder="Name"
+        onchange="updateMemberName(${m.id}, this.value)">
+      <div class="level-control">
+        <button class="level-btn" onclick="changeLevel(${m.id}, -1)">−</button>
+        <div class="level-display">${m.level}</div>
+        <button class="level-btn" onclick="changeLevel(${m.id}, +1)">+</button>
+      </div>
+      <button class="remove-btn" onclick="removePartyMember(${m.id})">×</button>
+    </div>
+  `).join('');
+  document.getElementById('party-size').textContent  = state.party.length;
+  document.getElementById('total-level').textContent = totalPartyLevel();
+}
+
+function renderDifficulty() {
+  document.querySelectorAll('.diff-btn').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.diff === state.difficulty));
+  const t = crThreshold();
+  const fmt = t % 1 === 0 ? t : t.toFixed(1);
+  document.getElementById('threshold-val').textContent      = fmt;
+  document.getElementById('threshold-display2').textContent = fmt;
+}
+
+function renderProgress() {
+  const thresh = crThreshold();
+  const used   = totalEncounterCR();
+  const rem    = thresh - used;
+  const pct    = thresh > 0 ? Math.min(used / thresh * 100, 100) : 0;
+  const over   = used > thresh;
+
+  const fill = document.getElementById('progress-fill');
+  fill.style.width      = pct + '%';
+  fill.style.background = over ? 'var(--red)' : pct > 80 ? 'var(--yellow)' : 'var(--green)';
+
+  document.getElementById('total-cr-display').textContent  = used % 1 === 0 ? used : used.toFixed(2);
+  document.getElementById('remaining-display').textContent =
+    Math.abs(rem).toFixed(rem % 1 === 0 ? 0 : 2) + (rem < 0 ? ' CR over' : ' CR remaining');
+
+  const a = assessDifficulty(used, thresh);
+  document.getElementById('assessment-wrap').innerHTML = used === 0 ? '' : `
+    <div class="assessment-badge assessment-${a.color}">${a.label}</div>
+    <div class="assessment-note">${a.note}</div>
+  `;
+}
+
+function addPartyToEncounter() {
+  if (!state.party.length) return;
+  state.party.forEach(p => {
+    // Don't double-add
+    if (state.monsters.some(m => m.isPC && m.name === p.name)) return;
+    state.monsters.push({
+      id:       state.nextMonsterId++,
+      name:     p.name,
+      cr:       0,        // PCs don't count toward CR budget
+      quantity: 1,
+      isPC:     true,
+      level:    p.level,
+      charData: p.charData || null,
+    });
+  });
+  render();
+}
+
+function renderMonsterList() {
+  const el = document.getElementById('monster-list');
+  if (!state.monsters.length) {
+    el.innerHTML = '<div class="empty-state">No monsters added yet</div>';
+    return;
+  }
+  el.innerHTML = state.monsters.map(m => m.isPC ? `
+    <div class="monster-row monster-row-pc">
+      <div class="monster-name">${m.name}</div>
+      <div class="monster-cr pc-badge">Lvl ${m.level}</div>
+      <div class="pc-label">PC</div>
+      <button class="remove-btn" onclick="removeMonster(${m.id})">×</button>
+    </div>` : `
+    <div class="monster-row ${m.monsterData ? 'monster-row-clickable' : ''}" onclick="${m.monsterData ? `showEncounterMonsterCard(${m.id})` : ''}">
+      <div class="monster-name">${m.name}${m.monsterData ? ' <span class="row-peek">▸</span>' : ''}</div>
+      <div class="monster-cr">CR ${formatCR(m.cr)}</div>
+      <div class="qty-control">
+        <button class="qty-btn" onclick="event.stopPropagation(); changeQty(${m.id}, -1)">−</button>
+        <div class="qty-display">${m.quantity}</div>
+        <button class="qty-btn" onclick="event.stopPropagation(); changeQty(${m.id}, +1)">+</button>
+      </div>
+      <button class="remove-btn" onclick="event.stopPropagation(); removeMonster(${m.id})">×</button>
+    </div>
+  `).join('');
+}
+
+// ─── Party actions ────────────────────────────────────────────────────────────
+function addPartyMember() {
+  state.party.push({ id: state.nextPartyId++, name: 'Adventurer', level: 1 });
+  render();
+}
+function removePartyMember(id) {
+  if (state.party.length <= 1) return;
+  state.party = state.party.filter(m => m.id !== id);
+  render();
+}
+function updateMemberName(id, name) {
+  const m = state.party.find(p => p.id === id);
+  if (m) { m.name = name; renderParty(); }
+}
+function changeLevel(id, delta) {
+  const m = state.party.find(p => p.id === id);
+  if (m) { m.level = Math.max(1, Math.min(20, m.level + delta)); render(); }
+}
+function setDifficulty(diff) {
+  state.difficulty = diff;
+  render();
+}
+
+// ─── Encounter actions ────────────────────────────────────────────────────────
+function addMonster(name, cr, key, stats) {
+  const existing = state.monsters.find(m => m.name === name);
+  if (existing) { existing.quantity++; }
+  else {
+    const fullData = (key && monsterCache[key]) ? monsterCache[key] : null;
+    state.monsters.push({ id: state.nextMonsterId++, name, cr, key: key || '', quantity: 1, stats: stats || null, monsterData: fullData });
+  }
+  render();
+}
+function removeMonster(id) {
+  state.monsters = state.monsters.filter(m => m.id !== id);
+  render();
+}
+function changeQty(id, delta) {
+  const m = state.monsters.find(m => m.id === id);
+  if (m) { m.quantity = Math.max(1, m.quantity + delta); render(); }
+}
+function clearEncounter() {
+  state.monsters = [];
+  render();
+}
+// ─── Custom monster ───────────────────────────────────────────────────────────
+function toggleCustomForm() {
+  const form = document.getElementById('custom-monster-form');
+  const icon = document.getElementById('custom-toggle-icon');
+  const open = form.style.display === 'none';
+  form.style.display = open ? '' : 'none';
+  icon.textContent   = open ? '▾' : '▸';
+}
+
+function addCustomMonster() {
+  const name = document.getElementById('cm-name').value.trim();
+  const cr   = parseFloat(document.getElementById('cm-cr').value);
+  const hp   = parseInt(document.getElementById('cm-hp').value)   || null;
+  const ac   = parseInt(document.getElementById('cm-ac').value)   || null;
+  const init = parseInt(document.getElementById('cm-init').value) || 0;
+  const type = document.getElementById('cm-type').value;
+  const size = document.getElementById('cm-size').value;
+  const errEl = document.getElementById('custom-error');
+
+  if (!name) { showCustomError('Name is required.'); return; }
+  if (isNaN(cr) || cr < 0) { showCustomError('Enter a valid CR (e.g. 0, 0.5, 13).'); return; }
+
+  errEl.style.display = 'none';
+
+  const existing = state.monsters.find(m => m.name === name);
+  if (existing) { existing.quantity++; }
+  else {
+    state.monsters.push({
+      id: state.nextMonsterId++,
+      name, cr,
+      key: '',
+      quantity: 1,
+      isCustom: true,
+      customStats: { hp, ac, initBonus: init, type, size },
+    });
+  }
+  render();
+
+  // Flash feedback on button
+  const btn = document.querySelector('.custom-add-btn');
+  btn.textContent = 'Added ✓';
+  setTimeout(() => btn.textContent = '+ Add to Encounter', 1500);
+}
+
+function showCustomError(msg) {
+  const el = document.getElementById('custom-error');
+  el.textContent = msg;
+  el.style.display = '';
+}
+
+function showEncounterMonsterCard(id) {
+  const m = state.monsters.find(x => x.id === id);
+  if (!m?.monsterData) return;
+  // Scroll the detail card into view and re-render it
+  document.getElementById('monster-detail').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  renderMonsterCard(m.monsterData);
+}
+
+function startCombat() {
+  if (!state.monsters.length) return;
+  localStorage.setItem('encounter_state', JSON.stringify(state));
+  window.location.href = 'combat.html';
+}
+
+function exportEncounter() {
+  const thresh = crThreshold(), used = totalEncounterCR(), a = assessDifficulty(used, thresh);
+  const lines = [
+    '=== D&D 5e ENCOUNTER ===', '',
+    'PARTY:',
+    ...state.party.map(m => `  ${m.name} (Level ${m.level})`),
+    `  Total Level: ${totalPartyLevel()}`, '',
+    `DIFFICULTY: ${state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1)}`,
+    `CR THRESHOLD: ${thresh % 1 === 0 ? thresh : thresh.toFixed(1)}`, '',
+    'MONSTERS:',
+    ...state.monsters.map(m => `  ${m.name} (CR ${formatCR(m.cr)}) ×${m.quantity}  [${(m.cr * m.quantity).toFixed(2)} CR]`),
+    '',
+    `TOTAL CR: ${used % 1 === 0 ? used : used.toFixed(2)} / ${thresh % 1 === 0 ? thresh : thresh.toFixed(1)}`,
+    `ASSESSMENT: ${a.label} — ${a.note}`,
+  ];
+  const el = document.createElement('a');
+  el.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/plain' }));
+  el.download = 'encounter.txt';
+  el.click();
+}
+
+// ─── Search ───────────────────────────────────────────────────────────────────
+async function runSearch() {
+  const resultsEl = document.getElementById('search-results');
+  document.getElementById('monster-detail').innerHTML = '';
+  resultsEl.innerHTML = '<div class="results-status">Searching…</div>';
+
+  const name    = document.getElementById('f-name').value.trim();
+  const type    = document.getElementById('f-type').value;
+  const habitat = document.getElementById('f-habitat').value.toLowerCase();
+  const crMin   = document.getElementById('f-cr-min').value;
+  const crMax   = document.getElementById('f-cr-max').value;
+
+  const params = new URLSearchParams({
+    document__key__in: 'srd-2024,open5e-2024',
+    limit: habitat ? 400 : 50,
+    ordering: 'challenge_rating,name',
+  });
+  if (name)  params.append('name__icontains', name);
+  if (type)  params.append('type', type.toLowerCase());
+  if (crMin) params.append('challenge_rating__gte', crMin);
+  if (crMax) params.append('challenge_rating__lte', crMax);
+
+  try {
+    const res  = await fetch(`https://api.open5e.com/v2/creatures/?${params}`);
+    const data = await res.json();
+    let results = data.results || [];
+    if (habitat) results = results.filter(m => (habitatData[m.key] || []).includes(habitat));
+    renderResults(results, results.length);
+  } catch {
+    resultsEl.innerHTML = '<div class="results-status">Could not reach open5e — check your connection.</div>';
+  }
+}
+
+function renderResults(results, total) {
+  const el = document.getElementById('search-results');
+  if (!results.length) {
+    el.innerHTML = '<div class="results-status">No monsters found. Try different filters.</div>';
+    return;
+  }
+  const note = total > results.length
+    ? `<div class="results-count">Showing ${results.length} of ${total} results — add filters to narrow</div>`
+    : `<div class="results-count">${total} monster${total !== 1 ? 's' : ''} found</div>`;
+
+  el.innerHTML = note + `<div class="results-list">` + results.map(m => {
+    const typeKey = m.type?.name?.toLowerCase() || '';
+    const icon    = creatureTypeIcons[typeKey] || '';
+    const color   = creatureTypeColors[typeKey] || 'var(--text-muted)';
+    return `
+    <div class="result-row" onclick="selectMonster('${m.key}', this)">
+      <span class="result-icon" style="color:${color}">${icon}</span>
+      <span class="result-name">${m.name}</span>
+      <span class="result-meta">
+        <span class="result-type">${m.size?.name || ''} ${m.type?.name || ''}</span>
+        <span class="result-cr">CR ${formatCR(m.challenge_rating)}</span>
+      </span>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+// ─── Monster detail card ──────────────────────────────────────────────────────
+async function selectMonster(key, rowEl) {
+  // Highlight the selected row
+  document.querySelectorAll('.result-row').forEach(r => r.classList.remove('active'));
+  rowEl?.classList.add('active');
+
+  const detail = document.getElementById('monster-detail');
+  detail.innerHTML = '<div class="results-status">Loading…</div>';
+  detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  if (monsterCache[key]) { renderMonsterCard(monsterCache[key]); return; }
+
+  try {
+    const res = await fetch(`https://api.open5e.com/v2/creatures/${key}/`);
+    const m   = await res.json();
+    monsterCache[key] = m;
+    renderMonsterCard(m);
+  } catch {
+    detail.innerHTML = '<div class="results-status">Failed to load monster.</div>';
+  }
+}
+
+function renderMonsterCard(m) {
+  const cr  = m.challenge_rating;
+  const pb  = calcPB(cr);
+  const sub = [m.size?.name, m.type?.name, m.alignment].filter(Boolean).join(' ');
+
+  const speed = m.speed_all || {};
+  const speedParts = [
+    speed.walk   ? `${speed.walk} ft.`          : '',
+    speed.fly    ? `fly ${speed.fly} ft.`        : '',
+    speed.swim   ? `swim ${speed.swim} ft.`      : '',
+    speed.climb  ? `climb ${speed.climb} ft.`    : '',
+    speed.burrow ? `burrow ${speed.burrow} ft.`  : '',
+  ].filter(Boolean).join(', ') || '—';
+
+  const abs  = m.ability_scores || {};
+  const mods = m.modifiers      || {};
+  const saves = m.saving_throws    || {};
+
+  const senses = [
+    m.darkvision_range  ? `Darkvision ${m.darkvision_range} ft.`   : '',
+    m.blindsight_range  ? `Blindsight ${m.blindsight_range} ft.`   : '',
+    m.tremorsense_range ? `Tremorsense ${m.tremorsense_range} ft.` : '',
+    m.truesight_range   ? `Truesight ${m.truesight_range} ft.`     : '',
+    `Passive Perception ${m.passive_perception}`,
+  ].filter(Boolean).join(', ');
+
+  const immun = m.resistances_and_immunities || {};
+  const resistLines = [
+    immun.damage_immunities_display    ? `<span class="ri-label">Immunities</span> ${immun.damage_immunities_display}`       : '',
+    immun.damage_resistances_display   ? `<span class="ri-label">Resistances</span> ${immun.damage_resistances_display}`     : '',
+    immun.damage_vulnerabilities_display ? `<span class="ri-label">Vulnerabilities</span> ${immun.damage_vulnerabilities_display}` : '',
+    immun.condition_immunities_display ? `<span class="ri-label">Condition Immunities</span> ${immun.condition_immunities_display}` : '',
+  ].filter(Boolean);
+
+  const profSkills = Object.entries(m.skill_bonuses || {})
+    .map(([k, v]) => `${k.charAt(0).toUpperCase()+k.slice(1)} ${modStr(v)}`).join(', ');
+  const languages = m.languages?.as_string || '';
+
+  const ACTION_LABELS = {
+    ACTION: 'Actions', BONUS_ACTION: 'Bonus Actions',
+    REACTION: 'Reactions', LEGENDARY_ACTION: 'Legendary Actions', LAIR_ACTION: 'Lair Actions',
+  };
+  const actionGroups = {};
+  for (const a of (m.actions || [])) {
+    const t = a.action_type;
+    if (!actionGroups[t]) actionGroups[t] = [];
+    actionGroups[t].push(a);
+  }
+  const actionOrder = ['ACTION','BONUS_ACTION','REACTION','LEGENDARY_ACTION','LAIR_ACTION'];
+
+  const traitsHtml = (m.traits || []).map(a =>
+    `<p class="detail-text"><strong>${a.name}.</strong> ${a.desc}</p>`).join('');
+
+  const actionsHtml = actionOrder
+    .filter(t => actionGroups[t]?.length)
+    .map(t => `
+      <div class="detail-section-title">${ACTION_LABELS[t]}</div>
+      ${actionGroups[t].map(a => `<p class="detail-text"><strong>${a.name}.</strong> ${a.desc}</p>`).join('')}
+    `).join('');
+
+  const typeKey   = m.type?.name?.toLowerCase() || '';
+  const typeIcon  = creatureTypeIcons[typeKey]  || '';
+  const typeColor = creatureTypeColors[typeKey] || 'var(--accent)';
+
+  const habitats = habitatData[m.key] || [];
+  const habitatHtml = habitats.length ? `
+    <div class="monster-habitats">
+      <span class="habitat-label">Habitats</span>
+      ${habitats.map(h => `<span class="habitat-tag" style="background:${habitatTypeColors[h] || 'var(--surface2)'}; border-color:${habitatTypeColors[h] || 'var(--border)'}; color:#fff">${h}</span>`).join('')}
+    </div>` : '';
+
+  document.getElementById('monster-detail').innerHTML = `
+    <div class="monster-detail-card">
+      <div class="monster-detail-head" style="border-bottom-color:${typeColor}">
+        <div class="monster-type-icon" style="color:${typeColor}">${typeIcon}</div>
+        <div class="monster-detail-title">
+          <div class="monster-detail-name">${m.name}</div>
+          <div class="monster-detail-sub">${sub}</div>
+        </div>
+        <button class="monster-detail-add-btn" style="background:${typeColor}"
+          data-name="${m.name.replace(/"/g, '&quot;')}" data-cr="${cr}" data-key="${m.key}"
+          data-hp="${m.hit_points || ''}" data-ac="${m.armor_class || ''}" data-init="${m.initiative_bonus || 0}"
+          onclick="addMonster(this.dataset.name, parseFloat(this.dataset.cr), this.dataset.key, {hp:parseInt(this.dataset.hp)||null, ac:parseInt(this.dataset.ac)||null, initBonus:parseInt(this.dataset.init)||0}); this.textContent = 'Added ✓'">
+          + Add to Encounter
+        </button>
+      </div>
+
+      <div class="monster-detail-stats">
+        <div class="stat-cell">
+          <div class="stat-cell-label">CR</div>
+          <div class="stat-cell-value">${formatCR(cr)}<div class="stat-cell-sub">Proficiency Bonus: +${pb}</div></div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell-label">Initiative Bonus</div>
+          <div class="stat-cell-value">${(() => {
+            const bonus = Number(m.initiative_bonus || 0);
+            return bonus >= 0 ? `+${bonus.toLocaleString()}` : bonus.toLocaleString();
+          })()}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell-label">AC</div>
+          <div class="stat-cell-value">${m.armor_class}${m.armor_detail ? `<div class="stat-cell-sub">${m.armor_detail}</div>` : ''}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell-label">HP</div>
+          <div class="stat-cell-value">${m.hit_points}<div class="stat-cell-sub">${m.hit_dice}</div></div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell-label">Speed</div>
+          <div class="stat-cell-value stat-cell-speed">${speedParts}</div>
+        </div>
+      </div>
+
+      <div class="monster-detail-abilities">
+        ${['strength','dexterity','constitution','intelligence','wisdom','charisma'].map(s => `
+          <div class="ability-cell">
+            <div class="ability-label">${s.slice(0,3).toUpperCase()}</div>
+            <div class="ability-score">${abs[s] ?? '—'} (${modStr(mods[s])})</div>
+            <div class="ability-mod">Save: ${modStr(saves[s])}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="monster-detail-meta">
+        ${profSkills ? `<div class="meta-line"><span class="ri-label">Skills</span> ${profSkills}</div>`          : ''}
+        ${resistLines.map(l => `<div class="meta-line">${l}</div>`).join('')}
+        ${senses     ? `<div class="meta-line"><span class="ri-label">Senses</span> ${senses}</div>`             : ''}
+        ${languages  ? `<div class="meta-line"><span class="ri-label">Languages</span> ${languages}</div>`  : ''}
+      </div>
+
+      ${habitatHtml}
+
+      <div class="monster-detail-body">
+        ${traitsHtml  ? `<div class="detail-section-title">Traits</div>${traitsHtml}` : ''}
+        ${actionsHtml}
+      </div>
+    </div>
+  `;
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+render();
+loadCharacterRoster();
+</script>
+</body>
+</html>
