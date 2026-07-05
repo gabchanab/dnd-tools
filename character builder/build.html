@@ -615,12 +615,28 @@ function goTo(n) {
 // Open5e API — called directly from the browser (CORS allowed)
 // ═══════════════════════════════════════════════════════════════════════════
 const API = 'https://api.open5e.com/v2';
+const FETCH_TIMEOUT_MS = 12000;
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw new Error(`Open5e didn't respond within ${FETCH_TIMEOUT_MS / 1000}s (${url}). It may be down — try again shortly.`);
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 async function fetchAll(endpoint) {
   let results = [], page = 1, total = null;
   while (true) {
     const url = `${API}/${endpoint}/?limit=100&page=${page}`;
-    const r = await fetch(url, { headers: { Accept: 'application/json' } });
+    const r = await fetchWithTimeout(url, { headers: { Accept: 'application/json' } });
     if (!r.ok) throw new Error(`HTTP ${r.status} from Open5e (${endpoint})`);
     const data = await r.json();
     results = results.concat(data.results || []);

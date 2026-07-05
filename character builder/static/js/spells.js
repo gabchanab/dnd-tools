@@ -1,4 +1,20 @@
 const OPEN5E_API_BASE = 'https://api.open5e.com/v2';
+const OPEN5E_FETCH_TIMEOUT_MS = 12000;
+
+async function fetchOpen5e(url) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), OPEN5E_FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw new Error(`Open5e didn't respond within ${OPEN5E_FETCH_TIMEOUT_MS / 1000}s. It may be down — try again shortly.`);
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 // Reformat the raw open5e response into the flat shape the rest of the app expects.
 // This mirrors what the old Flask /api/spells/<id> endpoint used to return.
@@ -37,7 +53,7 @@ async function searchSpells({ level = '', school = '', class: cls = '', name = '
   const params = new URLSearchParams({ document__key: 'srd-2024', limit: 1000 });
   if (level !== '') params.append('level', level);
 
-  const res = await fetch(`${OPEN5E_API_BASE}/spells/?${params}`);
+  const res = await fetchOpen5e(`${OPEN5E_API_BASE}/spells/?${params}`);
   if (!res.ok) throw new Error(`API error ${res.status}`);
   const data = await res.json();
 
@@ -66,7 +82,7 @@ async function searchSpells({ level = '', school = '', class: cls = '', name = '
 }
 
 async function getSpellDetail(idx) {
-  const res = await fetch(`${OPEN5E_API_BASE}/spells/${idx}/`);
+  const res = await fetchOpen5e(`${OPEN5E_API_BASE}/spells/${idx}/`);
   if (!res.ok) throw new Error(`API error ${res.status}`);
   const raw = await res.json();
   return normaliseSpell(idx, raw);
