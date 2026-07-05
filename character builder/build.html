@@ -1539,7 +1539,9 @@ async function loadAll() {
       fetchAll('classes'),
       fetchAll('backgrounds'),
       Promise.all(['subclasses', 'backgrounds', 'species', 'feats', 'classes'].map(f =>
-        fetch(`homebrew/${f}.json`).then(r => r.ok ? r.json() : []))),
+        fetch(`homebrew/${f}.json`)
+          .then(r => r.ok ? r.text() : '')
+          .then(text => { try { return text ? JSON.parse(text) : []; } catch { return []; } }))),
     ];
     if (editId) fetches.push(
       supabase.from('characters').select('data').eq('id', editId).single()
