@@ -320,6 +320,22 @@
 const $ = (id) => document.getElementById(id);
 
 const API_BASE = 'https://api.open5e.com/v2';
+const FETCH_TIMEOUT_MS = 12000;
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw new Error(`Open5e didn't respond within ${FETCH_TIMEOUT_MS / 1000}s. It may be down — try again shortly.`);
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 // ── Edition toggle ────────────────────────────────────────────────
 function getDocumentKey() {
@@ -372,7 +388,7 @@ async function search() {
   if (lvl !== '') params.append('level', lvl);
 
   try {
-    const res  = await fetch(`${API_BASE}/spells/?${params}`);
+    const res  = await fetchWithTimeout(`${API_BASE}/spells/?${params}`);
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const data = await res.json();
 
@@ -427,7 +443,7 @@ async function loadSpell(idx) {
   const detail = $('detail');
   detail.innerHTML = '<div class="status">Unfurling the scroll…</div>';
   try {
-    const res = await fetch(`${API_BASE}/spells/${idx}/`);
+    const res = await fetchWithTimeout(`${API_BASE}/spells/${idx}/`);
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const raw = await res.json();
     renderSpell(normaliseSpell(idx, raw));
