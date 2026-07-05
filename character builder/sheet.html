@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ char_name }} — Character Sheet</title>
+  <title id="page-title">Character Sheet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=IM+Fell+English:ital@0;1&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/sheet.css') }}">
+  <link rel="stylesheet" href="static/css/sheet.css">
   <style>
     .back-btn{position:fixed;top:1.2rem;left:1.2rem;z-index:100;
       font-family:var(--font-heading);font-size:.60rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
@@ -83,15 +83,6 @@
     .sl-illusion    {background-color:rgba(122,95,168,.15);border-color:rgba(122,95,168,.65);color:#2a1f5a}
     .sl-necromancy  {background-color:rgba(90,86,78,.15);  border-color:rgba(90,86,78,.65);  color:#2a2620}
     .sl-transmutation{background-color:rgba(168,130,58,.15);border-color:rgba(168,130,58,.65);color:#5a3f10}
-    /* Sigil + description two-column layout */
-    .spe-body-row{display:flex;gap:.85rem;align-items:flex-start}
-    .spe-sigil-col{flex:0 0 calc(50% - .425rem)}
-    .spe-sigil-placeholder{width:100%;aspect-ratio:1/1;background:#1a2535;border-radius:6px;
-      display:flex;align-items:center;justify-content:center;
-      font-size:.70rem;color:#8a90b0;font-style:italic;letter-spacing:.05em;
-      box-shadow:0 0 0 1px rgba(185,155,80,.22)}
-    .spe-sigil-img{width:100%;border-radius:6px;display:block;
-      box-shadow:0 0 0 1px rgba(185,155,80,.30),0 4px 18px rgba(0,0,0,.28)}
     .spe-desc-col{flex:1;min-width:0}
     /* ── Dice rolling ── */
     [data-roll-mod]{cursor:pointer;transition:filter .15s,opacity .15s}
@@ -174,32 +165,21 @@
   </style>
 </head>
 <body>
-<div id="sheet-data"
-     data-prof-bonus="{{ proficiency_bonus }}"
-     style="display:none" aria-hidden="true"></div>
-<a class="back-btn" href="/">← My Characters</a>
-<a class="edit-btn" href="/build?edit=1">✏ Edit Character</a>
+<div id="sheet-data" data-prof-bonus="0" style="display:none" aria-hidden="true"></div>
+<a class="back-btn" id="back-link" href="index.html">← My Characters</a>
+<a class="edit-btn" id="edit-link" href="build.html">✏ Edit Character</a>
 <div class="page-texture"></div>
 
-<main class="sheet">
+<div id="sheet-status" style="padding:3rem 1rem;text-align:center;font-family:var(--font-heading);color:var(--text-dim)"></div>
+
+<main class="sheet" id="sheet-main" style="display:none">
   <!-- HEADER -->
   <header class="sheet-header">
     <div class="header-ornament">✦</div>
     <div class="char-identity">
-      <h1 class="char-name">{{ char_name }}</h1>
-      <p class="char-sub">
-        {{ species_name or '—' }} &nbsp;·&nbsp;
-        {{ class_name or '—' }}{% if subclass_name %} <span class="subclass-pill{% if subclass_homebrew %} homebrew{% endif %}">{{ subclass_name }}</span>{% endif %}
-        &nbsp;·&nbsp; Level {{ level }}
-        &nbsp;·&nbsp; {{ alignment }}
-      </p>
-      <p class="char-meta">
-        {% if background_name %}<span>Background: <em>{{ background_name }}</em></span>{% endif %}
-        {% if player_name %}<span>Player: <em>{{ player_name }}</em></span>{% endif %}
-        <span>Proficiency: <strong>+{{ proficiency_bonus }}</strong></span>
-        <span>Hit Dice: <strong>{{ hit_dice_display }}</strong></span>
-        <span>Passive Perception: <strong>{{ passive_perception }}</strong></span>
-      </p>
+      <h1 class="char-name" id="char-name"></h1>
+      <p class="char-sub" id="char-sub"></p>
+      <p class="char-meta" id="char-meta"></p>
     </div>
     <div class="header-ornament">✦</div>
   </header>
@@ -216,28 +196,26 @@
         <section class="panel">
           <h2 class="panel-title">Combat</h2>
           
-          <button class="inspiration-btn"
-                  data-inspired="{{ 'true' if inspiration else 'false' }}"
+          <button class="inspiration-btn" id="inspiration-btn"
+                  data-inspired="false"
                   title="Click to toggle inspiration">
             ♛ Inspiration
           </button>
 
           <div class="combat-row">
-            <div class="stat-badge"><div class="stat-val">{{ armor_class }}</div><div class="stat-lbl">Armour Class</div></div>
-            <div class="stat-badge" data-roll-mod="{{ initiative }}" data-roll-label="Initiative"><div class="stat-val">{{ initiative }}</div><div class="stat-lbl">Initiative</div></div>
-            <div class="stat-badge"><div class="stat-val">{{ speed }}ft</div><div class="stat-lbl">Speed</div></div>
+            <div class="stat-badge"><div class="stat-val" id="armor-class-val"></div><div class="stat-lbl">Armour Class</div></div>
+            <div class="stat-badge" id="initiative-badge"><div class="stat-val" id="initiative-val"></div><div class="stat-lbl">Initiative</div></div>
+            <div class="stat-badge"><div class="stat-val" id="speed-val"></div><div class="stat-lbl">Speed</div></div>
           </div>
-          {% if spell_save_dc %}
-          <div class="combat-row" style="margin-top:.45rem">
-            <div class="stat-badge"><div class="stat-val">{{ spell_mod }}</div><div class="stat-lbl">Spell Mod ({{ spell_ability }})</div></div>
-            <div class="stat-badge" data-roll-mod="{{ spell_attack }}" data-roll-label="Spell Attack"><div class="stat-val">{{ spell_attack }}</div><div class="stat-lbl">Spell Attack</div></div>
-            <div class="stat-badge"><div class="stat-val">{{ spell_save_dc }}</div><div class="stat-lbl">Spell Save DC</div></div>
+          <div class="combat-row" id="spellcasting-row" style="margin-top:.45rem;display:none">
+            <div class="stat-badge"><div class="stat-val" id="spell-mod-val"></div><div class="stat-lbl">Spell Mod (<span id="spell-ability-val"></span>)</div></div>
+            <div class="stat-badge" id="spell-attack-badge"><div class="stat-val" id="spell-attack-val"></div><div class="stat-lbl">Spell Attack</div></div>
+            <div class="stat-badge"><div class="stat-val" id="spell-save-dc-val"></div><div class="stat-lbl">Spell Save DC</div></div>
           </div>
-          {% endif %}
           <div class="combat-row" style="margin-top:.45rem">
-            <div class="stat-badge"><div class="stat-val" id="hp-max-val">{{ hp_max }}</div><div class="stat-lbl"> Maximum Hit Points</div></div>
-            <div class="stat-badge"><div class="stat-val" id="hp-current-val">{{ hp_current }}</div><div class="stat-lbl"> Current Hit Points</div></div>
-            <div class="stat-badge"><div class="stat-val" id="hp-temp-val">{{ hp_temp }}</div><div class="stat-lbl"> Temporary Hit Points</div></div>
+            <div class="stat-badge"><div class="stat-val" id="hp-max-val"></div><div class="stat-lbl"> Maximum Hit Points</div></div>
+            <div class="stat-badge"><div class="stat-val" id="hp-current-val"></div><div class="stat-lbl"> Current Hit Points</div></div>
+            <div class="stat-badge"><div class="stat-val" id="hp-temp-val"></div><div class="stat-lbl"> Temporary Hit Points</div></div>
           </div>
 
           <div class="hp-adjust-row">
@@ -272,100 +250,23 @@
 
         <div class="panel">
           <h2 class="panel-title">Skills</h2>
-          <ul class="skill-list">
-            {% for sk in skills %}
-            <li class="skill-row prof-{{ sk.proficiency }}"
-                data-roll-mod="{{ sk.bonus }}" data-roll-label="{{ sk.name }}"
-                data-base-mod="{{ sk.base_mod }}" data-prof-state="{{ sk.proficiency }}">
-              <span class="skill-dot skill-dot-btn" title="Click to cycle proficiency">{% if sk.proficiency == 'expert' %}◆{% elif sk.proficiency == 'proficient' %}●{% elif sk.proficiency == 'half' %}◐{% else %}○{% endif %}</span>
-              <span class="skill-name">{{ sk.name }}</span><span class="adv-toggle" data-adv-state="none" title="Click to set advantage / disadvantage">A</span>
-              <span class="skill-ability">{{ sk.ability }}</span>
-              <span class="skill-bonus {{ 'pos' if sk.bonus >= 0 else 'neg' }}">{{ '%+d' % sk.bonus }}</span>
-            </li>
-            {% endfor %}
-          </ul>
+          <ul class="skill-list" id="skill-list"></ul>
         </div>
 
-        {% if armor_proficiencies or weapon_proficiencies or bg_tool_proficiency or bg_languages %}
-        <section class="panel">
+        <section class="panel" id="proficiencies-section" style="display:none">
           <h2 class="panel-title">Languages &amp; Proficiencies</h2>
-          {% if armor_proficiencies %}
-          <div style="margin-bottom:.5rem">
-            <span class="trait-name">Armour</span>
-            <span class="feat-desc">{{ armor_proficiencies }}</span>
-          </div>
-          {% endif %}
-          {% if weapon_proficiencies %}
-          <div style="margin-bottom:.5rem">
-            <span class="trait-name">Weapons</span>
-            <span class="feat-desc">{{ weapon_proficiencies }}</span>
-          </div>
-          {% endif %}
-          {% if bg_tool_proficiency %}
-          <div style="margin-bottom:.5rem">
-            <span class="trait-name">Tools</span>
-            <span class="feat-desc">{{ bg_tool_proficiency }}</span>
-          </div>
-          {% endif %}
-          {% if bg_languages %}
-          <div>
-            <span class="trait-name">Languages</span>
-            <span class="feat-desc">{{ bg_languages }}</span>
-          </div>
-          {% endif %}
+          <div id="proficiencies-body"></div>
         </section>
-        {% endif %}
 
-        {% if traits or bg_trait_name or bg_ofeat_name %}
-        <section class="panel">
-          <h2 class="panel-title">{{ species_name }} and {{ background_name }} Traits</h2>
-          <ul class="trait-list">
-            <h3 class="sptrait-title">Species Traits</h3>
-              {% for t in traits %}
-              <li class="trait-item">
-                <span class="trait-name">{{ t.name }}</span>
-                <span class="feat-desc">{{ t.desc }}</span>
-              </li>
-              {% endfor %}
-              {% if bg_trait_name or bg_ofeat_name %}
-                <h3 class="sptrait-title">Background Traits</h3>
-                {% if bg_trait_name %}
-                  <li class="trait-item">
-                    <span class="trait-name">{{ bg_trait_name }}</span>
-                    {% if bg_trait_desc %}<span class="feat-desc">{{ bg_trait_desc }}</span>{% endif %}
-                  </li>
-                {% endif %}
-                {% if bg_ofeat_name %}
-                  <li class="trait-item">
-                    <span class="trait-name">{{ bg_ofeat_name }}</span>
-                    {% if bg_ofeat_desc %}<span class="feat-desc">{{ bg_ofeat_desc }}</span>{% endif %}
-                  </li>
-                {% endif %}
-              {% endif %}
-          </ul>
+        <section class="panel" id="traits-section" style="display:none">
+          <h2 class="panel-title" id="traits-title"></h2>
+          <ul class="trait-list" id="traits-body"></ul>
         </section>
-        {% endif %}
 
-        {% if gold > 0 or class_equipment or bg_equipment %}
-        <section class="panel">
+        <section class="panel" id="wealth-section" style="display:none">
           <h2 class="panel-title">Wealth &amp; Equipment</h2>
-          {% if gold > 0 %}
-          <div style="font-family:var(--font-heading);font-size:1.1rem;color:var(--gold);margin-bottom:.6rem">{{ gold | int }} gp</div>
-          {% endif %}
-          {% if class_equipment %}
-          <div style="margin-bottom:.5rem">
-            <span class="trait-name">Class Equipment</span>
-            <span class="feat-desc">{{ class_equipment }}</span>
-          </div>
-          {% endif %}
-          {% if bg_equipment %}
-          <div>
-            <span class="trait-name">Background Equipment</span>
-            <span class="feat-desc">{{ bg_equipment }}</span>
-          </div>
-          {% endif %}
+          <div id="wealth-body"></div>
         </section>
-        {% endif %}
 
       </div>
 
@@ -374,123 +275,38 @@
 
         <section class="panel">
           <h2 class="panel-title">Ability Scores</h2>
-          <div class="ability-grid">
-            {% for ab in abilities %}
-            <div class="ability-block">
-              <div class="ability-label">{{ ab.label }}</div>
-              <div class="ability-score">{{ ab.score }}</div>
-              <div class="ability-mod {{ 'pos' if ab.modifier >= 0 else 'neg' }}"
-                   data-roll-mod="{{ ab.modifier }}" data-roll-label="{{ ab.label }} Check">{{ '%+d' % ab.modifier }}</div>
-              <div class="ability-save"
-                   data-roll-mod="{{ ab.save }}" data-roll-label="{{ ab.label }} Save">
-                <span class="save-dot {{ 'filled' if ab.save_prof else '' }}">●</span>
-                Save {{ '%+d' % ab.save }}
-              </div>
-            </div>
-            {% endfor %}
-          </div>
+          <div class="ability-grid" id="ability-grid"></div>
         </section>
 
-        {% if spell_slots %}
-        <section class="panel">
+        <section class="panel" id="spell-slots-section" style="display:none">
           <h2 class="panel-title">Spell Slots</h2>
-          {% set ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'] %}
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem .75rem">
-            {% for col_min, col_max in [(1,3),(4,6),(7,9)] %}
-            <div class="slot-grid">
-              {% for sl in spell_slots if col_min <= sl.level <= col_max %}
-              <div class="slot-row">
-                <span class="slot-level">{{ ordinals[sl.level - 1] }}</span>
-                <div class="slot-pips">
-                  {% for i in range(sl.max) %}
-                  <button class="slot-pip {{ 'avail' if i < sl.available else 'used' }}"
-                          data-state="{{ 'avail' if i < sl.available else 'used' }}">{% if i < sl.available %}◆{% else %}◇{% endif %}</button>
-                  {% endfor %}
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-            {% endfor %}
-          </div>
+          <div id="spell-slots-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem .75rem"></div>
         </section>
-        {% endif %}
 
-        {% if prepared_spells %}
-        <section class="panel">
+        <section class="panel" id="prepared-spells-section" style="display:none">
           <h2 class="panel-title">Prepared Spells</h2>
-          <div id="prepared-spell-list">
-            {% for sp in prepared_spells %}
-            {% set sp_name  = sp.name  if sp is mapping else sp %}
-            {% set sp_level = sp.level if sp is mapping else none %}
-            {% set sp_index = sp.index if sp is mapping else none %}
-            <div class="spe-item{% if sp_index %} spe-clickable{% endif %}"{% if sp_index %} data-spell-index="{{ sp_index }}"{% endif %}>
-              <span class="spe-name">{{ sp_name }}</span>
-              {% if sp_level is not none %}
-                {% if sp_level == 0 %}<span class="spell-lvl-tag cantrip">cantrip</span>
-                {% elif sp_level == 1 %}<span class="spell-lvl-tag">1st</span>
-                {% elif sp_level == 2 %}<span class="spell-lvl-tag">2nd</span>
-                {% elif sp_level == 3 %}<span class="spell-lvl-tag">3rd</span>
-                {% else %}<span class="spell-lvl-tag">{{ sp_level }}th</span>
-                {% endif %}
-              {% endif %}
-              {% if sp_index %}<span class="spe-chevron">›</span>{% endif %}
-            </div>
-            {% endfor %}
-          </div>
+          <div id="prepared-spell-list"></div>
         </section>
-        {% endif %}
 
-        {% if class_features %}
-        <section class="panel">
-          <h2 class="panel-title">{{ class_name }} Features</h2>
-          <ul class="trait-list">
-            {% for f in class_features %}
-            <li class="trait-item">
-              <span class="trait-name">{{ f.name }}</span>
-              <span class="feat-desc">{{ f.desc }}</span>
-            </li>
-            {% endfor %}
-          </ul>
+        <section class="panel" id="class-features-section" style="display:none">
+          <h2 class="panel-title" id="class-features-title"></h2>
+          <ul class="trait-list" id="class-features-body"></ul>
         </section>
-        {% endif %}
 
-        {% if subclass_features %}
-        <section class="panel">
-          <h2 class="panel-title">{{ subclass_name }} Features</h2>
-          <ul class="trait-list">
-            {% for f in subclass_features %}
-            <li class="trait-item">
-              <span class="trait-name">{{ f.name }}</span>
-              <span class="feat-desc">{{ f.desc }}</span>
-            </li>
-            {% endfor %}
-          </ul>
+        <section class="panel" id="subclass-features-section" style="display:none">
+          <h2 class="panel-title" id="subclass-features-title"></h2>
+          <ul class="trait-list" id="subclass-features-body"></ul>
         </section>
-        {% endif %}
 
-        {% if resources %}
-        <section class="panel">
+        <section class="panel" id="resources-section" style="display:none">
           <h2 class="panel-title">Resources</h2>
-          {% for res in resources %}
-          <div class="resource-row">
-            <div class="resource-name">{{ res.name }}</div>
-            <div class="resource-pips">
-              {% for i in range(res.max_uses) %}
-              <span class="pip {{ 'active' if i < res.current_uses else 'spent' }}">◆</span>
-              {% endfor %}
-            </div>
-          </div>
-          {% endfor %}
+          <div id="resources-body"></div>
         </section>
-        {% endif %}
 
-        {% if backstory or notes %}
-        <section class="panel">
+        <section class="panel" id="notes-section" style="display:none">
           <h2 class="panel-title">Character Notes</h2>
-          {% if backstory %}<p class="notes-text" style="margin-bottom:.5rem">{{ backstory }}</p>{% endif %}
-          {% if notes %}<p class="notes-text">{{ notes }}</p>{% endif %}
+          <div id="notes-body"></div>
         </section>
-        {% endif %}
 
       </div>
     </div>
@@ -503,15 +319,257 @@
       <button id="save-char-btn" onclick="saveCharacter()" style="background:none;border:none;cursor:pointer;font:inherit;font-size:inherit;color:var(--gold);padding:0;text-decoration:underline">Save Character</button>
     <span id="save-char-msg" style="font-size:.72rem;display:none"></span>
     <span>·</span>
-    <a href="/">My Characters</a>
+    <a href="index.html">My Characters</a>
     <span>·</span>
-    <a href="/build?edit=1">✏ Edit Character</a>
+    <a href="build.html" id="edit-link-2">✏ Edit Character</a>
     <span>·</span>
-    <a href="/build">New Character</a>
+    <a href="build.html">New Character</a>
   </footer>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="static/js/supabase-client.js?v=1"></script>
+<script src="static/js/auth.js?v=1"></script>
+<script src="static/js/spells.js?v=1"></script>
 <script>
+function fmtSigned(n) { return (n >= 0 ? '+' : '') + n; }
+
+var PROF_DOTS = { none: '○', half: '◐', proficient: '●', expert: '◆' };
+
+function renderSheet(ctx) {
+  document.title = ctx.char_name + ' — Character Sheet';
+  document.getElementById('page-title').textContent = ctx.char_name + ' — Character Sheet';
+  renderHeader(ctx);
+  renderCombat(ctx);
+  renderSkills(ctx);
+  renderProficiencies(ctx);
+  renderTraits(ctx);
+  renderWealth(ctx);
+  renderAbilities(ctx);
+  renderSpellSlots(ctx);
+  renderPreparedSpells(ctx);
+  renderClassFeatures(ctx);
+  renderSubclassFeatures(ctx);
+  renderResources(ctx);
+  renderNotes(ctx);
+}
+
+function renderHeader(ctx) {
+  document.getElementById('char-name').textContent = ctx.char_name;
+  document.getElementById('char-sub').innerHTML =
+    (ctx.species_name || '—') + ' &nbsp;·&nbsp; ' +
+    (ctx.class_name || '—') +
+    (ctx.subclass_name ? ' <span class="subclass-pill' + (ctx.subclass_homebrew ? ' homebrew' : '') + '">' + ctx.subclass_name + '</span>' : '') +
+    ' &nbsp;·&nbsp; Level ' + ctx.level +
+    ' &nbsp;·&nbsp; ' + ctx.alignment;
+
+  var metaParts = [];
+  if (ctx.background_name) metaParts.push('<span>Background: <em>' + ctx.background_name + '</em></span>');
+  if (ctx.player_name) metaParts.push('<span>Player: <em>' + ctx.player_name + '</em></span>');
+  metaParts.push('<span>Proficiency: <strong>+' + ctx.proficiency_bonus + '</strong></span>');
+  metaParts.push('<span>Hit Dice: <strong>' + ctx.hit_dice_display + '</strong></span>');
+  metaParts.push('<span>Passive Perception: <strong>' + ctx.passive_perception + '</strong></span>');
+  document.getElementById('char-meta').innerHTML = metaParts.join(' ');
+}
+
+function renderCombat(ctx) {
+  document.getElementById('sheet-data').dataset.profBonus = ctx.proficiency_bonus;
+  document.getElementById('inspiration-btn').dataset.inspired = ctx.inspiration ? 'true' : 'false';
+
+  document.getElementById('armor-class-val').textContent = ctx.armor_class;
+  document.getElementById('initiative-val').textContent = ctx.initiative;
+  document.getElementById('initiative-badge').dataset.rollMod = ctx.initiative;
+  document.getElementById('initiative-badge').dataset.rollLabel = 'Initiative';
+  document.getElementById('speed-val').textContent = ctx.speed + 'ft';
+
+  if (ctx.spell_save_dc) {
+    document.getElementById('spellcasting-row').style.display = '';
+    document.getElementById('spell-mod-val').textContent = ctx.spell_mod;
+    document.getElementById('spell-ability-val').textContent = ctx.spell_ability;
+    document.getElementById('spell-attack-val').textContent = ctx.spell_attack;
+    document.getElementById('spell-attack-badge').dataset.rollMod = ctx.spell_attack;
+    document.getElementById('spell-attack-badge').dataset.rollLabel = 'Spell Attack';
+    document.getElementById('spell-save-dc-val').textContent = ctx.spell_save_dc;
+  }
+
+  document.getElementById('hp-max-val').textContent = ctx.hp_max;
+  document.getElementById('hp-current-val').textContent = ctx.hp_current;
+  document.getElementById('hp-temp-val').textContent = ctx.hp_temp;
+}
+
+function renderSkills(ctx) {
+  document.getElementById('skill-list').innerHTML = ctx.skills.map(function (sk) {
+    var dot = PROF_DOTS[sk.proficiency] || '○';
+    return '<li class="skill-row prof-' + sk.proficiency + '" ' +
+      'data-roll-mod="' + sk.bonus + '" data-roll-label="' + sk.name + '" ' +
+      'data-base-mod="' + sk.base_mod + '" data-prof-state="' + sk.proficiency + '">' +
+      '<span class="skill-dot skill-dot-btn" title="Click to cycle proficiency">' + dot + '</span>' +
+      '<span class="skill-name">' + sk.name + '</span>' +
+      '<span class="adv-toggle" data-adv-state="none" title="Click to set advantage / disadvantage">A</span>' +
+      '<span class="skill-ability">' + sk.ability + '</span>' +
+      '<span class="skill-bonus ' + (sk.bonus >= 0 ? 'pos' : 'neg') + '">' + fmtSigned(sk.bonus) + '</span>' +
+      '</li>';
+  }).join('');
+}
+
+function renderProficiencies(ctx) {
+  var parts = [];
+  if (ctx.armor_proficiencies) parts.push('<div style="margin-bottom:.5rem"><span class="trait-name">Armour</span> <span class="feat-desc">' + ctx.armor_proficiencies + '</span></div>');
+  if (ctx.weapon_proficiencies) parts.push('<div style="margin-bottom:.5rem"><span class="trait-name">Weapons</span> <span class="feat-desc">' + ctx.weapon_proficiencies + '</span></div>');
+  if (ctx.bg_tool_proficiency) parts.push('<div style="margin-bottom:.5rem"><span class="trait-name">Tools</span> <span class="feat-desc">' + ctx.bg_tool_proficiency + '</span></div>');
+  if (ctx.bg_languages) parts.push('<div><span class="trait-name">Languages</span> <span class="feat-desc">' + ctx.bg_languages + '</span></div>');
+  if (parts.length) {
+    document.getElementById('proficiencies-section').style.display = '';
+    document.getElementById('proficiencies-body').innerHTML = parts.join('');
+  }
+}
+
+function renderTraits(ctx) {
+  var hasContent = (ctx.traits && ctx.traits.length) || ctx.bg_trait_name || ctx.bg_ofeat_name;
+  if (!hasContent) return;
+  document.getElementById('traits-section').style.display = '';
+  document.getElementById('traits-title').textContent = ctx.species_name + ' and ' + ctx.background_name + ' Traits';
+
+  var html = '<h3 class="sptrait-title">Species Traits</h3>';
+  html += ctx.traits.map(function (t) {
+    return '<li class="trait-item"><span class="trait-name">' + t.name + '</span> <span class="feat-desc">' + t.desc + '</span></li>';
+  }).join('');
+
+  if (ctx.bg_trait_name || ctx.bg_ofeat_name) {
+    html += '<h3 class="sptrait-title">Background Traits</h3>';
+    if (ctx.bg_trait_name) {
+      html += '<li class="trait-item"><span class="trait-name">' + ctx.bg_trait_name + '</span>' +
+        (ctx.bg_trait_desc ? ' <span class="feat-desc">' + ctx.bg_trait_desc + '</span>' : '') + '</li>';
+    }
+    if (ctx.bg_ofeat_name) {
+      html += '<li class="trait-item"><span class="trait-name">' + ctx.bg_ofeat_name + '</span>' +
+        (ctx.bg_ofeat_desc ? ' <span class="feat-desc">' + ctx.bg_ofeat_desc + '</span>' : '') + '</li>';
+    }
+  }
+  document.getElementById('traits-body').innerHTML = html;
+}
+
+function renderWealth(ctx) {
+  var parts = [];
+  if (ctx.gold > 0) parts.push('<div style="font-family:var(--font-heading);font-size:1.1rem;color:var(--gold);margin-bottom:.6rem">' + Math.trunc(ctx.gold) + ' gp</div>');
+  if (ctx.class_equipment) parts.push('<div style="margin-bottom:.5rem"><span class="trait-name">Class Equipment</span> <span class="feat-desc">' + ctx.class_equipment + '</span></div>');
+  if (ctx.bg_equipment) parts.push('<div><span class="trait-name">Background Equipment</span> <span class="feat-desc">' + ctx.bg_equipment + '</span></div>');
+  if (parts.length) {
+    document.getElementById('wealth-section').style.display = '';
+    document.getElementById('wealth-body').innerHTML = parts.join('');
+  }
+}
+
+function renderAbilities(ctx) {
+  document.getElementById('ability-grid').innerHTML = ctx.abilities.map(function (ab) {
+    return '<div class="ability-block">' +
+      '<div class="ability-label">' + ab.label + '</div>' +
+      '<div class="ability-score">' + ab.score + '</div>' +
+      '<div class="ability-mod ' + (ab.modifier >= 0 ? 'pos' : 'neg') + '" data-roll-mod="' + ab.modifier + '" data-roll-label="' + ab.label + ' Check">' + fmtSigned(ab.modifier) + '</div>' +
+      '<div class="ability-save" data-roll-mod="' + ab.save + '" data-roll-label="' + ab.label + ' Save">' +
+      '<span class="save-dot ' + (ab.save_prof ? 'filled' : '') + '">●</span> Save ' + fmtSigned(ab.save) +
+      '</div></div>';
+  }).join('');
+}
+
+function renderSpellSlots(ctx) {
+  if (!ctx.spell_slots.length) return;
+  document.getElementById('spell-slots-section').style.display = '';
+  var ordinals = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+  var ranges = [[1, 3], [4, 6], [7, 9]];
+  document.getElementById('spell-slots-grid').innerHTML = ranges.map(function (range) {
+    var rows = ctx.spell_slots.filter(function (sl) { return sl.level >= range[0] && sl.level <= range[1]; });
+    var rowsHtml = rows.map(function (sl) {
+      var pips = [];
+      for (var i = 0; i < sl.max; i++) {
+        var avail = i < sl.available;
+        pips.push('<button class="slot-pip ' + (avail ? 'avail' : 'used') + '" data-state="' + (avail ? 'avail' : 'used') + '">' + (avail ? '◆' : '◇') + '</button>');
+      }
+      return '<div class="slot-row"><span class="slot-level">' + ordinals[sl.level - 1] + '</span><div class="slot-pips">' + pips.join('') + '</div></div>';
+    }).join('');
+    return '<div class="slot-grid">' + rowsHtml + '</div>';
+  }).join('');
+}
+
+function renderPreparedSpells(ctx) {
+  if (!ctx.prepared_spells.length) return;
+  document.getElementById('prepared-spells-section').style.display = '';
+  document.getElementById('prepared-spell-list').innerHTML = ctx.prepared_spells.map(function (sp) {
+    var name = typeof sp === 'object' ? sp.name : sp;
+    var level = typeof sp === 'object' ? sp.level : null;
+    var index = typeof sp === 'object' ? sp.index : null;
+    var lvlTag = '';
+    if (level !== null && level !== undefined) {
+      if (level === 0) lvlTag = '<span class="spell-lvl-tag cantrip">cantrip</span>';
+      else if (level === 1) lvlTag = '<span class="spell-lvl-tag">1st</span>';
+      else if (level === 2) lvlTag = '<span class="spell-lvl-tag">2nd</span>';
+      else if (level === 3) lvlTag = '<span class="spell-lvl-tag">3rd</span>';
+      else lvlTag = '<span class="spell-lvl-tag">' + level + 'th</span>';
+    }
+    var chevron = index ? '<span class="spe-chevron">›</span>' : '';
+    return '<div class="spe-item' + (index ? ' spe-clickable' : '') + '"' + (index ? ' data-spell-index="' + index + '"' : '') + '>' +
+      '<span class="spe-name">' + name + '</span>' + lvlTag + chevron + '</div>';
+  }).join('');
+}
+
+function renderClassFeatures(ctx) {
+  if (!ctx.class_features.length) return;
+  document.getElementById('class-features-section').style.display = '';
+  document.getElementById('class-features-title').textContent = ctx.class_name + ' Features';
+  document.getElementById('class-features-body').innerHTML = ctx.class_features.map(function (f) {
+    return '<li class="trait-item"><span class="trait-name">' + f.name + '</span> <span class="feat-desc">' + f.desc + '</span></li>';
+  }).join('');
+}
+
+function renderSubclassFeatures(ctx) {
+  if (!ctx.subclass_features.length) return;
+  document.getElementById('subclass-features-section').style.display = '';
+  document.getElementById('subclass-features-title').textContent = ctx.subclass_name + ' Features';
+  document.getElementById('subclass-features-body').innerHTML = ctx.subclass_features.map(function (f) {
+    return '<li class="trait-item"><span class="trait-name">' + f.name + '</span> <span class="feat-desc">' + f.desc + '</span></li>';
+  }).join('');
+}
+
+function renderResources(ctx) {
+  if (!ctx.resources.length) return;
+  document.getElementById('resources-section').style.display = '';
+  document.getElementById('resources-body').innerHTML = ctx.resources.map(function (res) {
+    var pips = [];
+    for (var i = 0; i < res.max_uses; i++) pips.push('<span class="pip ' + (i < res.current_uses ? 'active' : 'spent') + '">◆</span>');
+    return '<div class="resource-row"><div class="resource-name">' + res.name + '</div><div class="resource-pips">' + pips.join('') + '</div></div>';
+  }).join('');
+}
+
+function renderNotes(ctx) {
+  if (!ctx.backstory && !ctx.notes) return;
+  document.getElementById('notes-section').style.display = '';
+  var html = '';
+  if (ctx.backstory) html += '<p class="notes-text" style="margin-bottom:.5rem">' + ctx.backstory + '</p>';
+  if (ctx.notes) html += '<p class="notes-text">' + ctx.notes + '</p>';
+  document.getElementById('notes-body').innerHTML = html;
+}
+
+async function loadAndRender() {
+  await requireAuth();
+  const id = new URLSearchParams(window.location.search).get('id');
+  const statusEl = document.getElementById('sheet-status');
+  if (!id) { statusEl.textContent = 'No character id in the URL.'; return; }
+
+  const { data, error } = await supabase.from('characters').select('data').eq('id', id).single();
+  if (error || !data) { statusEl.textContent = 'Character not found.'; return; }
+
+  window.__CHAR_ID = id;
+  window.__CTX = data.data.ctx;
+  window.__RAW = data.data.raw;
+  document.getElementById('edit-link').href = 'build.html?edit=' + id;
+  document.getElementById('edit-link-2').href = 'build.html?edit=' + id;
+
+  renderSheet(window.__CTX);
+  statusEl.style.display = 'none';
+  document.getElementById('sheet-main').style.display = '';
+}
+loadAndRender();
+
 (function () {
   function doRoll(modAttr, label, anchor) {
     var mod = parseInt(modAttr, 10);
@@ -603,33 +661,11 @@
                '<div class="sl-meta-cell">' + speGlyphs.comp + '<div><div class="sl-meta-label">Components</div><div class="sl-meta-val">' + compsText + '</div></div></div>' +
                '<div class="sl-meta-cell">' + speGlyphs.duration + '<div><div class="sl-meta-label">Duration</div><div class="sl-meta-val">' + s.duration + '</div></div></div>' +
              '</div>' +
-             '<div class="spe-body-row">' +
-               '<div class="spe-sigil-col">' +
-                 '<div class="spe-sigil-placeholder">✦</div>' +
-               '</div>' +
-               '<div class="spe-desc-col">' +
-                 '<div class="sl-desc">' + desc + higher + '</div>' +
-                 classes +
-               '</div>' +
+             '<div class="spe-desc-col">' +
+               '<div class="sl-desc">' + desc + higher + '</div>' +
+               classes +
              '</div>' +
            '</div>';
-  }
-
-  function speLoadSigil(name, school, panel) {
-    var col = panel.querySelector('.spe-sigil-col');
-    if (!col) return;
-    var url = '/api/sigil?name=' + encodeURIComponent(name.toUpperCase())
-                         + '&school=' + encodeURIComponent((school || 'evocation').toUpperCase());
-    var img = new Image();
-    img.className = 'spe-sigil-img';
-    img.onload = function () {
-      col.innerHTML = '';
-      col.appendChild(img);
-    };
-    img.onerror = function () {
-      col.style.display = 'none';
-    };
-    img.src = url;
   }
 
   /* Close whichever detail panel is currently open (if any) */
@@ -663,13 +699,11 @@
     panel.innerHTML = '<div class="sl-card-body" style="font-size:.82rem;color:var(--text-dim);font-style:italic">Unfurling the scroll…</div>';
     item.insertAdjacentElement('afterend', panel);
 
-    fetch('/api/spells/' + idx)
-      .then(function(r){ return r.json(); })
+    getSpellDetail(idx)
       .then(function(s){
         /* Only update if this panel is still the one attached to this item */
         if (item.classList.contains('spe-open') && item.nextElementSibling === panel) {
           panel.innerHTML = speRenderCard(s);
-          speLoadSigil(s.name, s.school_index, panel);
         }
       })
       .catch(function(err){
@@ -878,14 +912,15 @@
    Recalculates skill bonus each time and updates the display.
 ───────────────────────────────────────────────────────────── */
 (function () {
-  var PROF_BONUS = parseInt(document.getElementById('sheet-data').dataset.profBonus, 10);
+  function getProfBonus() { return parseInt(document.getElementById('sheet-data').dataset.profBonus, 10) || 0; }
   var STATES     = ['none', 'half', 'proficient', 'expert'];
   var DOTS       = { none: '○', half: '◐', proficient: '●', expert: '◆' };
 
   function calcBonus(baseMod, state) {
-    if (state === 'half')       return baseMod + Math.floor(PROF_BONUS / 2);
-    if (state === 'proficient') return baseMod + PROF_BONUS;
-    if (state === 'expert')     return baseMod + PROF_BONUS * 2;
+    var profBonus = getProfBonus();
+    if (state === 'half')       return baseMod + Math.floor(profBonus / 2);
+    if (state === 'proficient') return baseMod + profBonus;
+    if (state === 'expert')     return baseMod + profBonus * 2;
     return baseMod;  /* none */
   }
 
@@ -926,31 +961,71 @@
   });
 })();
 
-/* ── Save character to my_characters/ folder ── */
-function saveCharacter() {
+/* ── Save character: persists the current live play state (HP, spell
+   slots used, inspiration, skill proficiency changes) back to Supabase,
+   not just the original build ── */
+async function saveCharacter() {
   var btn = document.getElementById('save-char-btn');
   var msg = document.getElementById('save-char-msg');
   btn.disabled = true;
-  fetch('/api/character/save', { method: 'POST' })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      msg.style.display  = 'inline';
-      if (data.ok) {
-        msg.style.color  = '#2d7a3a';
-        msg.textContent  = '✓ Saved as ' + data.filename;
-      } else {
-        msg.style.color  = '#b03030';
-        msg.textContent  = '✗ ' + (data.error || 'Error saving');
-      }
-      btn.disabled = false;
-      setTimeout(function () { msg.style.display = 'none'; }, 3000);
-    })
-    .catch(function () {
-      msg.style.display = 'inline';
-      msg.style.color   = '#b03030';
-      msg.textContent   = '✗ Request failed';
-      btn.disabled = false;
+
+  try {
+    var ctx = JSON.parse(JSON.stringify(window.__CTX));
+
+    ctx.hp_current = parseInt(document.getElementById('hp-current-val').textContent, 10) || 0;
+    ctx.hp_temp = parseInt(document.getElementById('hp-temp-val').textContent, 10) || 0;
+    ctx.hp_pct = ctx.hp_max ? Math.round((ctx.hp_current / ctx.hp_max) * 100) : 0;
+
+    ctx.inspiration = document.getElementById('inspiration-btn').dataset.inspired === 'true';
+
+    var ordinals = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+    var slotsByOrdinal = {};
+    document.querySelectorAll('#spell-slots-grid .slot-row').forEach(function (row) {
+      var pips = row.querySelectorAll('.slot-pip');
+      var available = 0;
+      pips.forEach(function (p) { if (p.dataset.state === 'avail') available++; });
+      slotsByOrdinal[row.querySelector('.slot-level').textContent] = { max: pips.length, available: available };
     });
+    ctx.spell_slots = ctx.spell_slots.map(function (sl) {
+      var live = slotsByOrdinal[ordinals[sl.level - 1]];
+      if (!live) return sl;
+      return { level: sl.level, max: live.max, available: live.available, used: live.max - live.available };
+    });
+
+    var skillsByName = {};
+    document.querySelectorAll('#skill-list .skill-row').forEach(function (row) {
+      skillsByName[row.querySelector('.skill-name').textContent] = {
+        proficiency: row.dataset.profState,
+        base_mod: parseInt(row.dataset.baseMod, 10),
+        bonus: parseInt(row.dataset.rollMod, 10),
+      };
+    });
+    ctx.skills = ctx.skills.map(function (sk) {
+      var live = skillsByName[sk.name];
+      if (!live) return sk;
+      return { name: sk.name, ability: sk.ability, base_mod: live.base_mod, bonus: live.bonus, proficiency: live.proficiency };
+    });
+
+    var { error } = await supabase.from('characters')
+      .update({ data: { raw: window.__RAW, ctx: ctx } })
+      .eq('id', window.__CHAR_ID);
+
+    window.__CTX = ctx;
+    msg.style.display = 'inline';
+    if (!error) {
+      msg.style.color = '#2d7a3a';
+      msg.textContent = '✓ Saved';
+    } else {
+      msg.style.color = '#b03030';
+      msg.textContent = '✗ ' + error.message;
+    }
+  } catch (e) {
+    msg.style.display = 'inline';
+    msg.style.color = '#b03030';
+    msg.textContent = '✗ ' + e.message;
+  }
+  btn.disabled = false;
+  setTimeout(function () { msg.style.display = 'none'; }, 3000);
 }
 </script>
 </body>

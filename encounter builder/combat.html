@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Combat Tracker — D&D 5e</title>
 <link rel="stylesheet" href="combat.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js?v=1"></script>
+<script src="js/auth.js?v=1"></script>
 </head>
 <body>
 
@@ -288,7 +291,25 @@ let turnIndex = 0;
 let round = 1;
 let turnOrder = []; // sorted combatant ids
 
-function beginCombat() {
+// ── Combat session persistence — so an in-progress fight survives a reload ──
+let combatSessionId = localStorage.getItem('combat_session_id') || null;
+let _saveTimer = null;
+
+function currentCombatState() {
+  return { combatants, round, turnIndex, turnOrder };
+}
+
+function scheduleSave() {
+  if (!combatSessionId) return; // combat not started yet, nothing to persist
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(async () => {
+    await supabase.from('combat_sessions')
+      .update({ combatants: currentCombatState(), updated_at: new Date().toISOString() })
+      .eq('id', combatSessionId);
+  }, 400);
+}
+
+async function beginCombat() {
   // Assign 0 to any un-rolled initiatives
   combatants.forEach(c => { if (c.initiative == null) c.initiative = 0; });
 
@@ -302,6 +323,23 @@ function beginCombat() {
   document.getElementById('phase-initiative').style.display = 'none';
   document.getElementById('phase-combat').style.display    = '';
   document.getElementById('round-display').style.display   = '';
+
+  if (!combatSessionId) {
+    const user = await requireAuth();
+    const { data: encRow, error: encErr } = await supabase.from('encounters')
+      .insert({ owner_id: user.id, name: `Encounter ${new Date().toLocaleString()}`, monsters: encounterState?.monsters || [] })
+      .select('id').single();
+    if (!encErr) {
+      const { data: sessRow, error: sessErr } = await supabase.from('combat_sessions')
+        .insert({ encounter_id: encRow.id, combatants: currentCombatState() })
+        .select('id').single();
+      if (!sessErr) {
+        combatSessionId = sessRow.id;
+        localStorage.setItem('combat_session_id', combatSessionId);
+      }
+    }
+  }
+
   renderCombat();
   log(`⚔ Combat begins! Round 1`);
 }
@@ -311,6 +349,8 @@ function resetCombat() {
   document.getElementById('phase-initiative').style.display = '';
   document.getElementById('phase-combat').style.display    = 'none';
   document.getElementById('round-display').style.display   = 'none';
+  localStorage.removeItem('combat_session_id');
+  combatSessionId = null;
   renderInitCards();
 }
 
@@ -320,6 +360,7 @@ function renderCombat() {
   renderTurnStrip();
   renderActivePanel();
   renderCombatantsList();
+  scheduleSave();
 }
 
 function renderTurnStrip() {
@@ -715,7 +756,33 @@ function clearLog() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────
-if (encounterState) renderInitCards();
+async function initCombatPage() {
+  await requireAuth();
+
+  if (combatSessionId) {
+    const { data, error } = await supabase.from('combat_sessions')
+      .select('combatants').eq('id', combatSessionId).single();
+    if (!error && data) {
+      const restored = data.combatants;
+      combatants = restored.combatants;
+      round = restored.round;
+      turnIndex = restored.turnIndex;
+      turnOrder = restored.turnOrder;
+      document.getElementById('phase-initiative').style.display = 'none';
+      document.getElementById('phase-combat').style.display    = '';
+      document.getElementById('round-display').style.display   = '';
+      renderCombat();
+      log('↻ Restored in-progress combat');
+      return;
+    }
+    // Stale or missing session — clear it and fall through to a fresh setup
+    localStorage.removeItem('combat_session_id');
+    combatSessionId = null;
+  }
+
+  if (encounterState) renderInitCards();
+}
+initCombatPage();
 </script>
 </body>
 </html>

@@ -6,7 +6,9 @@
 <title>D&D 5e Encounter Builder</title>
 <link rel="stylesheet" href="styles.css?v=3">
 <script src="data/habitats.js"></script>
-<script src="data/party_members.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js?v=1"></script>
+<script src="js/auth.js?v=1"></script>
 </head>
 <body>
 
@@ -265,10 +267,11 @@ const habitatTypeColors = {
 const habitatData = window.HABITAT_DATA || {};
 
 // ─── Character roster ─────────────────────────────────────────────────────────
-let savedCharacters = [];   // full character objects loaded from data/party_members.js
+let savedCharacters = [];   // full character objects loaded live from Supabase
 
-function loadCharacterRoster() {
-  savedCharacters = window.SAVED_CHARACTERS || [];
+async function loadCharacterRoster() {
+  const { data, error } = await supabase.from('characters').select('id,name,data');
+  savedCharacters = error ? [] : data.map(r => ({ id: r.id, ...r.data.ctx }));
   if (!savedCharacters.length) {
     document.getElementById('character-roster').innerHTML =
       '<div class="roster-error">No characters found</div>';
@@ -816,8 +819,12 @@ function renderMonsterCard(m) {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-render();
-loadCharacterRoster();
+async function init() {
+  await requireAuth();
+  render();
+  loadCharacterRoster();
+}
+init();
 </script>
 </body>
 </html>

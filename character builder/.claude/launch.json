@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "character-builder",
-      "runtimeExecutable": "/Users/gabrielabou-chanab/dev/character builder/.venv/bin/python",
-      "runtimeArgs": ["-c", "from app import app; app.run(port=5001, debug=False, use_reloader=False)"],
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "5001"],
       "port": 5001
     }
   ]

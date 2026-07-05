@@ -6,7 +6,7 @@
   <title>Character Vault</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/sheet.css') }}">
+  <link rel="stylesheet" href="static/css/sheet.css">
   <style>
     body {
       min-height: 100vh;
@@ -169,39 +169,62 @@
   <p class="vault-sub">Select a character to continue your adventure, or forge a new hero</p>
 </header>
 
-<div class="char-grid">
-
-  <!-- Saved characters -->
-  {% for c in characters %}
-  <div class="char-card">
-    <div class="card-name">{{ c.char_name }}</div>
-    <div class="card-identity">
-      {{ c.species_name or '—' }} &nbsp;·&nbsp;
-      {{ c.class_name or '—' }}
-    </div>
-    <div class="card-identity">{% if c.level %}Level {{ c.level }}{% endif %}</div>
-    {% if c.subclass_name %}
-    <div class="card-subclass">{{ c.subclass_name }}</div>
-    {% endif %}
-    {% if c.background_name %}
-    <div class="card-bg">{{ c.background_name }}</div>
-    {% endif %}
-    <div class="card-actions">
-      <a class="card-btn" href="{{ url_for('edit_character', filename=c.filename) }}">✏ Edit</a>
-      <a class="card-btn" href="{{ url_for('load_character', filename=c.filename) }}">Open Sheet →</a>
-    </div>
-  </div>
-  {% endfor %}
-
-  <!-- New character button — always last -->
-  <a class="new-card" href="{{ url_for('builder') }}">
+<div class="char-grid" id="char-grid">
+  <!-- New character button — always present, rendered first, saved characters inserted before it -->
+  <a class="new-card" href="build.html" id="new-card">
     <div class="new-card-icon">✦</div>
     <div class="new-card-label">New Character</div>
-    {% if not characters %}
-    <div class="empty-hint">No saved characters yet</div>
-    {% endif %}
   </a>
-
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="static/js/supabase-client.js?v=1"></script>
+<script src="static/js/auth.js?v=1"></script>
+<script>
+function cardHtml(c) {
+  var ctx = c.data.ctx || {};
+  var subclass = ctx.subclass_name
+    ? '<div class="card-subclass">' + ctx.subclass_name + '</div>' : '';
+  var bg = ctx.background_name
+    ? '<div class="card-bg">' + ctx.background_name + '</div>' : '';
+  return '<div class="char-card">' +
+    '<div class="card-name">' + (ctx.char_name || c.name) + '</div>' +
+    '<div class="card-identity">' + (ctx.species_name || '—') + ' &nbsp;·&nbsp; ' + (ctx.class_name || '—') + '</div>' +
+    '<div class="card-identity">' + (ctx.level ? 'Level ' + ctx.level : '') + '</div>' +
+    subclass + bg +
+    '<div class="card-actions">' +
+      '<a class="card-btn" href="build.html?edit=' + c.id + '">✏ Edit</a>' +
+      '<a class="card-btn" href="sheet.html?id=' + c.id + '">Open Sheet →</a>' +
+    '</div>' +
+  '</div>';
+}
+
+async function loadVault() {
+  var user = await requireAuth();
+  var { data, error } = await supabase
+    .from('characters')
+    .select('id,name,data,updated_at')
+    .eq('owner_id', user.id)
+    .order('updated_at', { ascending: false });
+
+  var grid = document.getElementById('char-grid');
+  var newCard = document.getElementById('new-card');
+
+  if (error) {
+    grid.insertAdjacentHTML('afterbegin', '<div class="empty-hint">Failed to load characters: ' + error.message + '</div>');
+    return;
+  }
+
+  if (!data.length) {
+    newCard.insertAdjacentHTML('beforeend', '<div class="empty-hint">No saved characters yet</div>');
+    return;
+  }
+
+  data.forEach(function (c) {
+    newCard.insertAdjacentHTML('beforebegin', cardHtml(c));
+  });
+}
+loadVault();
+</script>
 </body>
 </html>

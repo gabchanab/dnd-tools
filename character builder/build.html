@@ -575,6 +575,11 @@ select{cursor:pointer;appearance:none;
 
 </div><!-- /shell -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="static/js/supabase-client.js?v=1"></script>
+<script src="static/js/auth.js?v=1"></script>
+<script src="static/js/build-context.js?v=1"></script>
+<script src="static/js/spells.js?v=1"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
 // State — single object holding all selections and loaded data
@@ -609,12 +614,12 @@ function goTo(n) {
 // ═══════════════════════════════════════════════════════════════════════════
 // Open5e API — called directly from the browser (CORS allowed)
 // ═══════════════════════════════════════════════════════════════════════════
-const API = '/api/open5e';
+const API = 'https://api.open5e.com/v2';
 
 async function fetchAll(endpoint) {
   let results = [], page = 1, total = null;
   while (true) {
-    const url = `${API}/${endpoint}?limit=100&page=${page}`;
+    const url = `${API}/${endpoint}/?limit=100&page=${page}`;
     const r = await fetch(url, { headers: { Accept: 'application/json' } });
     if (!r.ok) throw new Error(`HTTP ${r.status} from Open5e (${endpoint})`);
     const data = await r.json();
@@ -1098,22 +1103,28 @@ async function submitCharacter() {
     spells: S.selectedSpells.map(s => ({ name: s.name, level: s.level, index: s.index })),
     hit_die_override: HPC.die,
     hp_rolled: HPC.method === 'roll' ? hpCalcTotal() : null,
-    // Pass pre-fetched data so Flask never needs to call Open5e
-    species_data:   S.spData  ? JSON.stringify(S.spData)  : null,
-    class_data:     S.clData  ? JSON.stringify(S.clData)  : null,
-    bg_data:        S.bgData  ? JSON.stringify(S.bgData)  : null,
-    subclass_data:  S.subData ? JSON.stringify(S.subData) : null
+    // Pre-fetched data, computed client-side alongside everything else now
+    species_data:   S.spData  || null,
+    class_data:     S.clData  || null,
+    bg_data:        S.bgData  || null,
+    subclass_data:  S.subData || null,
   };
 
   try {
-    const r    = await fetch('/api/build', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const data = await r.json();
-    if (data.ok) { window.location.href = '/sheet'; }
-    else { throw new Error(data.error || 'Unknown error'); }
+    const ctx = buildCharacterContext(payload);
+    const editId = new URLSearchParams(window.location.search).get('edit');
+    const row = { owner_id: window.__USER.id, name: ctx.char_name, data: { raw: payload, ctx } };
+
+    let id = editId;
+    if (editId) {
+      const { error } = await supabase.from('characters').update(row).eq('id', editId);
+      if (error) throw error;
+    } else {
+      const { data, error } = await supabase.from('characters').insert(row).select('id').single();
+      if (error) throw error;
+      id = data.id;
+    }
+    window.location.href = `sheet.html?id=${id}`;
   } catch (e) {
     btn.textContent = '⚔ Generate Character Sheet'; btn.disabled = false;
     alert('Error building character: ' + e.message);
@@ -1166,20 +1177,13 @@ async function slSearch() {
   document.getElementById('sl-card').classList.remove('visible');
   wrap.innerHTML = '<div class="sl-results-wrap"><div class="sl-status">Consulting the archives…</div></div>';
 
-  const params = new URLSearchParams();
   const lvl = document.getElementById('sl-level').value;
   const sch = document.getElementById('sl-school').value;
   const cls = document.getElementById('sl-class').value;
   const nm  = document.getElementById('sl-name').value.trim();
-  if (lvl !== '') params.append('level', lvl);
-  if (sch) params.append('school', sch);
-  if (cls) params.append('class', cls);
-  if (nm)  params.append('name', nm);
 
   try {
-    const res  = await fetch('/api/spells/search?' + params.toString());
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Search failed');
+    const data = await searchSpells({ level: lvl, school: sch, class: cls, name: nm });
     slRenderList(data.results);
   } catch (err) {
     wrap.innerHTML = `<div class="sl-results-wrap"><div class="sl-status">Search failed: ${err.message}</div></div>`;
@@ -1224,9 +1228,7 @@ async function slLoadSpell(idx) {
   card.className = 'sl-card visible';
   card.innerHTML = '<div class="sl-card-body"><div class="sl-status">Unfurling the scroll…</div></div>';
   try {
-    const res = await fetch('/api/spells/' + idx);
-    const s   = await res.json();
-    if (!res.ok) throw new Error(s.error || 'Load failed');
+    const s = await getSpellDetail(idx);
     _slCurrentSpell = s;
     slRenderSpell(s);
   } catch (err) {
@@ -1293,18 +1295,9 @@ function slRemoveSpell(idx) {
   slUpdateSelectedDisplay();
 }
 
-// Spell slot progression tables (mirrors app.py SLOTS)
-const SPELL_SLOTS = {
-  full: {1:[2],2:[3],3:[4,2],4:[4,3],5:[4,3,2],6:[4,3,3],7:[4,3,3,1],
-         8:[4,3,3,2],9:[4,3,3,3,1],10:[4,3,3,3,2],11:[4,3,3,3,2,1],
-         12:[4,3,3,3,2,1],13:[4,3,3,3,2,1,1],14:[4,3,3,3,2,1,1],
-         15:[4,3,3,3,2,1,1,1],16:[4,3,3,3,2,1,1,1],17:[4,3,3,3,2,1,1,1,1],
-         18:[4,3,3,3,3,1,1,1,1],19:[4,3,3,3,3,2,1,1,1],20:[4,3,3,3,3,2,2,1,1]},
-  half: {1:[],2:[2],3:[3],4:[3],5:[4,2],6:[4,2],7:[4,3],8:[4,3],9:[4,3,2],
-         10:[4,3,2],11:[4,3,3],12:[4,3,3],13:[4,3,3,1],14:[4,3,3,1],
-         15:[4,3,3,2],16:[4,3,3,2],17:[4,3,3,3,1],18:[4,3,3,3,1],
-         19:[4,3,3,3,2],20:[4,3,3,3,2]},
-};
+// Spell slot progression table now lives in static/js/build-context.js
+// (shared, fixed copy — this file used to have its own duplicate with a bug:
+// half[1] was [] instead of [2], and no pact table at all).
 const SL_ORDINALS = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
 
 function slGetSlotsInfo() {
@@ -1538,19 +1531,28 @@ function prefill(raw) {
 }
 
 async function loadAll() {
-  const isEdit = new URLSearchParams(window.location.search).get('edit') === '1';
+  window.__USER = await requireAuth();
+  const editId = new URLSearchParams(window.location.search).get('edit');
   try {
     const fetches = [
       fetchAll('species'),
       fetchAll('classes'),
       fetchAll('backgrounds'),
-      fetch('/api/homebrew').then(r => r.json()),
+      Promise.all(['subclasses', 'backgrounds', 'species', 'feats', 'classes'].map(f =>
+        fetch(`homebrew/${f}.json`).then(r => r.ok ? r.json() : []))),
     ];
-    if (isEdit) fetches.push(fetch('/api/character/builder-data').then(r => r.json()));
+    if (editId) fetches.push(
+      supabase.from('characters').select('data').eq('id', editId).single()
+        .then(({ data, error }) => { if (error) throw error; return data.data.raw; })
+    );
 
     const results = await Promise.all(fetches);
-    const [spRaw, clRaw, bgRaw, hbRaw] = results;
-    const editRaw = isEdit ? (results[4] || {}) : null;
+    const [spRaw, clRaw, bgRaw, hbParts] = results;
+    const hbRaw = {
+      subclasses: hbParts[0], backgrounds: hbParts[1], species: hbParts[2],
+      feats: hbParts[3], classes: hbParts[4],
+    };
+    const editRaw = editId ? (results[4] || {}) : null;
 
     S.allSp  = spRaw;
     // Open5e v2 /classes returns both base classes and subclasses (subclasses have subclass_of set)

@@ -12,6 +12,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "3457", "--directory", "character builder/dnd_spellbook"],
       "port": 3457
+    },
+    {
+      "name": "character-builder",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3458", "--directory", "character builder"],
+      "port": 3458
     }
   ]
 }
