@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D&D Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="character builder/static/css/sheet.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4rem 2rem 3rem;
+    }
+
+    /* ── Header — mirrors the Character Vault's header ── */
+    .hub-header { text-align: center; margin-bottom: 3rem; }
+    .hub-ornament { font-size: 1.4rem; color: var(--gold); opacity: .55;
+                    letter-spacing: .5em; display: block; margin-bottom: .8rem; }
+    .hub-title { font-family: var(--font-display); font-size: 2rem; font-weight: 700;
+                 color: var(--gold); letter-spacing: .12em;
+                 text-shadow: 0 0 32px var(--gold-glow), 0 0 8px rgba(185,155,80,.2);
+                 margin: 0 0 .4rem; }
+    .hub-sub { font-size: .82rem; color: var(--text-dim); font-style: italic;
+               font-family: var(--font-body); }
+
+    /* ── Grid — same card grid as the Character Vault ── */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.1rem;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    /* ── App link card — same shape/hover as the vault's char-card ── */
+    .app-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.6rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+      text-decoration: none;
+      text-align: center;
+      transition: border-color .2s, box-shadow .2s, transform .15s;
+    }
+    .app-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 18px var(--gold-glow), 0 4px 20px rgba(0,0,0,.18);
+      transform: translateY(-2px);
+    }
+    .app-card-icon {
+      font-size: 1.8rem;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .app-card-name {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: .04em;
+    }
+    .app-card-desc {
+      font-size: .78rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+<div class="page-texture"></div>
+
+<header class="hub-header">
+  <span class="hub-ornament">✦ ── ✦ ── ✦</span>
+  <h1 class="hub-title">D&amp;D Tools</h1>
+  <p class="hub-sub">Choose where to go</p>
+</header>
+
+<div class="app-grid">
+  <a class="app-card" href="character builder/index.html">
+    <div class="app-card-icon">✦</div>
+    <div class="app-card-name">Character Vault</div>
+    <div class="app-card-desc">Build and manage your characters</div>
+  </a>
+  <a class="app-card" href="encounter builder/index.html">
+    <div class="app-card-icon">⚔</div>
+    <div class="app-card-name">Encounter Builder</div>
+    <div class="app-card-desc">Assemble and run combat encounters</div>
+  </a>
+  <a class="app-card" href="character builder/dnd_spellbook/spellbook.html">
+    <div class="app-card-icon">✧</div>
+    <div class="app-card-name">Spell Library</div>
+    <div class="app-card-desc">Look up spells across editions</div>
+  </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js?v=1"></script>
+<script src="js/auth.js?v=1"></script>
+<script>
+requireAuth();
+</script>
+</body>
+</html>

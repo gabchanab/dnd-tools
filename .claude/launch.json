@@ -18,6 +18,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "3458", "--directory", "character builder"],
       "port": 3458
+    },
+    {
+      "name": "hub",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3459"],
+      "port": 3459
     }
   ]
 }

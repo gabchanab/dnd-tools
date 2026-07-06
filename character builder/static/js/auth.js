@@ -1,3 +1,5 @@
+const HUB_URL = 'https://gabchanab.github.io/dnd-tools/index.html';
+
 function renderSignInGate() {
   if (document.getElementById('auth-gate')) return;
   const overlay = document.createElement('div');
@@ -24,7 +26,7 @@ function renderSignInGate() {
     status.textContent = 'Sending...';
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.href },
+      options: { emailRedirectTo: HUB_URL },
     });
     status.textContent = error ? error.message : 'Check your email for the link.';
   });
