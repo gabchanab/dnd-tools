@@ -254,6 +254,7 @@ function buildCharacterContext(f) {
     class_features: classFeatures,
     subclass_features: subclassFeatures,
     resources: [],
+    death_saves: { successes: 0, failures: 0 },
     prepared_spells: preparedSpells,
     cantrips: f.cantrips || [],
     notes: f.notes || '',

@@ -395,6 +395,17 @@ function renderCombat(ctx) {
   document.getElementById('hp-max-val').textContent = ctx.hp_max;
   document.getElementById('hp-current-val').textContent = ctx.hp_current;
   document.getElementById('hp-temp-val').textContent = ctx.hp_temp;
+
+  var ds = ctx.death_saves || { successes: 0, failures: 0 };
+  [['ds-successes', ds.successes, '♥', '◇'], ['ds-failures', ds.failures, '☠', '☠']].forEach(function (entry) {
+    var containerId = entry[0], count = entry[1], onSymbol = entry[2], offSymbol = entry[3];
+    var pips = document.querySelectorAll('#' + containerId + ' .ds-pip');
+    pips.forEach(function (pip, i) {
+      var on = i < count;
+      pip.dataset.state = on ? 'on' : 'off';
+      pip.textContent = on ? onSymbol : offSymbol;
+    });
+  });
 }
 
 function renderSkills(ctx) {
@@ -1005,6 +1016,11 @@ async function saveCharacter() {
       if (!live) return sk;
       return { name: sk.name, ability: sk.ability, base_mod: live.base_mod, bonus: live.bonus, proficiency: live.proficiency };
     });
+
+    function countOnPips(containerId) {
+      return document.querySelectorAll('#' + containerId + ' .ds-pip[data-state="on"]').length;
+    }
+    ctx.death_saves = { successes: countOnPips('ds-successes'), failures: countOnPips('ds-failures') };
 
     var { error } = await supabase.from('characters')
       .update({ data: { raw: window.__RAW, ctx: ctx } })
