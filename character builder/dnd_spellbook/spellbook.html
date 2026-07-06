@@ -244,6 +244,14 @@
     }
     .toggle-switch input:checked + .toggle-track .toggle-thumb { transform: translateX(20px); }
 
+    .home-link {
+      position: fixed; top: 1.2rem; left: 1.2rem; z-index: 100;
+      font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 6px 14px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; color: var(--muted); text-decoration: none; transition: all 0.2s;
+    }
+    .home-link:hover { border-color: var(--gold); color: var(--gold-dark); box-shadow: 0 0 8px rgba(184, 134, 42, 0.3); }
+
     .school-abjuration    { background-color: #d4e3f0; border-color: #5a7ea3; color: #1e3a5f; }
     .school-conjuration   { background-color: #ddd9f5; border-color: #6b5fb8; color: #2e2766; }
     .school-divination    { background-color: #d4ebdf; border-color: #4a8a6e; color: #1f4a35; }
@@ -255,6 +263,7 @@
   </style>
 </head>
 <body>
+  <a class="home-link" href="../../index.html">← Homepage</a>
   <div class="wrap">
     <h1>Grimoire</h1>
     <p class="subtitle">A lookup of arcane and divine workings</p>
