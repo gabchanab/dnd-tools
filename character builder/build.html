@@ -612,40 +612,16 @@ function goTo(n) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Open5e API — called directly from the browser (CORS allowed)
+// Species/classes/backgrounds are pre-fetched into static/data/*.json (see
+// static/data/README) instead of being fetched live from Open5e — the live
+// /classes endpoint in particular was found to reliably time out at the page
+// sizes needed to pull the full list, regardless of retries.
 // ═══════════════════════════════════════════════════════════════════════════
-const API = 'https://api.open5e.com/v2';
-const FETCH_TIMEOUT_MS = 12000;
 
-async function fetchWithTimeout(url, options = {}) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } catch (e) {
-    if (e.name === 'AbortError') {
-      throw new Error(`Open5e didn't respond within ${FETCH_TIMEOUT_MS / 1000}s (${url}). It may be down — try again shortly.`);
-    }
-    throw e;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function fetchAll(endpoint) {
-  let results = [], page = 1, total = null;
-  while (true) {
-    const url = `${API}/${endpoint}/?limit=100&page=${page}`;
-    const r = await fetchWithTimeout(url, { headers: { Accept: 'application/json' } });
-    if (!r.ok) throw new Error(`HTTP ${r.status} from Open5e (${endpoint})`);
-    const data = await r.json();
-    results = results.concat(data.results || []);
-    if (total === null) total = data.count || 0;
-    if (!data.next || results.length >= total) break;
-    page++;
-    if (page > 15) break;
-  }
-  return results;
+async function fetchStatic(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error(`HTTP ${r.status} loading ${path}`);
+  return r.json();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1551,9 +1527,9 @@ async function loadAll() {
   const editId = new URLSearchParams(window.location.search).get('edit');
   try {
     const fetches = [
-      fetchAll('species'),
-      fetchAll('classes'),
-      fetchAll('backgrounds'),
+      fetchStatic('static/data/species.json'),
+      fetchStatic('static/data/classes.json'),
+      fetchStatic('static/data/backgrounds.json'),
       Promise.all(['subclasses', 'backgrounds', 'species', 'feats', 'classes'].map(f =>
         fetch(`homebrew/${f}.json`)
           .then(r => r.ok ? r.text() : '')
