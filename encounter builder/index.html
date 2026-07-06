@@ -572,6 +572,10 @@ function showEncounterMonsterCard(id) {
 
 function startCombat() {
   if (!state.monsters.length) return;
+  // Starting a brand new encounter should never resume a stale combat
+  // session left over from a previous fight — only a reload of combat.html
+  // itself, mid-fight, should restore anything.
+  localStorage.removeItem('combat_session_id');
   localStorage.setItem('encounter_state', JSON.stringify(state));
   window.location.href = 'combat.html';
 }
