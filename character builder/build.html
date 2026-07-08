@@ -542,7 +542,7 @@ select{cursor:pointer;appearance:none;
           <input type="radio" name="hp-method" value="custom" onchange="hpCalcUpdate()">
           Custom
         </label>
-        <input type="number" id="hp_custom-input" min="1" placeholder="Enter HP" style="display:none" oninput="hpCalcUpdate()">
+        <input type="number" id="hp-custom-input" min="1" placeholder="Enter HP" style="display:none" oninput="hpCalcUpdate()">
       </div>
       <!-- Result -->
       <div class="hp-result-row">
@@ -1413,7 +1413,6 @@ function hpCalcUpdate() {
 
   } else if (method === 'custom') {
   const customInput = document.getElementById('hp-custom-input');
-  customInput.style.display = 'inline-block';
   total = Math.max(1, parseInt(customInput.value, 10) || 1);
   breakdown = 'Custom value';
   } else {
