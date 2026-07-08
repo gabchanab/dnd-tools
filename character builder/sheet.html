@@ -224,7 +224,7 @@
             <div class="stat-badge"><div class="stat-val" id="speed-val"></div><div class="stat-lbl">Speed</div></div>
           </div>
           <div class="combat-row" id="spellcasting-row" style="margin-top:.45rem;display:none">
-            <div class="stat-badge"><div class="stat-val" id="spell-mod-val"></div><div class="stat-lbl">Spell Mod (<span id="spell-ability-val"></span>)</div></div>
+            <div class="stat-badge" id="spell-mod-badge"><div class="stat-val" id="spell-mod-val"></div><div class="stat-lbl">Spell Mod (<span id="spell-ability-val"></span>)</div></div>
             <div class="stat-badge" id="spell-attack-badge"><div class="stat-val" id="spell-attack-val"></div><div class="stat-lbl">Spell Attack</div></div>
             <div class="stat-badge"><div class="stat-val" id="spell-save-dc-val"></div><div class="stat-lbl">Spell Save DC</div></div>
           </div>
@@ -402,6 +402,8 @@ function renderCombat(ctx) {
     document.getElementById('spellcasting-row').style.display = '';
     document.getElementById('spell-mod-val').textContent = ctx.spell_mod;
     document.getElementById('spell-ability-val').textContent = ctx.spell_ability;
+    document.getElementById('spell-ability-badge').dataset.rollMod = ctx.spell_ability;
+    document.getElementById('spell-ability-badge').dataset.rollLabel = 'Spellcasting Ability';
     document.getElementById('spell-attack-val').textContent = ctx.spell_attack;
     document.getElementById('spell-attack-badge').dataset.rollMod = ctx.spell_attack;
     document.getElementById('spell-attack-badge').dataset.rollLabel = 'Spell Attack';
