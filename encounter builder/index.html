@@ -36,6 +36,11 @@
     </div>
 
     <div class="card">
+      <div class="card-title">Previous Encounters</div>
+      <div id="previous-encounters"></div>
+    </div>
+
+    <div class="card">
       <div class="card-title">Difficulty</div>
       <div class="difficulty-grid">
         <button class="diff-btn" data-diff="trivial"  onclick="setDifficulty('trivial')">Trivial<br><small>×⅓</small></button>
@@ -315,6 +320,69 @@ function importCharacter(i) {
   });
   render();
   renderCharacterRoster();
+}
+
+// ─── Previous encounters ────────────────────────────────────────────────────
+let previousEncounters = [];
+
+async function loadPreviousEncounters() {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data, error } = await supabase.from('encounters')
+    .select('id,name,monsters,updated_at')
+    .eq('owner_id', user.id)
+    .order('updated_at', { ascending: false });
+  previousEncounters = error ? [] : data;
+  renderPreviousEncounters();
+}
+
+function summariseCombatants(monsters) {
+  const counts = {};
+  (monsters || []).forEach(m => {
+    const qty = m.isPC ? 1 : (m.quantity || 1);
+    counts[m.name] = (counts[m.name] || 0) + qty;
+  });
+  const parts = Object.entries(counts).map(([name, qty]) => qty > 1 ? `${name} x${qty}` : name);
+  return parts.length ? parts.join(', ') : 'No combatants';
+}
+
+function renderPreviousEncounters() {
+  const el = document.getElementById('previous-encounters');
+  if (!previousEncounters.length) {
+    el.innerHTML = '<div class="roster-error">No saved encounters yet</div>';
+    return;
+  }
+  el.innerHTML = previousEncounters.map(enc => `
+    <div class="roster-row" onclick="openPreviousEncounter('${enc.id}')">
+      <div class="roster-info">
+        <span class="roster-name">${enc.name}</span>
+        <span class="roster-sub">${summariseCombatants(enc.monsters)}</span>
+      </div>
+      <span class="roster-badge encounter-delete-btn" title="Delete this encounter"
+            onclick="deletePreviousEncounter(event, '${enc.id}')">🗑</span>
+    </div>`).join('');
+}
+
+async function openPreviousEncounter(encounterId) {
+  const { data, error } = await supabase.from('combat_sessions')
+    .select('id').eq('encounter_id', encounterId).single();
+  if (error || !data) {
+    alert('Could not find saved combat state for this encounter.');
+    return;
+  }
+  localStorage.setItem('combat_session_id', data.id);
+  window.location.href = 'combat.html';
+}
+
+async function deletePreviousEncounter(event, encounterId) {
+  event.stopPropagation(); // don't also trigger the row's own "open" click
+  if (!confirm("Delete this encounter? This can't be undone.")) return;
+  const { error } = await supabase.from('encounters').delete().eq('id', encounterId);
+  if (error) {
+    alert('Failed to delete: ' + error.message);
+    return;
+  }
+  previousEncounters = previousEncounters.filter(e => e.id !== encounterId);
+  renderPreviousEncounters();
 }
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -829,6 +897,7 @@ async function init() {
   await requireAuth();
   render();
   loadCharacterRoster();
+  loadPreviousEncounters();
 }
 init();
 </script>
