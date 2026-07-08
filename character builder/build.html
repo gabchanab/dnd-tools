@@ -542,13 +542,15 @@ select{cursor:pointer;appearance:none;
           <input type="radio" name="hp-method" value="custom" onchange="hpCalcUpdate()">
           Custom
         </label>
+      </div>
+      <div class="hp-calc-row">
         <input type="number" id="hp-custom-input" min="1" placeholder="Enter HP" style="display:none" oninput="hpCalcUpdate()">
       </div>
       <!-- Result -->
       <div class="hp-result-row">
         <span class="hp-total" id="hp-total">— HP</span>
         <span class="hp-breakdown" id="hp-breakdown"></span>
-        <button type="button" class="hp-reroll-btn" id="hp-reroll-btn" style="display:none" onclick="hpCalcRoll()">🎲 Re-roll</button>
+        <button type="button" class="hp-reroll-btn" id="hp-reroll-btn" style="display:none; width:70px;" onclick="hpCalcRoll()">🎲 Re-roll</button>
       </div>
     </div>
 
