@@ -538,6 +538,11 @@ select{cursor:pointer;appearance:none;
           <input type="radio" name="hp-method" value="roll" onchange="hpCalcRoll()">
           Roll Hit Points
         </label>
+        <label class="hp-method-label">
+          <input type="radio" name="hp-method" value="custom" onchange="hpCalcUpdate()">
+          Custom
+        </label>
+        <input type="number" id="hp_custom-input" min="1" placeholder="Enter HP" style="display:none" oninput="hpCalcUpdate()">
       </div>
       <!-- Result -->
       <div class="hp-result-row">
@@ -1094,7 +1099,9 @@ async function submitCharacter() {
     skills,
     spells: S.selectedSpells.map(s => ({ name: s.name, level: s.level, index: s.index })),
     hit_die_override: HPC.die,
-    hp_rolled: HPC.method === 'roll' ? hpCalcTotal() : null,
+    hp_rolled: HPC.method === 'roll' ? hpCalcTotal()
+         : HPC.method === 'custom' ? parseInt(document.getElementById('hp-custom-input').value, 10)
+         : null,
     // Pre-fetched data, computed client-side alongside everything else now
     species_data:   S.spData  || null,
     class_data:     S.clData  || null,
@@ -1388,6 +1395,8 @@ function hpCalcUpdate() {
 
   const rerollBtn = document.getElementById('hp-reroll-btn');
   if (rerollBtn) rerollBtn.style.display = method === 'roll' ? 'inline-block' : 'none';
+  const customInput = document.getElementById('hp-custom-input');
+  if (customInput) customInput.style.display = method === 'custom' ? 'inline-block' : 'none';
 
   let total, breakdown;
 
@@ -1402,6 +1411,11 @@ function hpCalcUpdate() {
     parts.push(`${conPart >= 0 ? '+' : ''}${conPart} <span class="hp-lbl">(CON×${level})</span>`);
     breakdown = parts.join(' + ');
 
+  } else if (method === 'custom') {
+  const customInput = document.getElementById('hp-custom-input');
+  customInput.style.display = 'inline-block';
+  total = Math.max(1, parseInt(customInput.value, 10) || 1);
+  breakdown = 'Custom value';
   } else {
     // Ensure we have exactly level-1 stored rolls; add new ones if level increased
     while (HPC.rolls.length < level - 1) HPC.rolls.push(Math.ceil(Math.random() * die));
