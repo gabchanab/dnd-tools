@@ -240,6 +240,8 @@ function buildCharacterContext(f) {
     hp_pct: 100,
     hit_dice_display: `${level}d${hitDie}`,
     armor_class: 10 + mod(sc.dexterity),
+    armor_choice: 'none',
+    has_shield: false,
     speed: speedVal,
     initiative: fmt(mod(sc.dexterity)),
     inspiration: true,

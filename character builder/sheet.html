@@ -20,6 +20,16 @@
       backdrop-filter:blur(6px)}
     .back-btn:hover{border-color:var(--gold);color:var(--gold-dim);box-shadow:0 0 12px var(--gold-glow)}
     .edit-btn:hover{border-color:var(--gold);color:var(--gold-dim);box-shadow:0 0 12px var(--gold-glow)}
+    .armor-controls{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap}
+    .armor-controls select{flex:1;min-width:110px;font-family:var(--font-body);font-size:.78rem;
+      padding:.3rem .5rem;border-radius:6px;border:1px solid var(--border-mid);
+      background:var(--bg-inset);color:var(--text)}
+    .armor-shield-label{display:flex;align-items:center;gap:.3rem;font-family:var(--font-body);
+      font-size:.78rem;color:var(--text-mid);white-space:nowrap}
+    #add-armor-btn{font-family:var(--font-heading);font-size:.62rem;font-weight:700;
+      letter-spacing:.08em;text-transform:uppercase;padding:.3rem .7rem;border-radius:14px;
+      cursor:pointer;background:transparent;border:1px solid var(--border-mid);color:var(--gold-dim)}
+    #add-armor-btn:hover{border-color:var(--gold);box-shadow:0 0 8px var(--gold-glow)}
     .trait-list{list-style:none;display:flex;flex-direction:column;gap:4px}
     .trait-item{font-size:.90rem;color:var(--text-mid);padding:.3rem 0;
       border-bottom:1px dotted var(--border-dim)}
@@ -201,6 +211,12 @@
                   title="Click to toggle inspiration">
             ♛ Inspiration
           </button>
+
+          <div class="armor-controls">
+            <select id="armor-select"></select>
+            <label class="armor-shield-label"><input type="checkbox" id="shield-check"> Shield</label>
+            <button id="add-armor-btn" onclick="addArmor()">Add Armour</button>
+          </div>
 
           <div class="combat-row">
             <div class="stat-badge"><div class="stat-val" id="armor-class-val"></div><div class="stat-lbl">Armour Class</div></div>
@@ -406,6 +422,71 @@ function renderCombat(ctx) {
       pip.textContent = on ? onSymbol : offSymbol;
     });
   });
+
+  populateArmorSelect();
+  document.getElementById('armor-select').value = ctx.armor_choice || 'none';
+  document.getElementById('shield-check').checked = !!ctx.has_shield;
+}
+
+/* ── Armour selection — recomputes AC from armour category + shield ── */
+var ARMOR_TABLE = {
+  none:            { label: 'No Armour',     base: null, cat: 'none' },
+  padded:          { label: 'Padded',        base: 11,   cat: 'light' },
+  leather:         { label: 'Leather',       base: 11,   cat: 'light' },
+  'studded-leather': { label: 'Studded Leather', base: 12, cat: 'light' },
+  hide:            { label: 'Hide',          base: 12,   cat: 'medium' },
+  'chain-shirt':   { label: 'Chain Shirt',   base: 13,   cat: 'medium' },
+  'scale-mail':    { label: 'Scale Mail',    base: 14,   cat: 'medium' },
+  breastplate:     { label: 'Breastplate',   base: 14,   cat: 'medium' },
+  'half-plate':    { label: 'Half Plate',    base: 15,   cat: 'medium' },
+  'ring-mail':     { label: 'Ring Mail',     base: 14,   cat: 'heavy' },
+  'chain-mail':    { label: 'Chain Mail',    base: 16,   cat: 'heavy' },
+  splint:          { label: 'Splint',        base: 17,   cat: 'heavy' },
+  plate:           { label: 'Plate',         base: 18,   cat: 'heavy' },
+};
+var ARMOR_GROUPS = [
+  ['', ['none']],
+  ['Light Armour', ['padded', 'leather', 'studded-leather']],
+  ['Medium Armour', ['hide', 'chain-shirt', 'scale-mail', 'breastplate', 'half-plate']],
+  ['Heavy Armour', ['ring-mail', 'chain-mail', 'splint', 'plate']],
+];
+
+function populateArmorSelect() {
+  var sel = document.getElementById('armor-select');
+  if (sel.dataset.populated) return;
+  sel.innerHTML = ARMOR_GROUPS.map(function (group) {
+    var label = group[0], keys = group[1];
+    var options = keys.map(function (k) {
+      return '<option value="' + k + '">' + ARMOR_TABLE[k].label + '</option>';
+    }).join('');
+    return label ? '<optgroup label="' + label + '">' + options + '</optgroup>' : options;
+  }).join('');
+  sel.dataset.populated = 'true';
+}
+
+function computeArmorClass(armorKey, hasShield, dexMod) {
+  var armor = ARMOR_TABLE[armorKey] || ARMOR_TABLE.none;
+  var ac;
+  if (armor.cat === 'none') ac = 10 + dexMod;
+  else if (armor.cat === 'light') ac = armor.base + dexMod;
+  else if (armor.cat === 'medium') ac = armor.base + Math.min(dexMod, 2);
+  else ac = armor.base; // heavy — no Dex bonus
+  if (hasShield) ac += 2;
+  return ac;
+}
+
+function addArmor() {
+  var armorKey = document.getElementById('armor-select').value;
+  var hasShield = document.getElementById('shield-check').checked;
+  var dexAbility = (window.__CTX.abilities || []).find(function (a) { return a.key === 'dexterity'; });
+  var dexMod = dexAbility ? dexAbility.modifier : 0;
+
+  var newAC = computeArmorClass(armorKey, hasShield, dexMod);
+  document.getElementById('armor-class-val').textContent = newAC;
+
+  window.__CTX.armor_class = newAC;
+  window.__CTX.armor_choice = armorKey;
+  window.__CTX.has_shield = hasShield;
 }
 
 function renderSkills(ctx) {
@@ -988,6 +1069,10 @@ async function saveCharacter() {
     ctx.hp_pct = ctx.hp_max ? Math.round((ctx.hp_current / ctx.hp_max) * 100) : 0;
 
     ctx.inspiration = document.getElementById('inspiration-btn').dataset.inspired === 'true';
+
+    ctx.armor_choice = document.getElementById('armor-select').value;
+    ctx.has_shield = document.getElementById('shield-check').checked;
+    ctx.armor_class = window.__CTX.armor_class;
 
     var ordinals = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
     var slotsByOrdinal = {};
