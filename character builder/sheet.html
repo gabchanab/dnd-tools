@@ -400,6 +400,7 @@ function renderCombat(ctx) {
 
   if (ctx.spell_save_dc) {
     document.getElementById('spellcasting-row').style.display = '';
+    document.getElementById('spell-ability-val').textContent = ctx.spell_ability;
     document.getElementById('spell-mod-val').textContent = ctx.spell_mod;
     document.getElementById('spell-mod-badge').dataset.rollMod = ctx.spell_mod;
     document.getElementById('spell-mod-badge').dataset.rollLabel = 'Spellcasting Ability';
