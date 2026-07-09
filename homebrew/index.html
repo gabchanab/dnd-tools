@@ -398,6 +398,7 @@ function renderCreatureCard(m) {
 // ─── List, filter, delete ───────────────────────────────────────────────────
 let allItems = [];
 let currentFilter = 'all';
+let editingId = null;
 
 async function loadItems() {
   const { data, error } = await supabase.from('homebrew_items')
@@ -434,6 +435,7 @@ function renderList() {
         '<div class="hb-row-text"><span class="hb-row-name">' + it.name + '</span>' +
         '<span class="hb-row-sub">' + it.type + ' · ' + date + '</span></div>' +
       '</div>' +
+      '<span class="hb-delete-btn" title="Edit" onclick="startEdit(event, \'' + it.id + '\')">✏</span>' +
       '<span class="hb-delete-btn" title="Delete" onclick="deleteItem(event, \'' + it.id + '\')">🗑</span>' +
     '</div>';
   }).join('');
@@ -472,13 +474,75 @@ document.addEventListener('click', function (e) {
 
 // ─── Create flow ─────────────────────────────────────────────────────────────
 function startCreate(type) {
+  editingId = null;
+  document.querySelector('#hb-form-spell button.hb-btn-primary').textContent = 'Create Spell';
+  document.querySelector('#hb-form-creature button.hb-btn-primary').textContent = 'Create Creature';
   document.getElementById('hb-step1').classList.remove('active');
   document.getElementById('hb-step2').classList.add('active');
   document.getElementById('hb-form-spell').style.display = type === 'spell' ? '' : 'none';
   document.getElementById('hb-form-creature').style.display = type === 'creature' ? '' : 'none';
 }
 
+const ACTION_TYPE_LABELS = { ACTION: 'Action', BONUS_ACTION: 'Bonus Action', REACTION: 'Reaction',
+  LEGENDARY_ACTION: 'Legendary Action', LAIR_ACTION: 'Lair Action' };
+
+function startEdit(event, id) {
+  event.stopPropagation();
+  hbClose();
+  const item = allItems.find(it => it.id === id);
+  if (!item) return;
+  const d = item.data;
+  startCreate(item.type);
+  editingId = id;
+
+  if (item.type === 'spell') {
+    document.querySelector('#hb-form-spell button.hb-btn-primary').textContent = 'Save Changes';
+    document.getElementById('sp-name').value = d.name || '';
+    document.getElementById('sp-level').value = d.level ?? 1;
+    document.getElementById('sp-school').value = d.school_index || 'evocation';
+    document.getElementById('sp-casting').value = d.casting_time || '';
+    document.getElementById('sp-range').value = d.range || '';
+    document.getElementById('sp-duration').value = d.duration || '';
+    const comps = (d.components || '').split(',').map(s => s.trim());
+    document.getElementById('sp-verbal').checked = comps.includes('V');
+    document.getElementById('sp-somatic').checked = comps.includes('S');
+    const hasMaterial = comps.includes('M');
+    document.getElementById('sp-material').checked = hasMaterial;
+    document.getElementById('sp-material-text').style.display = hasMaterial ? 'inline-block' : 'none';
+    document.getElementById('sp-material-text').value = d.material || '';
+    document.getElementById('sp-ritual').checked = !!d.ritual;
+    document.getElementById('sp-concentration').checked = !!d.concentration;
+    document.getElementById('sp-desc').value = (d.desc || []).join('\n');
+    document.getElementById('sp-higher').value = (d.higher_level || []).join('\n');
+    document.getElementById('sp-classes').value = (d.classes || []).join(', ');
+  } else {
+    document.querySelector('#hb-form-creature button.hb-btn-primary').textContent = 'Save Changes';
+    document.getElementById('cr-name').value = d.name || '';
+    document.getElementById('cr-size').value = (d.size && d.size.name) || d.size || 'Medium';
+    document.getElementById('cr-type').value = (d.type && d.type.name) || d.type || 'Beast';
+    document.getElementById('cr-alignment').value = d.alignment || '';
+    document.getElementById('cr-cr').value = d.challenge_rating ?? 1;
+    document.getElementById('cr-ac').value = d.armor_class ?? 12;
+    document.getElementById('cr-hp').value = d.hit_points ?? 20;
+    document.getElementById('cr-hitdice').value = d.hit_dice || '';
+    document.getElementById('cr-init').value = d.initiative_bonus ?? 0;
+    const speed = d.speed_all || {};
+    document.getElementById('cr-speed-walk').value = speed.walk ?? 30;
+    document.getElementById('cr-speed-fly').value = speed.fly ?? 0;
+    document.getElementById('cr-speed-swim').value = speed.swim ?? 0;
+    document.getElementById('cr-speed-climb').value = speed.climb ?? 0;
+    document.getElementById('cr-speed-burrow').value = speed.burrow ?? 0;
+    const abbrevs = { strength:'str', dexterity:'dex', constitution:'con', intelligence:'int', wisdom:'wis', charisma:'cha' };
+    const abs = d.ability_scores || {};
+    Object.keys(abbrevs).forEach(a => { document.getElementById('cr-' + abbrevs[a]).value = abs[a] ?? 10; });
+    document.getElementById('cr-traits').value = (d.traits || []).map(t => t.name + ' | ' + t.desc).join('\n');
+    document.getElementById('cr-actions').value = (d.actions || [])
+      .map(a => a.name + ' | ' + (ACTION_TYPE_LABELS[a.action_type] || 'Action') + ' | ' + a.desc).join('\n');
+  }
+}
+
 function backToStep1() {
+  editingId = null;
   document.getElementById('hb-step2').classList.remove('active');
   document.getElementById('hb-step1').classList.add('active');
 }
@@ -502,7 +566,7 @@ async function submitSpell() {
 
   const { data: { user } } = await supabase.auth.getUser();
   const data = {
-    index: null, name, level,
+    index: editingId ? 'hb-' + editingId : null, name, level,
     school_index: school, school_name: SCHOOL_NAMES[school],
     casting_time: document.getElementById('sp-casting').value.trim(),
     range: document.getElementById('sp-range').value.trim(),
@@ -517,14 +581,19 @@ async function submitSpell() {
     _homebrew: true,
   };
 
-  const { data: row, error } = await supabase.from('homebrew_items')
-    .insert({ owner_id: user.id, type: 'spell', name, data }).select('id').single();
+  let error;
+  if (editingId) {
+    ({ error } = await supabase.from('homebrew_items').update({ name, data }).eq('id', editingId));
+  } else {
+    const { data: row, error: insertErr } = await supabase.from('homebrew_items')
+      .insert({ owner_id: user.id, type: 'spell', name, data }).select('id').single();
+    error = insertErr;
+    if (!error) { data.index = 'hb-' + row.id; await supabase.from('homebrew_items').update({ data }).eq('id', row.id); }
+  }
   if (error) { status.textContent = 'Failed: ' + error.message; return; }
-  data.index = 'hb-' + row.id;
-  await supabase.from('homebrew_items').update({ data }).eq('id', row.id);
 
   status.style.color = '#2d7a3a';
-  status.textContent = '✓ Created';
+  status.textContent = editingId ? '✓ Saved' : '✓ Created';
   ['sp-name','sp-casting','sp-range','sp-duration','sp-desc','sp-higher','sp-classes','sp-material-text'].forEach(id => document.getElementById(id).value = '');
   await loadItems();
   setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
@@ -561,7 +630,7 @@ async function submitCreature() {
 
   const { data: { user } } = await supabase.auth.getUser();
   const data = {
-    key: null, name,
+    key: editingId ? 'hb-' + editingId : null, name,
     challenge_rating: cr,
     hit_points: parseInt(document.getElementById('cr-hp').value, 10) || 1,
     armor_class: parseInt(document.getElementById('cr-ac').value, 10) || 10,
@@ -583,14 +652,19 @@ async function submitCreature() {
     _homebrew: true,
   };
 
-  const { data: row, error } = await supabase.from('homebrew_items')
-    .insert({ owner_id: user.id, type: 'creature', name, data }).select('id').single();
+  let error;
+  if (editingId) {
+    ({ error } = await supabase.from('homebrew_items').update({ name, data }).eq('id', editingId));
+  } else {
+    const { data: row, error: insertErr } = await supabase.from('homebrew_items')
+      .insert({ owner_id: user.id, type: 'creature', name, data }).select('id').single();
+    error = insertErr;
+    if (!error) { data.key = 'hb-' + row.id; await supabase.from('homebrew_items').update({ data }).eq('id', row.id); }
+  }
   if (error) { status.textContent = 'Failed: ' + error.message; return; }
-  data.key = 'hb-' + row.id;
-  await supabase.from('homebrew_items').update({ data }).eq('id', row.id);
 
   status.style.color = '#2d7a3a';
-  status.textContent = '✓ Created';
+  status.textContent = editingId ? '✓ Saved' : '✓ Created';
   ['cr-name','cr-alignment','cr-hitdice','cr-traits','cr-actions'].forEach(id => document.getElementById(id).value = '');
   await loadItems();
   setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
