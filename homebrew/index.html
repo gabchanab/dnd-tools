@@ -57,6 +57,7 @@
     .hb-row-name { font-size: .85rem; font-weight: 600; color: var(--text); white-space: nowrap;
       overflow: hidden; text-overflow: ellipsis; }
     .hb-row-sub { font-size: .68rem; color: var(--text-dim); font-style: italic; }
+    .hb-row-actions { display: flex; gap: 2px; flex-shrink: 0; }
     .hb-delete-btn { font-size: .85rem; padding: 4px 8px; border-radius: 4px; flex-shrink: 0;
       transition: background .1s; }
     .hb-delete-btn:hover { background: rgba(180,50,50,.15); color: #a33; }
@@ -435,8 +436,10 @@ function renderList() {
         '<div class="hb-row-text"><span class="hb-row-name">' + it.name + '</span>' +
         '<span class="hb-row-sub">' + it.type + ' · ' + date + '</span></div>' +
       '</div>' +
-      '<span class="hb-delete-btn" title="Edit" onclick="startEdit(event, \'' + it.id + '\')">✏</span>' +
-      '<span class="hb-delete-btn" title="Delete" onclick="deleteItem(event, \'' + it.id + '\')">🗑</span>' +
+      '<div class="hb-row-actions">' +
+        '<span class="hb-delete-btn" title="Edit" onclick="startEdit(event, \'' + it.id + '\')">✏</span>' +
+        '<span class="hb-delete-btn" title="Delete" onclick="deleteItem(event, \'' + it.id + '\')">🗑</span>' +
+      '</div>' +
     '</div>';
   }).join('');
 }
