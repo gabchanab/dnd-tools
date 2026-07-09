@@ -30,6 +30,31 @@
       letter-spacing:.08em;text-transform:uppercase;padding:.3rem .7rem;border-radius:14px;
       cursor:pointer;background:transparent;border:1px solid var(--border-mid);color:var(--gold-dim)}
     #add-armor-btn:hover{border-color:var(--gold);box-shadow:0 0 8px var(--gold-glow)}
+    .resource-row{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;
+      border-bottom:1px dotted var(--border-dim);flex-wrap:wrap}
+    .resource-row:last-child{border-bottom:none}
+    .resource-name{font-family:var(--font-heading);font-size:.72rem;font-weight:700;
+      color:var(--text);letter-spacing:.03em}
+    .resource-rest-tag{font-family:var(--font-body);font-size:.68rem;font-weight:400;
+      color:var(--text-dim);font-style:italic}
+    .resource-pips{display:flex;gap:.25rem}
+    .resource-count{font-family:var(--font-body);font-size:.78rem;color:var(--text-mid);margin-left:auto}
+    .resource-use-btn,.resource-rest-btn,#add-resource-btn{font-family:var(--font-heading);
+      font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .7rem;border-radius:14px;cursor:pointer;background:transparent;
+      border:1px solid var(--border-mid);color:var(--gold-dim)}
+    .resource-use-btn:hover,.resource-rest-btn:hover,#add-resource-btn:hover{
+      border-color:var(--gold);box-shadow:0 0 8px var(--gold-glow)}
+    .resource-use-btn:disabled{opacity:.35;cursor:not-allowed}
+    .resource-use-btn:disabled:hover{border-color:var(--border-mid);box-shadow:none}
+    .resource-add-row{display:flex;align-items:center;gap:.4rem;margin-top:.6rem;
+      padding-top:.6rem;border-top:1px dashed var(--border-dim);flex-wrap:wrap}
+    .resource-add-row input,.resource-add-row select{font-family:var(--font-body);
+      font-size:.78rem;padding:.3rem .5rem;border-radius:6px;border:1px solid var(--border-mid);
+      background:var(--bg-inset);color:var(--text)}
+    .resource-add-row input[type=text]{flex:1;min-width:110px}
+    .resource-add-row input[type=number]{width:70px}
+    .resource-rest-row{display:flex;gap:.4rem;margin-top:.6rem}
     .trait-list{list-style:none;display:flex;flex-direction:column;gap:4px}
     .trait-item{font-size:.90rem;color:var(--text-mid);padding:.3rem 0;
       border-bottom:1px dotted var(--border-dim)}
@@ -299,6 +324,24 @@
           <div id="spell-slots-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem .75rem"></div>
         </section>
 
+        <section class="panel" id="resources-section" style="display:none">
+          <h2 class="panel-title">Resources</h2>
+          <div id="resources-body"></div>
+          <div class="resource-add-row">
+            <input type="text" id="resource-name-input" placeholder="Ability name">
+            <input type="number" id="resource-max-input" placeholder="Uses" min="1">
+            <select id="resource-rest-input">
+              <option value="short">Short Rest</option>
+              <option value="long">Long Rest</option>
+            </select>
+            <button type="button" id="add-resource-btn" onclick="addResource()">+ Add</button>
+          </div>
+          <div class="resource-rest-row">
+            <button type="button" class="resource-rest-btn" onclick="shortRest()">🌙 Short Rest</button>
+            <button type="button" class="resource-rest-btn" onclick="longRest()">🌕 Long Rest</button>
+          </div>
+        </section>
+
         <section class="panel" id="prepared-spells-section" style="display:none">
           <h2 class="panel-title">Prepared Spells</h2>
           <div id="prepared-spell-list"></div>
@@ -312,11 +355,6 @@
         <section class="panel" id="subclass-features-section" style="display:none">
           <h2 class="panel-title" id="subclass-features-title"></h2>
           <ul class="trait-list" id="subclass-features-body"></ul>
-        </section>
-
-        <section class="panel" id="resources-section" style="display:none">
-          <h2 class="panel-title">Resources</h2>
-          <div id="resources-body"></div>
         </section>
 
         <section class="panel" id="notes-section" style="display:none">
@@ -625,13 +663,50 @@ function renderSubclassFeatures(ctx) {
 }
 
 function renderResources(ctx) {
-  if (!ctx.resources.length) return;
   document.getElementById('resources-section').style.display = '';
-  document.getElementById('resources-body').innerHTML = ctx.resources.map(function (res) {
+  var list = ctx.resources || [];
+  document.getElementById('resources-body').innerHTML = list.length ? list.map(function (res, i) {
     var pips = [];
-    for (var i = 0; i < res.max_uses; i++) pips.push('<span class="pip ' + (i < res.current_uses ? 'active' : 'spent') + '">◆</span>');
-    return '<div class="resource-row"><div class="resource-name">' + res.name + '</div><div class="resource-pips">' + pips.join('') + '</div></div>';
-  }).join('');
+    for (var j = 0; j < res.max_uses; j++) pips.push('<span class="pip ' + (j < res.current_uses ? 'active' : 'spent') + '">◆</span>');
+    var restLabel = res.rest === 'long' ? 'Long Rest' : 'Short Rest';
+    return '<div class="resource-row">' +
+      '<div class="resource-name">' + res.name + ' <span class="resource-rest-tag">(' + restLabel + ')</span></div>' +
+      '<div class="resource-pips">' + pips.join('') + '</div>' +
+      '<span class="resource-count">' + res.current_uses + '/' + res.max_uses + '</span>' +
+      '<button type="button" class="resource-use-btn" onclick="useResource(' + i + ')"' + (res.current_uses <= 0 ? ' disabled' : '') + '>Use</button>' +
+      '</div>';
+  }).join('') : '<p class="notes-text" style="opacity:.6">No limited-use abilities yet — add one below.</p>';
+}
+
+function addResource() {
+  var nameInput = document.getElementById('resource-name-input');
+  var maxInput  = document.getElementById('resource-max-input');
+  var restInput = document.getElementById('resource-rest-input');
+  var name = nameInput.value.trim();
+  var max  = parseInt(maxInput.value, 10);
+  if (!name || !max || max < 1) return;
+  window.__CTX.resources = window.__CTX.resources || [];
+  window.__CTX.resources.push({ name: name, max_uses: max, current_uses: max, rest: restInput.value });
+  nameInput.value = '';
+  maxInput.value = '';
+  renderResources(window.__CTX);
+}
+
+function useResource(i) {
+  var res = (window.__CTX.resources || [])[i];
+  if (!res || res.current_uses <= 0) return;
+  res.current_uses--;
+  renderResources(window.__CTX);
+}
+
+function shortRest() {
+  (window.__CTX.resources || []).forEach(function (r) { if (r.rest === 'short') r.current_uses = r.max_uses; });
+  renderResources(window.__CTX);
+}
+
+function longRest() {
+  (window.__CTX.resources || []).forEach(function (r) { r.current_uses = r.max_uses; });
+  renderResources(window.__CTX);
 }
 
 function renderNotes(ctx) {
