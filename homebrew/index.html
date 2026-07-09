@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homebrew</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../character builder/static/css/sheet.css">
+  <style>
+    body { padding: 3rem 1.2rem; }
+    .back-btn{position:fixed;top:1.2rem;left:1.2rem;z-index:100;
+      font-family:var(--font-heading);font-size:.60rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+      padding:.45rem 1.1rem;background:rgba(255,250,248,.90);border:1px solid var(--border);
+      border-radius:20px;color:var(--text-dim);text-decoration:none;transition:all .2s;
+      backdrop-filter:blur(6px)}
+    .back-btn:hover{border-color:var(--gold);color:var(--gold-dim);box-shadow:0 0 12px var(--gold-glow)}
+
+    .hb-wrap { max-width: 760px; margin: 0 auto; }
+    .hb-header { text-align: center; margin-bottom: 2rem; }
+    .hb-ornament { font-size: 1.4rem; color: var(--gold); opacity: .55;
+                   letter-spacing: .5em; display: block; margin-bottom: .8rem; }
+    .hb-title { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700;
+                color: var(--gold); letter-spacing: .1em;
+                text-shadow: 0 0 32px var(--gold-glow), 0 0 8px rgba(185,155,80,.2);
+                margin: 0 0 .4rem; }
+    .hb-sub { font-size: .82rem; color: var(--text-dim); font-style: italic; font-family: var(--font-body); }
+
+    .panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+             padding: 1.4rem 1.3rem; margin-bottom: 1.5rem; }
+    .panel-title { font-family: var(--font-heading); font-size: .75rem; font-weight: 700;
+                   letter-spacing: .1em; text-transform: uppercase; color: var(--gold-dim);
+                   margin: 0 0 1rem; }
+
+    /* ── Filter + search ── */
+    .hb-filter-row { display: flex; gap: .5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filter-chip{font-family:var(--font-heading);font-size:.60rem;font-weight:600;letter-spacing:.08em;padding:4px 12px;
+      border-radius:20px;border:1px solid var(--border);cursor:pointer;
+      background:rgba(255,248,245,.70);color:var(--text-dim);transition:all .15s;user-select:none}
+    .filter-chip:hover{border-color:var(--border-mid);color:var(--text-mid)}
+    .filter-chip.active{background:var(--gold-glow);border-color:var(--gold);color:var(--gold-dim)}
+    #hb-search { flex: 1; min-width: 140px; font-family: var(--font-body); font-size: .82rem;
+      padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-mid);
+      background: var(--bg-inset); color: var(--text); }
+
+    /* ── List rows (mirrors encounter builder's roster-row / Previous Encounters) ── */
+    .hb-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+      padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg-inset); margin-bottom: 6px; cursor: pointer; transition: all .15s; }
+    .hb-row:hover { border-color: var(--gold); }
+    .hb-row-info { display: flex; align-items: center; gap: .55rem; min-width: 0; }
+    .hb-row-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; background: rgba(255,255,255,.5); }
+    .hb-row-icon svg { width: 15px; height: 15px; }
+    .hb-row-icon.hb-creature-icon { background: var(--gold-glow); color: var(--gold-dim); font-size: .8rem; }
+    .hb-row-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .hb-row-name { font-size: .85rem; font-weight: 600; color: var(--text); white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; }
+    .hb-row-sub { font-size: .68rem; color: var(--text-dim); font-style: italic; }
+    .hb-delete-btn { font-size: .85rem; padding: 4px 8px; border-radius: 4px; flex-shrink: 0;
+      transition: background .1s; }
+    .hb-delete-btn:hover { background: rgba(180,50,50,.15); color: #a33; }
+    .hb-empty { font-size: .8rem; color: var(--text-dim); font-style: italic; padding: 1rem 0; text-align: center; }
+
+    /* Accordion detail — reuses the sheet's Prepared Spells / spell-card classes */
+    .spe-detail{overflow:hidden;border:1px solid var(--border-mid);border-radius:4px;
+      margin:.25rem 0 .6rem;background:rgba(255,250,248,.97);animation:spe-in .2s ease both}
+    @keyframes spe-in{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+    .sl-card-head{padding:.85rem 1rem;display:flex;align-items:center;gap:11px;border-bottom:2px solid}
+    .sl-card-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;flex-shrink:0;background:rgba(255,255,255,.55)}
+    .sl-card-icon svg{width:19px;height:19px}
+    .sl-card-name{font-family:var(--font-heading);font-size:.95rem;font-weight:600;
+      letter-spacing:.03em;margin:0;color:inherit}
+    .sl-card-sub{font-style:italic;font-size:.74rem;opacity:.8;margin-top:1px}
+    .sl-card-tags{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
+    .sl-tag{font-size:.52rem;letter-spacing:.10em;text-transform:uppercase;padding:2px 6px;
+      border-radius:2px;background:rgba(255,255,255,.55);font-weight:600;font-family:var(--font-heading)}
+    .sl-card-body{padding:.85rem 1rem}
+    .sl-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px;
+      padding:.6rem 0 .85rem;border-bottom:1px dashed var(--border);margin-bottom:.75rem}
+    .sl-meta-cell{display:flex;gap:7px;align-items:flex-start}
+    .sl-meta-cell svg{width:16px;height:16px;flex-shrink:0;opacity:.4;margin-top:1px}
+    .sl-meta-label{font-size:.56rem;color:var(--text-dim);text-transform:uppercase;
+      letter-spacing:.10em;font-family:var(--font-heading)}
+    .sl-meta-val{font-size:.83rem;color:var(--text)}
+    .sl-desc{font-size:.85rem;line-height:1.72;color:var(--text-mid)}
+    .sl-desc p{margin:0 0 .6em}.sl-desc p:last-child{margin-bottom:0}
+    .sl-higher{margin-top:.75rem;padding:.5rem .8rem;background:var(--gold-glow);
+      border-left:3px solid var(--gold);font-size:.81rem;color:var(--text-mid);border-radius:0 3px 3px 0}
+    .sl-classes-row{margin-top:.75rem;padding-top:.65rem;border-top:1px dashed var(--border);
+      display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+    .sl-classes-label{font-size:.55rem;color:var(--text-dim);text-transform:uppercase;
+      letter-spacing:.10em;margin-right:4px;font-family:var(--font-heading)}
+    .sl-class-chip{font-size:.70rem;padding:2px 7px;background:rgba(217,191,119,.15);
+      border:1px solid var(--border-dim);border-radius:2px;color:var(--text-mid)}
+    .sl-abjuration  {background-color:rgba(90,126,163,.15);border-color:rgba(90,126,163,.65);color:#1e3a5f}
+    .sl-conjuration {background-color:rgba(107,95,184,.15);border-color:rgba(107,95,184,.65);color:#2e2766}
+    .sl-divination  {background-color:rgba(74,138,110,.15);border-color:rgba(74,138,110,.65);color:#1f4a35}
+    .sl-enchantment {background-color:rgba(168,83,122,.15);border-color:rgba(168,83,122,.65);color:#5a1e3a}
+    .sl-evocation   {background-color:rgba(181,96,53,.15); border-color:rgba(181,96,53,.65); color:#5a2410}
+    .sl-illusion    {background-color:rgba(122,95,168,.15);border-color:rgba(122,95,168,.65);color:#2a1f5a}
+    .sl-necromancy  {background-color:rgba(90,86,78,.15);  border-color:rgba(90,86,78,.65);  color:#2a2620}
+    .sl-transmutation{background-color:rgba(168,130,58,.15);border-color:rgba(168,130,58,.65);color:#5a3f10}
+
+    /* Creature detail card */
+    .cr-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px,1fr)); gap: 9px;
+      padding: .6rem 0 .85rem; border-bottom: 1px dashed var(--border); margin-bottom: .75rem; }
+    .cr-stat-label { font-size: .56rem; color: var(--text-dim); text-transform: uppercase;
+      letter-spacing: .1em; font-family: var(--font-heading); }
+    .cr-stat-val { font-size: .95rem; color: var(--text); font-weight: 600; }
+    .cr-abilities { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: .75rem; }
+    .cr-ability-cell { text-align: center; background: var(--bg-inset); border-radius: 6px; padding: 6px 2px; }
+    .cr-ability-label { font-size: .55rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .08em; }
+    .cr-ability-score { font-size: .82rem; color: var(--text); font-weight: 600; }
+    .cr-ability-save { font-size: .62rem; color: var(--text-dim); }
+    .cr-section-title { font-size: .62rem; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--gold-dim); font-family: var(--font-heading); margin: .6rem 0 .3rem; }
+    .cr-trait { font-size: .84rem; color: var(--text-mid); margin: 0 0 .5em; }
+
+    /* ── Create flow ── */
+    .hb-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 1rem; }
+    .hb-type-card { background: var(--bg-inset); border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.4rem 1rem; display: flex; flex-direction: column; align-items: center; gap: .4rem;
+      cursor: pointer; transition: all .15s; text-align: center; }
+    .hb-type-card:hover { border-color: var(--gold); box-shadow: 0 0 14px var(--gold-glow); }
+    .hb-type-card-icon { font-size: 1.6rem; color: var(--gold); }
+    .hb-type-card-name { font-family: var(--font-heading); font-size: .85rem; font-weight: 700; color: var(--text); }
+
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .hb-form-row { display: flex; gap: .6rem; margin-bottom: .7rem; flex-wrap: wrap; }
+    .hb-form-field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 110px; }
+    .hb-form-field label { font-size: .6rem; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-dim); font-family: var(--font-heading); }
+    .hb-form-field input, .hb-form-field select, .hb-form-field textarea {
+      font-family: var(--font-body); font-size: .82rem; padding: 6px 8px; border-radius: 6px;
+      border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); }
+    .hb-form-field textarea { min-height: 70px; resize: vertical; }
+    .hb-check-row { display: flex; gap: 1rem; align-items: center; margin-bottom: .7rem; flex-wrap: wrap; }
+    .hb-check-row label { display: flex; align-items: center; gap: .3rem; font-size: .8rem; color: var(--text-mid); }
+    .hb-btn { font-family: var(--font-heading); font-size: .68rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: 7px 16px; border-radius: 16px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border-mid); color: var(--gold-dim); }
+    .hb-btn:hover { border-color: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
+    .hb-btn-primary { background: var(--gold-glow); border-color: var(--gold); }
+    .hb-form-status { font-size: .78rem; margin-top: .6rem; }
+  </style>
+</head>
+<body>
+
+<a class="back-btn" href="../index.html">← Homepage</a>
+
+<div class="hb-wrap">
+  <header class="hb-header">
+    <span class="hb-ornament">✦ ── ✦ ── ✦</span>
+    <h1 class="hb-title">Homebrew</h1>
+    <p class="hb-sub">Create and browse custom spells and creatures</p>
+  </header>
+
+  <section class="panel">
+    <div class="panel-title">Existing Homebrew</div>
+    <div class="hb-filter-row">
+      <span class="filter-chip active" data-type="all" onclick="setFilter('all')">All</span>
+      <span class="filter-chip" data-type="spell" onclick="setFilter('spell')">Spell</span>
+      <span class="filter-chip" data-type="creature" onclick="setFilter('creature')">Creature</span>
+      <input type="text" id="hb-search" placeholder="Search by name" oninput="renderList()">
+    </div>
+    <div id="hb-list"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title">Create New</div>
+
+    <div class="step-panel active" id="hb-step1">
+      <div class="hb-type-grid">
+        <div class="hb-type-card" onclick="startCreate('spell')">
+          <div class="hb-type-card-icon">✧</div>
+          <div class="hb-type-card-name">Spell</div>
+        </div>
+        <div class="hb-type-card" onclick="startCreate('creature')">
+          <div class="hb-type-card-icon">⚔</div>
+          <div class="hb-type-card-name">Creature</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="hb-step2">
+      <button class="hb-btn" style="margin-bottom:1rem" onclick="backToStep1()">← Back</button>
+
+      <div id="hb-form-spell" style="display:none">
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:2"><label>Name</label><input type="text" id="sp-name"></div>
+          <div class="hb-form-field"><label>Level</label>
+            <select id="sp-level">
+              <option value="0">Cantrip</option>
+              <option value="1" selected>1st</option><option value="2">2nd</option><option value="3">3rd</option>
+              <option value="4">4th</option><option value="5">5th</option><option value="6">6th</option>
+              <option value="7">7th</option><option value="8">8th</option><option value="9">9th</option>
+            </select>
+          </div>
+          <div class="hb-form-field"><label>School</label>
+            <select id="sp-school">
+              <option value="abjuration">Abjuration</option>
+              <option value="conjuration">Conjuration</option>
+              <option value="divination">Divination</option>
+              <option value="enchantment">Enchantment</option>
+              <option value="evocation" selected>Evocation</option>
+              <option value="illusion">Illusion</option>
+              <option value="necromancy">Necromancy</option>
+              <option value="transmutation">Transmutation</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field"><label>Casting Time</label><input type="text" id="sp-casting" placeholder="1 action"></div>
+          <div class="hb-form-field"><label>Range</label><input type="text" id="sp-range" placeholder="60 feet"></div>
+          <div class="hb-form-field"><label>Duration</label><input type="text" id="sp-duration" placeholder="Instantaneous"></div>
+        </div>
+        <div class="hb-check-row">
+          <label><input type="checkbox" id="sp-verbal" checked> Verbal</label>
+          <label><input type="checkbox" id="sp-somatic" checked> Somatic</label>
+          <label><input type="checkbox" id="sp-material" onchange="document.getElementById('sp-material-text').style.display=this.checked?'inline-block':'none'"> Material</label>
+          <input type="text" id="sp-material-text" placeholder="material component" style="display:none;flex:1;min-width:120px;font-family:var(--font-body);font-size:.8rem;padding:5px 8px;border-radius:6px;border:1px solid var(--border-mid);background:var(--bg-inset);color:var(--text)">
+          <label><input type="checkbox" id="sp-ritual"> Ritual</label>
+          <label><input type="checkbox" id="sp-concentration"> Concentration</label>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Description</label><textarea id="sp-desc" placeholder="One paragraph per line"></textarea></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>At Higher Levels (optional)</label><textarea id="sp-higher"></textarea></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Classes (comma-separated)</label><input type="text" id="sp-classes" placeholder="Wizard, Sorcerer"></div>
+        </div>
+        <button class="hb-btn hb-btn-primary" onclick="submitSpell()">Create Spell</button>
+        <div class="hb-form-status" id="sp-status"></div>
+      </div>
+
+      <div id="hb-form-creature" style="display:none">
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:2"><label>Name</label><input type="text" id="cr-name"></div>
+          <div class="hb-form-field"><label>Size</label>
+            <select id="cr-size">
+              <option>Tiny</option><option>Small</option><option selected>Medium</option>
+              <option>Large</option><option>Huge</option><option>Gargantuan</option>
+            </select>
+          </div>
+          <div class="hb-form-field"><label>Type</label>
+            <select id="cr-type">
+              <option>Aberration</option><option selected>Beast</option><option>Celestial</option>
+              <option>Construct</option><option>Dragon</option><option>Elemental</option>
+              <option>Fey</option><option>Fiend</option><option>Giant</option>
+              <option>Humanoid</option><option>Monstrosity</option><option>Ooze</option>
+              <option>Plant</option><option>Undead</option>
+            </select>
+          </div>
+          <div class="hb-form-field"><label>Alignment</label><input type="text" id="cr-alignment" placeholder="Unaligned"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field"><label>Challenge Rating</label><input type="number" id="cr-cr" step="0.125" min="0" value="1"></div>
+          <div class="hb-form-field"><label>Armour Class</label><input type="number" id="cr-ac" value="12"></div>
+          <div class="hb-form-field"><label>Hit Points</label><input type="number" id="cr-hp" value="20"></div>
+          <div class="hb-form-field"><label>Hit Dice (optional)</label><input type="text" id="cr-hitdice" placeholder="4d8+4"></div>
+          <div class="hb-form-field"><label>Initiative Bonus</label><input type="number" id="cr-init" value="0"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field"><label>Speed (walk)</label><input type="number" id="cr-speed-walk" value="30"></div>
+          <div class="hb-form-field"><label>Fly</label><input type="number" id="cr-speed-fly" value="0"></div>
+          <div class="hb-form-field"><label>Swim</label><input type="number" id="cr-speed-swim" value="0"></div>
+          <div class="hb-form-field"><label>Climb</label><input type="number" id="cr-speed-climb" value="0"></div>
+          <div class="hb-form-field"><label>Burrow</label><input type="number" id="cr-speed-burrow" value="0"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field"><label>STR</label><input type="number" id="cr-str" value="10"></div>
+          <div class="hb-form-field"><label>DEX</label><input type="number" id="cr-dex" value="10"></div>
+          <div class="hb-form-field"><label>CON</label><input type="number" id="cr-con" value="10"></div>
+          <div class="hb-form-field"><label>INT</label><input type="number" id="cr-int" value="10"></div>
+          <div class="hb-form-field"><label>WIS</label><input type="number" id="cr-wis" value="10"></div>
+          <div class="hb-form-field"><label>CHA</label><input type="number" id="cr-cha" value="10"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1">
+            <label>Traits (one per line: Name | Description)</label>
+            <textarea id="cr-traits" placeholder="Keen Smell | The creature has advantage on Wisdom (Perception) checks that rely on smell."></textarea>
+          </div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1">
+            <label>Actions (one per line: Name | Type | Description — Type is one of Action, Bonus Action, Reaction, Legendary Action, Lair Action)</label>
+            <textarea id="cr-actions" placeholder="Bite | Action | Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6+2) piercing damage."></textarea>
+          </div>
+        </div>
+        <button class="hb-btn hb-btn-primary" onclick="submitCreature()">Create Creature</button>
+        <div class="hb-form-status" id="cr-status"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js?v=1"></script>
+<script src="js/auth.js?v=1"></script>
+<script>
+const speSchoolIcons = {
+  abjuration:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 5 V12 C4 17 8 21 12 22 C16 21 20 17 20 12 V5 Z"/></svg>',
+  conjuration:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/><circle cx="12" cy="12" r="10" stroke-dasharray="1 4"/></svg>',
+  divination:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 6 8 4 12 4 C16 4 19 6 22 12 C19 18 16 20 12 20 C8 20 5 18 2 12 Z"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>',
+  enchantment:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 6.6 A5 5 0 0 0 12 6 A5 5 0 0 0 3.2 6.6 C2.5 9.5 4.5 12.5 12 19 C19.5 12.5 21.5 9.5 20.8 6.6 Z"/></svg>',
+  evocation:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L5 13 H11 L9 22 L19 10 H13 Z"/></svg>',
+  illusion:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 7 8 5 12 5 C16 5 19 7 22 12 C19 17 16 19 12 19 C8 19 5 17 2 12 Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  necromancy:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 C7.5 3 5 6 5 10 V14 L7 16 V19 H10 V17 H14 V19 H17 V16 L19 14 V10 C19 6 16.5 3 12 3 Z"/><circle cx="9.5" cy="11" r="1" fill="currentColor"/><circle cx="14.5" cy="11" r="1" fill="currentColor"/></svg>',
+  transmutation:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 H16 L13 6 M20 15 H8 L11 18"/></svg>',
+};
+const speGlyphs = {
+  time:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15 14"/></svg>',
+  range:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 C8 8 8 16 12 22 C16 16 16 8 12 2 Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  comp:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L21 8 V16 L12 21 L3 16 V8 Z"/><path d="M12 3 V21 M3 8 L21 16 M21 8 L3 16"/></svg>',
+  duration:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4 H19 M5 20 H19 M7 4 C7 9 17 11 17 12 C17 13 7 15 7 20 M17 4 C17 9 7 11 7 12 C7 13 17 15 17 20"/></svg>',
+};
+
+function speRenderCard(s) {
+  var school    = s.school_index || 'evocation';
+  var icon      = speSchoolIcons[school] || '';
+  var subtitle  = s.level === 0 ? (s.school_name + ' cantrip') : ('Level ' + s.level + ' ' + (s.school_name || '').toLowerCase());
+  var tags      = [s.ritual && 'Ritual', s.concentration && 'Concentration'].filter(Boolean);
+  var desc      = (s.desc || []).map(function(p){ return '<p>' + p + '</p>'; }).join('');
+  var higher    = (s.higher_level && s.higher_level.length)
+    ? '<div class="sl-higher"><strong>At higher levels.</strong> ' + s.higher_level.join(' ') + '</div>' : '';
+  var compsText = s.material ? (s.components + ' <em>(' + s.material + ')</em>') : s.components;
+  var classes   = (s.classes || []).length
+    ? '<div class="sl-classes-row"><span class="sl-classes-label">Classes</span>' +
+      s.classes.map(function(c){ return '<span class="sl-class-chip">' + c + '</span>'; }).join('') + '</div>' : '';
+
+  return '<div class="sl-card-head sl-' + school + '">' +
+           '<div class="sl-card-icon sl-' + school + '">' + icon + '</div>' +
+           '<div><h3 class="sl-card-name">' + s.name + '</h3>' +
+           '<div class="sl-card-sub">' + subtitle + '</div></div>' +
+           '<div class="sl-card-tags">' + tags.map(function(t){ return '<span class="sl-tag">' + t + '</span>'; }).join('') + '</div>' +
+         '</div>' +
+         '<div class="sl-card-body">' +
+           '<div class="sl-meta">' +
+             '<div class="sl-meta-cell">' + speGlyphs.time + '<div><div class="sl-meta-label">Casting Time</div><div class="sl-meta-val">' + s.casting_time + '</div></div></div>' +
+             '<div class="sl-meta-cell">' + speGlyphs.range + '<div><div class="sl-meta-label">Range</div><div class="sl-meta-val">' + s.range + '</div></div></div>' +
+             '<div class="sl-meta-cell">' + speGlyphs.comp + '<div><div class="sl-meta-label">Components</div><div class="sl-meta-val">' + compsText + '</div></div></div>' +
+             '<div class="sl-meta-cell">' + speGlyphs.duration + '<div><div class="sl-meta-label">Duration</div><div class="sl-meta-val">' + s.duration + '</div></div></div>' +
+           '</div>' +
+           '<div class="sl-desc">' + desc + higher + '</div>' +
+           classes +
+         '</div>';
+}
+
+function modStr(v) { v = v || 0; return v >= 0 ? '+' + v : '' + v; }
+
+function renderCreatureCard(m) {
+  var speed = m.speed_all || {};
+  var speedParts = [
+    speed.walk   ? speed.walk + ' ft.'         : '',
+    speed.fly    ? 'fly ' + speed.fly + ' ft.'   : '',
+    speed.swim   ? 'swim ' + speed.swim + ' ft.' : '',
+    speed.climb  ? 'climb ' + speed.climb + ' ft.' : '',
+    speed.burrow ? 'burrow ' + speed.burrow + ' ft.' : '',
+  ].filter(Boolean).join(', ') || '—';
+  var abs = m.ability_scores || {}, mods = m.modifiers || {}, saves = m.saving_throws || {};
+  var sub = [m.size?.name, m.type?.name, m.alignment].filter(Boolean).join(' · ');
+
+  var traitsHtml = (m.traits || []).map(function(t){ return '<p class="cr-trait"><strong>' + t.name + '.</strong> ' + t.desc + '</p>'; }).join('');
+  var ACTION_LABELS = { ACTION:'Actions', BONUS_ACTION:'Bonus Actions', REACTION:'Reactions', LEGENDARY_ACTION:'Legendary Actions', LAIR_ACTION:'Lair Actions' };
+  var groups = {};
+  (m.actions || []).forEach(function(a){ (groups[a.action_type] = groups[a.action_type] || []).push(a); });
+  var actionsHtml = Object.keys(ACTION_LABELS).filter(function(k){ return groups[k] && groups[k].length; }).map(function(k){
+    return '<div class="cr-section-title">' + ACTION_LABELS[k] + '</div>' +
+      groups[k].map(function(a){ return '<p class="cr-trait"><strong>' + a.name + '.</strong> ' + a.desc + '</p>'; }).join('');
+  }).join('');
+
+  return '<div class="sl-card-head" style="border-bottom-color:var(--gold)">' +
+           '<div><h3 class="sl-card-name">' + m.name + '</h3><div class="sl-card-sub">' + sub + '</div></div>' +
+         '</div>' +
+         '<div class="sl-card-body">' +
+           '<div class="cr-stats">' +
+             '<div><div class="cr-stat-label">CR</div><div class="cr-stat-val">' + m.challenge_rating + '</div></div>' +
+             '<div><div class="cr-stat-label">AC</div><div class="cr-stat-val">' + m.armor_class + '</div></div>' +
+             '<div><div class="cr-stat-label">HP</div><div class="cr-stat-val">' + m.hit_points + (m.hit_dice ? ' (' + m.hit_dice + ')' : '') + '</div></div>' +
+             '<div><div class="cr-stat-label">Initiative</div><div class="cr-stat-val">' + modStr(m.initiative_bonus) + '</div></div>' +
+             '<div><div class="cr-stat-label">Speed</div><div class="cr-stat-val" style="font-size:.72rem">' + speedParts + '</div></div>' +
+           '</div>' +
+           '<div class="cr-abilities">' + ['strength','dexterity','constitution','intelligence','wisdom','charisma'].map(function(s){
+             return '<div class="cr-ability-cell"><div class="cr-ability-label">' + s.slice(0,3).toUpperCase() + '</div>' +
+               '<div class="cr-ability-score">' + (abs[s] ?? '—') + ' (' + modStr(mods[s]) + ')</div>' +
+               '<div class="cr-ability-save">Save ' + modStr(saves[s]) + '</div></div>';
+           }).join('') + '</div>' +
+           (m.passive_perception ? '<p class="cr-trait">Passive Perception ' + m.passive_perception + '</p>' : '') +
+           traitsHtml + actionsHtml +
+         '</div>';
+}
+
+// ─── List, filter, delete ───────────────────────────────────────────────────
+let allItems = [];
+let currentFilter = 'all';
+
+async function loadItems() {
+  const { data, error } = await supabase.from('homebrew_items')
+    .select('id,type,name,data,created_at')
+    .order('created_at', { ascending: false });
+  allItems = error ? [] : data;
+  renderList();
+}
+
+function setFilter(type) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.type === type));
+  renderList();
+}
+
+function renderList() {
+  const q = document.getElementById('hb-search').value.trim().toLowerCase();
+  const items = allItems.filter(it =>
+    (currentFilter === 'all' || it.type === currentFilter) &&
+    (!q || it.name.toLowerCase().includes(q))
+  );
+  const el = document.getElementById('hb-list');
+  if (!items.length) {
+    el.innerHTML = '<div class="hb-empty">No homebrew items match.</div>';
+    return;
+  }
+  el.innerHTML = items.map(it => {
+    const date = new Date(it.created_at).toLocaleDateString();
+    const icon = it.type === 'spell'
+      ? '<span class="hb-row-icon sl-' + (it.data.school_index || 'evocation') + '">' + (speSchoolIcons[it.data.school_index] || '') + '</span>'
+      : '<span class="hb-row-icon hb-creature-icon">⚔</span>';
+    return '<div class="hb-row hb-clickable" data-id="' + it.id + '">' +
+      '<div class="hb-row-info">' + icon +
+        '<div class="hb-row-text"><span class="hb-row-name">' + it.name + '</span>' +
+        '<span class="hb-row-sub">' + it.type + ' · ' + date + '</span></div>' +
+      '</div>' +
+      '<span class="hb-delete-btn" title="Delete" onclick="deleteItem(event, \'' + it.id + '\')">🗑</span>' +
+    '</div>';
+  }).join('');
+}
+
+async function deleteItem(event, id) {
+  event.stopPropagation();
+  if (!confirm("Delete this homebrew item? This can't be undone.")) return;
+  const { error } = await supabase.from('homebrew_items').delete().eq('id', id);
+  if (error) { alert('Failed to delete: ' + error.message); return; }
+  allItems = allItems.filter(it => it.id !== id);
+  renderList();
+}
+
+function hbClose() {
+  const open = document.querySelector('.hb-row.hb-open');
+  if (!open) return;
+  open.classList.remove('hb-open');
+  const detail = open.nextElementSibling;
+  if (detail && detail.classList.contains('spe-detail')) detail.remove();
+}
+
+document.addEventListener('click', function (e) {
+  const row = e.target.closest('.hb-clickable');
+  if (!row) return;
+  if (row.classList.contains('hb-open')) { hbClose(); return; }
+  hbClose();
+  const item = allItems.find(it => it.id === row.dataset.id);
+  if (!item) return;
+  row.classList.add('hb-open');
+  const panel = document.createElement('div');
+  panel.className = 'spe-detail';
+  panel.innerHTML = item.type === 'spell' ? speRenderCard(item.data) : renderCreatureCard(item.data);
+  row.insertAdjacentElement('afterend', panel);
+});
+
+// ─── Create flow ─────────────────────────────────────────────────────────────
+function startCreate(type) {
+  document.getElementById('hb-step1').classList.remove('active');
+  document.getElementById('hb-step2').classList.add('active');
+  document.getElementById('hb-form-spell').style.display = type === 'spell' ? '' : 'none';
+  document.getElementById('hb-form-creature').style.display = type === 'creature' ? '' : 'none';
+}
+
+function backToStep1() {
+  document.getElementById('hb-step2').classList.remove('active');
+  document.getElementById('hb-step1').classList.add('active');
+}
+
+const SCHOOL_NAMES = { abjuration:'Abjuration', conjuration:'Conjuration', divination:'Divination',
+  enchantment:'Enchantment', evocation:'Evocation', illusion:'Illusion', necromancy:'Necromancy', transmutation:'Transmutation' };
+
+async function submitSpell() {
+  const status = document.getElementById('sp-status');
+  const name = document.getElementById('sp-name').value.trim();
+  const level = parseInt(document.getElementById('sp-level').value, 10);
+  if (!name) { status.textContent = 'Name is required.'; return; }
+  if (isNaN(level) || level < 0 || level > 9) { status.textContent = 'Level must be 0-9.'; return; }
+
+  const school = document.getElementById('sp-school').value;
+  const comps = [
+    document.getElementById('sp-verbal').checked && 'V',
+    document.getElementById('sp-somatic').checked && 'S',
+    document.getElementById('sp-material').checked && 'M',
+  ].filter(Boolean).join(', ');
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const data = {
+    index: null, name, level,
+    school_index: school, school_name: SCHOOL_NAMES[school],
+    casting_time: document.getElementById('sp-casting').value.trim(),
+    range: document.getElementById('sp-range').value.trim(),
+    duration: document.getElementById('sp-duration').value.trim(),
+    components: comps,
+    material: document.getElementById('sp-material').checked ? document.getElementById('sp-material-text').value.trim() : '',
+    ritual: document.getElementById('sp-ritual').checked,
+    concentration: document.getElementById('sp-concentration').checked,
+    desc: document.getElementById('sp-desc').value.split('\n').map(s => s.trim()).filter(Boolean),
+    higher_level: document.getElementById('sp-higher').value.split('\n').map(s => s.trim()).filter(Boolean),
+    classes: document.getElementById('sp-classes').value.split(',').map(s => s.trim()).filter(Boolean),
+    _homebrew: true,
+  };
+
+  const { data: row, error } = await supabase.from('homebrew_items')
+    .insert({ owner_id: user.id, type: 'spell', name, data }).select('id').single();
+  if (error) { status.textContent = 'Failed: ' + error.message; return; }
+  data.index = 'hb-' + row.id;
+  await supabase.from('homebrew_items').update({ data }).eq('id', row.id);
+
+  status.style.color = '#2d7a3a';
+  status.textContent = '✓ Created';
+  ['sp-name','sp-casting','sp-range','sp-duration','sp-desc','sp-higher','sp-classes','sp-material-text'].forEach(id => document.getElementById(id).value = '');
+  await loadItems();
+  setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
+}
+
+async function submitCreature() {
+  const status = document.getElementById('cr-status');
+  const name = document.getElementById('cr-name').value.trim();
+  const cr = parseFloat(document.getElementById('cr-cr').value);
+  if (!name) { status.textContent = 'Name is required.'; return; }
+  if (isNaN(cr) || cr < 0) { status.textContent = 'Challenge Rating must be 0 or higher.'; return; }
+
+  const mod = s => Math.floor((s - 10) / 2);
+  const abilities = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
+  const abbrevs = { strength:'str', dexterity:'dex', constitution:'con', intelligence:'int', wisdom:'wis', charisma:'cha' };
+  const ability_scores = {}, modifiers = {}, saving_throws = {};
+  abilities.forEach(a => {
+    const score = parseInt(document.getElementById('cr-' + abbrevs[a]).value, 10) || 10;
+    ability_scores[a] = score;
+    modifiers[a] = mod(score);
+    saving_throws[a] = mod(score);
+  });
+
+  const traits = document.getElementById('cr-traits').value.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+    const [n, ...rest] = line.split('|');
+    return { name: (n || '').trim(), desc: rest.join('|').trim() };
+  });
+  const VALID_ACTION_TYPES = ['ACTION','BONUS_ACTION','REACTION','LEGENDARY_ACTION','LAIR_ACTION'];
+  const actions = document.getElementById('cr-actions').value.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+    const parts = line.split('|');
+    const actionType = (parts[1] || '').trim().toUpperCase().replace(/ /g, '_');
+    return { name: (parts[0] || '').trim(), action_type: VALID_ACTION_TYPES.includes(actionType) ? actionType : 'ACTION', desc: (parts[2] || '').trim() };
+  });
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const data = {
+    key: null, name,
+    challenge_rating: cr,
+    hit_points: parseInt(document.getElementById('cr-hp').value, 10) || 1,
+    armor_class: parseInt(document.getElementById('cr-ac').value, 10) || 10,
+    initiative_bonus: parseInt(document.getElementById('cr-init').value, 10) || 0,
+    size: { name: document.getElementById('cr-size').value },
+    type: { name: document.getElementById('cr-type').value },
+    alignment: document.getElementById('cr-alignment').value.trim(),
+    hit_dice: document.getElementById('cr-hitdice').value.trim(),
+    speed_all: {
+      walk: parseInt(document.getElementById('cr-speed-walk').value, 10) || 0,
+      fly: parseInt(document.getElementById('cr-speed-fly').value, 10) || 0,
+      swim: parseInt(document.getElementById('cr-speed-swim').value, 10) || 0,
+      climb: parseInt(document.getElementById('cr-speed-climb').value, 10) || 0,
+      burrow: parseInt(document.getElementById('cr-speed-burrow').value, 10) || 0,
+    },
+    ability_scores, modifiers, saving_throws,
+    passive_perception: 10 + modifiers.wisdom,
+    traits, actions,
+    _homebrew: true,
+  };
+
+  const { data: row, error } = await supabase.from('homebrew_items')
+    .insert({ owner_id: user.id, type: 'creature', name, data }).select('id').single();
+  if (error) { status.textContent = 'Failed: ' + error.message; return; }
+  data.key = 'hb-' + row.id;
+  await supabase.from('homebrew_items').update({ data }).eq('id', row.id);
+
+  status.style.color = '#2d7a3a';
+  status.textContent = '✓ Created';
+  ['cr-name','cr-alignment','cr-hitdice','cr-traits','cr-actions'].forEach(id => document.getElementById(id).value = '');
+  await loadItems();
+  setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+(async function init() {
+  await requireAuth();
+  loadItems();
+})();
+</script>
+</body>
+</html>

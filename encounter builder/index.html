@@ -697,6 +697,19 @@ async function runSearch() {
     const res  = await fetch(`https://api.open5e.com/v2/creatures/?${params}`);
     const data = await res.json();
     let results = data.results || [];
+
+    // Homebrew creatures merged in before the habitat filter — they carry no
+    // habitat data, so they're correctly excluded whenever a habitat filter is
+    // active (same as any other creature missing that data), rather than
+    // always showing regardless of the filter.
+    const { data: hbRows } = await supabase.from('homebrew_items').select('id,data').eq('type', 'creature');
+    let hbCreatures = (hbRows || []).map(row => ({ ...row.data, key: 'hb-' + row.id }));
+    if (name)  hbCreatures = hbCreatures.filter(m => m.name.toLowerCase().includes(name.toLowerCase()));
+    if (type)  hbCreatures = hbCreatures.filter(m => (m.type?.name || '').toLowerCase() === type.toLowerCase());
+    if (crMin) hbCreatures = hbCreatures.filter(m => m.challenge_rating >= parseFloat(crMin));
+    if (crMax) hbCreatures = hbCreatures.filter(m => m.challenge_rating <= parseFloat(crMax));
+    results = results.concat(hbCreatures);
+
     if (habitat) results = results.filter(m => (habitatData[m.key] || []).includes(habitat));
     renderResults(results, results.length);
   } catch {
@@ -743,6 +756,13 @@ async function selectMonster(key, rowEl) {
   if (monsterCache[key]) { renderMonsterCard(monsterCache[key]); return; }
 
   try {
+    if (key.startsWith('hb-')) {
+      const { data, error } = await supabase.from('homebrew_items').select('data').eq('id', key.slice(3)).single();
+      if (error || !data) throw new Error('Homebrew creature not found');
+      monsterCache[key] = data.data;
+      renderMonsterCard(data.data);
+      return;
+    }
     const res = await fetch(`https://api.open5e.com/v2/creatures/${key}/`);
     const m   = await res.json();
     monsterCache[key] = m;

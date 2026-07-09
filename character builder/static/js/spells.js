@@ -63,6 +63,19 @@ async function searchSpells({ level = '', school = '', class: cls = '', name = '
     school: s.school?.key || s.school || '',
   }));
 
+  // Homebrew spells are already stored in the final normalised shape (school_index,
+  // classes as plain name strings) — alias them into the shape this function's own
+  // filters expect (school key, classes as {name} objects) rather than touching the
+  // filters themselves.
+  const { data: hbRows } = await supabase.from('homebrew_items').select('id,data').eq('type', 'spell');
+  const hbSpells = (hbRows || []).map(row => ({
+    ...row.data,
+    index: 'hb-' + row.id,
+    school: row.data.school_index || '',
+    classes: (row.data.classes || []).map(c => ({ name: c })),
+  }));
+  spells = spells.concat(hbSpells);
+
   const schLower = school.toLowerCase();
   if (schLower) spells = spells.filter(s => s.school === schLower);
 
@@ -82,6 +95,12 @@ async function searchSpells({ level = '', school = '', class: cls = '', name = '
 }
 
 async function getSpellDetail(idx) {
+  if (idx.startsWith('hb-')) {
+    const id = idx.slice(3);
+    const { data, error } = await supabase.from('homebrew_items').select('data').eq('id', id).single();
+    if (error || !data) throw new Error('Homebrew spell not found');
+    return data.data;
+  }
   const res = await fetchOpen5e(`${OPEN5E_API_BASE}/spells/${idx}/`);
   if (!res.ok) throw new Error(`API error ${res.status}`);
   const raw = await res.json();

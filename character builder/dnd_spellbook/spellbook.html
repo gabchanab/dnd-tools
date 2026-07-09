@@ -325,7 +325,12 @@
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../static/js/supabase-client.js?v=1"></script>
+<script src="../static/js/auth.js?v=1"></script>
 <script>
+requireAuth();
+
 const $ = (id) => document.getElementById(id);
 
 const API_BASE = 'https://api.open5e.com/v2';
@@ -407,6 +412,18 @@ async function search() {
       school: s.school?.key || s.school || '',
     }));
 
+    // Homebrew spells aren't tied to a document/edition, so they're included
+    // regardless of the 2014/2024 toggle — same as how homebrew classes etc.
+    // work in the character builder (their own category, not an edition).
+    const { data: hbRows } = await supabase.from('homebrew_items').select('id,data').eq('type', 'spell');
+    const hbSpells = (hbRows || []).map(row => ({
+      ...row.data,
+      index: 'hb-' + row.id,
+      school: row.data.school_index || '',
+      classes: (row.data.classes || []).map(c => ({ name: c })),
+    }));
+    spells = spells.concat(hbSpells);
+
     // Apply remaining filters in JS (same logic Python was doing)
     if (sch) spells = spells.filter(s => s.school === sch);
     if (cls) spells = spells.filter(s =>
@@ -452,6 +469,12 @@ async function loadSpell(idx) {
   const detail = $('detail');
   detail.innerHTML = '<div class="status">Unfurling the scroll…</div>';
   try {
+    if (idx.startsWith('hb-')) {
+      const { data, error } = await supabase.from('homebrew_items').select('data').eq('id', idx.slice(3)).single();
+      if (error || !data) throw new Error('Homebrew spell not found');
+      renderSpell(data.data);
+      return;
+    }
     const res = await fetchWithTimeout(`${API_BASE}/spells/${idx}/`);
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const raw = await res.json();
