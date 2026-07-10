@@ -165,6 +165,7 @@
       <span class="filter-chip active" data-type="all" onclick="setFilter('all')">All</span>
       <span class="filter-chip" data-type="spell" onclick="setFilter('spell')">Spell</span>
       <span class="filter-chip" data-type="creature" onclick="setFilter('creature')">Creature</span>
+      <span class="filter-chip" data-type="background" onclick="setFilter('background')">Background</span>
       <input type="text" id="hb-search" placeholder="Search by name" oninput="renderList()">
     </div>
     <div id="hb-list"></div>
@@ -182,6 +183,10 @@
         <div class="hb-type-card" onclick="startCreate('creature')">
           <div class="hb-type-card-icon">⚔</div>
           <div class="hb-type-card-name">Creature</div>
+        </div>
+        <div class="hb-type-card" onclick="startCreate('background')">
+          <div class="hb-type-card-icon">❖</div>
+          <div class="hb-type-card-name">Background</div>
         </div>
       </div>
     </div>
@@ -296,6 +301,36 @@
         <button class="hb-btn hb-btn-primary" onclick="submitCreature()">Create Creature</button>
         <div class="hb-form-status" id="cr-status"></div>
       </div>
+
+      <div id="hb-form-background" style="display:none">
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Name</label><input type="text" id="bg-name"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Ability Score Increases</label><input type="text" id="bg-asi" placeholder="+2 to one ability score, +1 to another"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Skill Proficiencies</label><input type="text" id="bg-skills" placeholder="Pick two Skills"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Tool Proficiency</label><input type="text" id="bg-tool" placeholder="One of your choice"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Languages</label><input type="text" id="bg-languages" placeholder="One of your choice"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Equipment</label><input type="text" id="bg-equipment" placeholder="Traveler's clothes and 50 gp"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Origin Feat (optional)</label><input type="text" id="bg-feat" placeholder="Magic Initiate (Druid)"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field"><label>Trait Name (optional)</label><input type="text" id="bg-trait-name" placeholder="Planar Instinct"></div>
+          <div class="hb-form-field" style="flex:2"><label>Trait Description</label><input type="text" id="bg-trait-desc" placeholder="You have advantage on..."></div>
+        </div>
+        <button class="hb-btn hb-btn-primary" onclick="submitBackground()">Create Background</button>
+        <div class="hb-form-status" id="bg-status"></div>
+      </div>
     </div>
   </section>
 </div>
@@ -353,6 +388,17 @@ function speRenderCard(s) {
 }
 
 function modStr(v) { v = v || 0; return v >= 0 ? '+' + v : '' + v; }
+
+function renderBackgroundCard(bg) {
+  var benefits = bg.benefits || [];
+  var rows = benefits.map(function(b) {
+    return '<p class="cr-trait"><strong>' + b.name + '.</strong> ' + b.desc + '</p>';
+  }).join('');
+  return '<div class="sl-card-head" style="border-bottom-color:var(--gold)">' +
+           '<div><h3 class="sl-card-name">' + bg.name + '</h3><div class="sl-card-sub">Background</div></div>' +
+         '</div>' +
+         '<div class="sl-card-body">' + rows + '</div>';
+}
 
 function renderCreatureCard(m) {
   var speed = m.speed_all || {};
@@ -430,7 +476,9 @@ function renderList() {
     const date = new Date(it.created_at).toLocaleDateString();
     const icon = it.type === 'spell'
       ? '<span class="hb-row-icon sl-' + (it.data.school_index || 'evocation') + '">' + (speSchoolIcons[it.data.school_index] || '') + '</span>'
-      : '<span class="hb-row-icon hb-creature-icon">⚔</span>';
+      : it.type === 'creature'
+        ? '<span class="hb-row-icon hb-creature-icon">⚔</span>'
+        : '<span class="hb-row-icon hb-creature-icon">❖</span>';
     return '<div class="hb-row hb-clickable" data-id="' + it.id + '">' +
       '<div class="hb-row-info">' + icon +
         '<div class="hb-row-text"><span class="hb-row-name">' + it.name + '</span>' +
@@ -471,7 +519,9 @@ document.addEventListener('click', function (e) {
   row.classList.add('hb-open');
   const panel = document.createElement('div');
   panel.className = 'spe-detail';
-  panel.innerHTML = item.type === 'spell' ? speRenderCard(item.data) : renderCreatureCard(item.data);
+  panel.innerHTML = item.type === 'spell' ? speRenderCard(item.data)
+    : item.type === 'creature' ? renderCreatureCard(item.data)
+    : renderBackgroundCard(item.data);
   row.insertAdjacentElement('afterend', panel);
 });
 
@@ -480,10 +530,12 @@ function startCreate(type) {
   editingId = null;
   document.querySelector('#hb-form-spell button.hb-btn-primary').textContent = 'Create Spell';
   document.querySelector('#hb-form-creature button.hb-btn-primary').textContent = 'Create Creature';
+  document.querySelector('#hb-form-background button.hb-btn-primary').textContent = 'Create Background';
   document.getElementById('hb-step1').classList.remove('active');
   document.getElementById('hb-step2').classList.add('active');
   document.getElementById('hb-form-spell').style.display = type === 'spell' ? '' : 'none';
   document.getElementById('hb-form-creature').style.display = type === 'creature' ? '' : 'none';
+  document.getElementById('hb-form-background').style.display = type === 'background' ? '' : 'none';
 }
 
 const ACTION_TYPE_LABELS = { ACTION: 'Action', BONUS_ACTION: 'Bonus Action', REACTION: 'Reaction',
@@ -518,7 +570,7 @@ function startEdit(event, id) {
     document.getElementById('sp-desc').value = (d.desc || []).join('\n');
     document.getElementById('sp-higher').value = (d.higher_level || []).join('\n');
     document.getElementById('sp-classes').value = (d.classes || []).join(', ');
-  } else {
+  } else if (item.type === 'creature') {
     document.querySelector('#hb-form-creature button.hb-btn-primary').textContent = 'Save Changes';
     document.getElementById('cr-name').value = d.name || '';
     document.getElementById('cr-size').value = (d.size && d.size.name) || d.size || 'Medium';
@@ -541,6 +593,20 @@ function startEdit(event, id) {
     document.getElementById('cr-traits').value = (d.traits || []).map(t => t.name + ' | ' + t.desc).join('\n');
     document.getElementById('cr-actions').value = (d.actions || [])
       .map(a => a.name + ' | ' + (ACTION_TYPE_LABELS[a.action_type] || 'Action') + ' | ' + a.desc).join('\n');
+  } else {
+    document.querySelector('#hb-form-background button.hb-btn-primary').textContent = 'Save Changes';
+    const benefits = d.benefits || [];
+    const find = t => (benefits.find(b => b.type === t) || {}).desc || '';
+    document.getElementById('bg-name').value = d.name || '';
+    document.getElementById('bg-asi').value = find('ability_score');
+    document.getElementById('bg-skills').value = find('skill_proficiency');
+    document.getElementById('bg-tool').value = find('tool_proficiency');
+    document.getElementById('bg-languages').value = find('language');
+    document.getElementById('bg-equipment').value = find('equipment');
+    document.getElementById('bg-feat').value = find('feat');
+    const trait = benefits.find(b => b.type === 'trait');
+    document.getElementById('bg-trait-name').value = trait ? trait.name : '';
+    document.getElementById('bg-trait-desc').value = trait ? trait.desc : '';
   }
 }
 
@@ -669,6 +735,52 @@ async function submitCreature() {
   status.style.color = '#2d7a3a';
   status.textContent = editingId ? '✓ Saved' : '✓ Created';
   ['cr-name','cr-alignment','cr-hitdice','cr-traits','cr-actions'].forEach(id => document.getElementById(id).value = '');
+  await loadItems();
+  setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
+}
+
+async function submitBackground() {
+  const status = document.getElementById('bg-status');
+  const name = document.getElementById('bg-name').value.trim();
+  if (!name) { status.textContent = 'Name is required.'; return; }
+
+  const benefits = [
+    { name: 'Ability Score Increases', desc: document.getElementById('bg-asi').value.trim(), type: 'ability_score' },
+    { name: 'Skill Proficiencies', desc: document.getElementById('bg-skills').value.trim(), type: 'skill_proficiency' },
+    { name: 'Tool Proficiency', desc: document.getElementById('bg-tool').value.trim(), type: 'tool_proficiency' },
+    { name: 'Languages', desc: document.getElementById('bg-languages').value.trim(), type: 'language' },
+    { name: 'Equipment', desc: document.getElementById('bg-equipment').value.trim(), type: 'equipment' },
+  ].filter(b => b.desc);
+
+  const feat = document.getElementById('bg-feat').value.trim();
+  if (feat) benefits.push({ name: 'Origin Feat', desc: feat, type: 'feat' });
+
+  const traitName = document.getElementById('bg-trait-name').value.trim();
+  const traitDesc = document.getElementById('bg-trait-desc').value.trim();
+  if (traitName && traitDesc) benefits.push({ name: traitName, desc: traitDesc, type: 'trait' });
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const data = {
+    key: editingId ? 'hb-' + editingId : null, name,
+    benefits,
+    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    _homebrew: true,
+  };
+
+  let error;
+  if (editingId) {
+    ({ error } = await supabase.from('homebrew_items').update({ name, data }).eq('id', editingId));
+  } else {
+    const { data: row, error: insertErr } = await supabase.from('homebrew_items')
+      .insert({ owner_id: user.id, type: 'background', name, data }).select('id').single();
+    error = insertErr;
+    if (!error) { data.key = 'hb-' + row.id; await supabase.from('homebrew_items').update({ data }).eq('id', row.id); }
+  }
+  if (error) { status.textContent = 'Failed: ' + error.message; return; }
+
+  status.style.color = '#2d7a3a';
+  status.textContent = editingId ? '✓ Saved' : '✓ Created';
+  ['bg-name','bg-asi','bg-skills','bg-tool','bg-languages','bg-equipment','bg-feat','bg-trait-name','bg-trait-desc'].forEach(id => document.getElementById(id).value = '');
   await loadItems();
   setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
 }

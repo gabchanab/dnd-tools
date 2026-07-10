@@ -53,9 +53,9 @@ character builder/
 │
 ├── homebrew/                   # Your custom content — edit these JSON files to add options
 │   ├── subclasses.json         # Custom subclasses
-│   ├── backgrounds.json        # Custom backgrounds
 │   ├── species.json            # Custom species
 │   └── feats.json              # Custom feats / origin feats
+│   (custom backgrounds now live in Supabase — create them on the Homebrew page)
 │
 ├── my_characters/              # Saved character sheets (written by the Save JSON button)
 │   └── <CharacterName>.json
@@ -87,7 +87,9 @@ Add custom options by editing the JSON files in `homebrew/`. Each file is fetche
 ]
 ```
 
-**`backgrounds.json`**, **`species.json`**, **`feats.json`** — follow the same pattern as Open5e objects. See the existing files for examples.
+**`species.json`**, **`feats.json`** — follow the same pattern as Open5e objects. See the existing files for examples.
+
+Custom backgrounds are no longer edited as JSON — create and edit them on the Homebrew page (`homebrew/index.html`), which stores them in Supabase and merges them into the background picker automatically.
 
 ---
 

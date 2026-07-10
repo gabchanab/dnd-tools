@@ -1545,10 +1545,12 @@ async function loadAll() {
       fetchStatic('static/data/species.json'),
       fetchStatic('static/data/classes.json'),
       fetchStatic('static/data/backgrounds.json'),
-      Promise.all(['subclasses', 'backgrounds', 'species', 'feats', 'classes'].map(f =>
+      Promise.all(['subclasses', 'species', 'feats', 'classes'].map(f =>
         fetch(`homebrew/${f}.json`)
           .then(r => r.ok ? r.text() : '')
           .then(text => { try { return text ? JSON.parse(text) : []; } catch { return []; } }))),
+      supabase.from('homebrew_items').select('data').eq('type', 'background')
+        .then(({ data, error }) => error ? [] : (data || []).map(row => row.data)),
     ];
     if (editId) fetches.push(
       supabase.from('characters').select('data').eq('id', editId).single()
@@ -1556,12 +1558,12 @@ async function loadAll() {
     );
 
     const results = await Promise.all(fetches);
-    const [spRaw, clRaw, bgRaw, hbParts] = results;
+    const [spRaw, clRaw, bgRaw, hbParts, hbBackgrounds] = results;
     const hbRaw = {
-      subclasses: hbParts[0], backgrounds: hbParts[1], species: hbParts[2],
-      feats: hbParts[3], classes: hbParts[4],
+      subclasses: hbParts[0], species: hbParts[1],
+      feats: hbParts[2], classes: hbParts[3],
     };
-    const editRaw = editId ? (results[4] || {}) : null;
+    const editRaw = editId ? (results[5] || {}) : null;
 
     S.allSp  = spRaw;
     // Open5e v2 /classes returns both base classes and subclasses (subclasses have subclass_of set)
@@ -1640,23 +1642,8 @@ async function loadAll() {
       });
     });
 
-    // merge homebrew backgrounds
-    (hbRaw.backgrounds || []).forEach(hb => {
-      S.allBg.push({
-        key:                 hb.id,
-        name:                hb.name,
-        description:         hb.description || '',
-        benefits:            hb.benefits    || [],
-        skill_proficiencies: hb.skill_proficiencies || [],
-        tool_proficiency:    hb.tool_proficiency    || null,
-        origin_feat:         hb.origin_feat_id ? { name: hb.origin_feat_id } : null,
-        languages:           hb.languages || [],
-        starting_equipment:  hb.starting_equipment  || [],
-        document:            { display_name: hb.source || 'Homebrew', key: 'homebrew',
-                               gamesystem: { key: 'homebrew' } },
-        _homebrew:           hb.homebrew === true,
-      });
-    });
+    // merge homebrew backgrounds (already stored in the final S.allBg shape)
+    (hbBackgrounds || []).forEach(bg => S.allBg.push(bg));
 
     // merge homebrew species
     (hbRaw.species || []).forEach(hb => {
