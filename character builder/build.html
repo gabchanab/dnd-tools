@@ -1206,7 +1206,7 @@ function slRenderList(list) {
     return `<div class="sl-result-item" data-idx="${s.index}" data-school="${school}">
       <div class="sl-result-left">
         <span class="sl-badge sl-${school}">${icon}</span>
-        <span class="sl-spell-name">${s.name}</span>
+        <span class="sl-spell-name">${s.name}</span>${s._homebrew ? '<span class="hb-tag">HB</span>' : ''}
       </div>
       <span class="sl-lvl">${lvlLabel}</span>
     </div>`;

@@ -130,6 +130,9 @@
       box-shadow: 0 0 0 1px var(--gold-light);
     }
     .lvl { font-size: 12px; color: var(--muted); font-style: italic; }
+    .hb-tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #6b4f9a; border: 1px solid rgba(107,79,154,.40);
+      padding: 1px 5px; border-radius: 20px; margin-left: 4px; vertical-align: middle; }
 
     .status { padding: 1.5rem; text-align: center; color: var(--muted); font-style: italic; }
 
@@ -451,7 +454,7 @@ function renderList(list, knownSchool) {
     return `<div class="result-item" data-idx="${s.index}">
       <div class="result-left">
         <span class="school-badge school-${school}">${schoolIcons[school] || ''}</span>
-        <span>${s.name}</span>
+        <span>${s.name}</span>${s._homebrew ? '<span class="hb-tag">HB</span>' : ''}
       </div>
       <span class="lvl">${lvlLabel}</span>
     </div>`;

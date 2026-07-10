@@ -65,6 +65,10 @@
     .spell-lvl-tag{font-family:var(--font-heading);font-size:.60rem;font-weight:600;
       letter-spacing:.05em;color:var(--text-dim);opacity:.70;margin-left:.35rem}
     .spell-lvl-tag.cantrip{color:var(--purple-dim);opacity:.85}
+    .hb-tag{display:inline-block;font-family:var(--font-heading);font-size:.50rem;font-weight:700;
+      letter-spacing:.10em;text-transform:uppercase;color:var(--purple);
+      border:1px solid rgba(107,79,154,.40);padding:1px 5px;border-radius:20px;
+      margin-left:4px;vertical-align:middle}
     /* ── Prepared-spell accordion ── */
     .spe-item{display:flex;align-items:center;gap:.45rem;padding:.3rem .1rem;
       border-bottom:1px dotted var(--border-dim);font-size:.88rem;color:var(--text-mid)}
@@ -639,8 +643,9 @@ function renderPreparedSpells(ctx) {
       else lvlTag = '<span class="spell-lvl-tag">' + level + 'th</span>';
     }
     var chevron = index ? '<span class="spe-chevron">›</span>' : '';
+    var hbTag = index && index.indexOf('hb-') === 0 ? '<span class="hb-tag">HB</span>' : '';
     return '<div class="spe-item' + (index ? ' spe-clickable' : '') + '"' + (index ? ' data-spell-index="' + index + '"' : '') + '>' +
-      '<span class="spe-name">' + name + '</span>' + lvlTag + chevron + '</div>';
+      '<span class="spe-name">' + name + '</span>' + hbTag + lvlTag + chevron + '</div>';
   }).join('');
 }
 

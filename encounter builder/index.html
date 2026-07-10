@@ -734,7 +734,7 @@ function renderResults(results, total) {
     return `
     <div class="result-row" onclick="selectMonster('${m.key}', this)">
       <span class="result-icon" style="color:${color}">${icon}</span>
-      <span class="result-name">${m.name}</span>
+      <span class="result-name">${m.name}${m._homebrew ? '<span class="hb-tag">HB</span>' : ''}</span>
       <span class="result-meta">
         <span class="result-type">${m.size?.name || ''} ${m.type?.name || ''}</span>
         <span class="result-cr">CR ${formatCR(m.challenge_rating)}</span>
