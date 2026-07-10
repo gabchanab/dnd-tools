@@ -861,7 +861,8 @@ function pickSubclass(key, hb) {
         return `<div class="feature-level-heading">Level ${level}</div>${traitRows}`;
       }).join('');
 
-    const bodyHtml = spellLine + (featureHtml || '<em>No features defined in your JSON yet.</em>');
+    const descHtml = hbData.description ? `<span class="feature-desc">${hbData.description}</span>` : '';
+    const bodyHtml = descHtml + spellLine + (featureHtml || '<em>No features defined in your JSON yet.</em>');
     renderDetailPane('sub-detail', 'sub-dtitle', 'sub-dbody', S.subName + titleSuffix, [], bodyHtml);
 
   // ── Open5e subclass — show whatever description the API provides ──────
@@ -1545,11 +1546,16 @@ async function loadAll() {
       fetchStatic('static/data/species.json'),
       fetchStatic('static/data/classes.json'),
       fetchStatic('static/data/backgrounds.json'),
-      Promise.all(['subclasses', 'species', 'feats', 'classes'].map(f =>
-        fetch(`homebrew/${f}.json`)
-          .then(r => r.ok ? r.text() : '')
-          .then(text => { try { return text ? JSON.parse(text) : []; } catch { return []; } }))),
+      fetch('homebrew/feats.json')
+        .then(r => r.ok ? r.text() : '')
+        .then(text => { try { return text ? JSON.parse(text) : []; } catch { return []; } }),
       supabase.from('homebrew_items').select('data').eq('type', 'background')
+        .then(({ data, error }) => error ? [] : (data || []).map(row => row.data)),
+      supabase.from('homebrew_items').select('data').eq('type', 'class')
+        .then(({ data, error }) => error ? [] : (data || []).map(row => row.data)),
+      supabase.from('homebrew_items').select('data').eq('type', 'subclass')
+        .then(({ data, error }) => error ? [] : (data || []).map(row => row.data)),
+      supabase.from('homebrew_items').select('data').eq('type', 'species')
         .then(({ data, error }) => error ? [] : (data || []).map(row => row.data)),
     ];
     if (editId) fetches.push(
@@ -1558,12 +1564,8 @@ async function loadAll() {
     );
 
     const results = await Promise.all(fetches);
-    const [spRaw, clRaw, bgRaw, hbParts, hbBackgrounds] = results;
-    const hbRaw = {
-      subclasses: hbParts[0], species: hbParts[1],
-      feats: hbParts[2], classes: hbParts[3],
-    };
-    const editRaw = editId ? (results[5] || {}) : null;
+    const [spRaw, clRaw, bgRaw, hbFeats, hbBackgrounds, hbClasses, hbSubclasses, hbSpecies] = results;
+    const editRaw = editId ? (results[8] || {}) : null;
 
     S.allSp  = spRaw;
     // Open5e v2 /classes returns both base classes and subclasses (subclasses have subclass_of set)
@@ -1571,95 +1573,11 @@ async function loadAll() {
     S.allSub = clRaw.filter(c => !!c.subclass_of);
     S.allBg  = bgRaw;
 
-    // merge homebrew classes
-    (hbRaw.classes || []).forEach(hb => {
-      // Build the pipe-delimited CORE_TRAITS_TABLE desc that app.py parses for
-      // equipment, armor training, and weapon proficiencies
-      const coreDesc = [
-        `||`,
-        `|---|---|`,
-        `|Primary Ability|${(hb.saving_throws || []).join(' and ')}|`,
-        `|Hit Point Die|${hb.hit_dice || 'D8'} per ${hb.name} level|`,
-        `|Saving Throw Proficiencies|${(hb.saving_throws || []).join(' and ')}|`,
-        `|Skill Proficiencies|${hb.skill_proficiencies || ''}|`,
-        `|Weapon Proficiencies|${hb.weapon_proficiencies || ''}|`,
-        `|Armor Training|${hb.armor_training || ''}|`,
-        `|Starting Equipment|${hb.starting_equipment || ''}|`,
-      ].join('\n');
-
-      // Convert the simple feature list into the Open5e shape
-      const features = [
-        { name: `Core ${hb.name} Traits`, feature_type: 'CORE_TRAITS_TABLE',
-          desc: coreDesc, gained_at: [], data_for_class_table: [] },
-        ...(hb.features || []).map(f => ({
-          name:         f.name,
-          desc:         f.description || '',
-          feature_type: 'CLASS_LEVEL_FEATURE',
-          gained_at:    [{ level: f.level || 1 }],
-        })),
-      ];
-
-      // Auto-generate the Spellcasting feature if a spellcasting ability is set —
-      // app.py uses a regex on this description to derive spell attack / save DC
-      if (hb.spellcasting_ability && (hb.caster_type || 'NONE') !== 'NONE') {
-        const featName = hb.caster_type === 'PACT' ? 'Pact Magic' : 'Spellcasting';
-        features.push({
-          name:         featName,
-          desc:         `${hb.spellcasting_ability} is your spellcasting ability for your ${hb.name} spells. Your spell save DC equals 8 + your proficiency bonus + your ${hb.spellcasting_ability} modifier.`,
-          feature_type: 'CLASS_LEVEL_FEATURE',
-          gained_at:    [{ level: 1 }],
-        });
-      }
-
-      S.allCl.push({
-        key:           hb.id,
-        name:          hb.name,
-        hit_dice:      hb.hit_dice || 'D8',
-        caster_type:   hb.caster_type || 'NONE',
-        saving_throws: (hb.saving_throws || []).map(s => ({ name: s })),
-        desc:          hb.description || '',
-        features,
-        document: {
-          display_name: hb.source || 'Homebrew',
-          key:          'homebrew',
-          gamesystem:   { key: 'homebrew' },
-        },
-        _homebrew: hb.homebrew === true,
-        _hbData:   hb,
-      });
-    });
-
-    // merge homebrew subclasses
-    (hbRaw.subclasses || []).forEach(hb => {
-      S.allSub.push({
-        key:         hb.id,
-        name:        hb.name,
-        subclass_of: { key: hb.parent_class_id, name: hb.parent_class_id },
-        document:    { display_name: hb.source || 'Homebrew', key: 'homebrew',
-                       gamesystem: { key: 'homebrew' } },
-        _homebrew:   hb.homebrew === true,
-        _hbData:     hb,
-      });
-    });
-
-    // merge homebrew backgrounds (already stored in the final S.allBg shape)
+    // merge homebrew classes/subclasses/backgrounds/species (already stored in the final shape)
+    (hbClasses || []).forEach(cl => S.allCl.push(cl));
+    (hbSubclasses || []).forEach(sc => S.allSub.push(sc));
     (hbBackgrounds || []).forEach(bg => S.allBg.push(bg));
-
-    // merge homebrew species
-    (hbRaw.species || []).forEach(hb => {
-      S.allSp.push({
-        key:      hb.id,
-        name:     hb.name,
-        traits:   (hb.traits || []).map(t =>
-          typeof t === 'string'
-            ? { name: t, desc: '' }
-            : { name: t.name || '', desc: t.description || t.desc || '' }
-        ),
-        document: { display_name: hb.source || 'Homebrew', key: 'homebrew',
-                    gamesystem: { key: 'homebrew' } },
-        _homebrew: hb.homebrew === true,
-      });
-    });
+    (hbSpecies || []).forEach(sp => S.allSp.push(sp));
 
     renderSpecies();
     renderClasses();

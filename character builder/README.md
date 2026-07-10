@@ -52,10 +52,8 @@ character builder/
 │   └── alphabet_coordinates.py # Maps letters → polar coords, draws sigil PNGs via matplotlib
 │
 ├── homebrew/                   # Your custom content — edit these JSON files to add options
-│   ├── subclasses.json         # Custom subclasses
-│   ├── species.json            # Custom species
 │   └── feats.json              # Custom feats / origin feats
-│   (custom backgrounds now live in Supabase — create them on the Homebrew page)
+│   (custom classes, subclasses, backgrounds, and species now live in Supabase — create them on the Homebrew page)
 │
 ├── my_characters/              # Saved character sheets (written by the Save JSON button)
 │   └── <CharacterName>.json
@@ -69,27 +67,7 @@ character builder/
 
 ## Homebrew content
 
-Add custom options by editing the JSON files in `homebrew/`. Each file is fetched by the builder at `/api/homebrew` and merged with the official Open5e data.
-
-**`subclasses.json`** — array of subclass objects:
-```json
-[
-  {
-    "name": "School of Shadows",
-    "class": "wizard",
-    "_hbData": {
-      "features": {
-        "3": [{ "name": "Shadow Step", "description": "You can teleport…" }],
-        "7": [{ "name": "Umbral Form", "description": "As a bonus action…" }]
-      }
-    }
-  }
-]
-```
-
-**`species.json`**, **`feats.json`** — follow the same pattern as Open5e objects. See the existing files for examples.
-
-Custom backgrounds are no longer edited as JSON — create and edit them on the Homebrew page (`homebrew/index.html`), which stores them in Supabase and merges them into the background picker automatically.
+Custom classes, subclasses, backgrounds, and species are created and edited on the Homebrew page (`homebrew/index.html`), which stores them in Supabase and merges them into the relevant picker automatically. Feats are the one remaining type still edited as JSON — add them to `homebrew/feats.json` following the same shape as Open5e objects.
 
 ---
 

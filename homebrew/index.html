@@ -166,6 +166,9 @@
       <span class="filter-chip" data-type="spell" onclick="setFilter('spell')">Spell</span>
       <span class="filter-chip" data-type="creature" onclick="setFilter('creature')">Creature</span>
       <span class="filter-chip" data-type="background" onclick="setFilter('background')">Background</span>
+      <span class="filter-chip" data-type="class" onclick="setFilter('class')">Class</span>
+      <span class="filter-chip" data-type="subclass" onclick="setFilter('subclass')">Subclass</span>
+      <span class="filter-chip" data-type="species" onclick="setFilter('species')">Species</span>
       <input type="text" id="hb-search" placeholder="Search by name" oninput="renderList()">
     </div>
     <div id="hb-list"></div>
@@ -187,6 +190,18 @@
         <div class="hb-type-card" onclick="startCreate('background')">
           <div class="hb-type-card-icon">❖</div>
           <div class="hb-type-card-name">Background</div>
+        </div>
+        <div class="hb-type-card" onclick="startCreate('class')">
+          <div class="hb-type-card-icon">⬡</div>
+          <div class="hb-type-card-name">Class</div>
+        </div>
+        <div class="hb-type-card" onclick="startCreate('subclass')">
+          <div class="hb-type-card-icon">⬡</div>
+          <div class="hb-type-card-name">Subclass</div>
+        </div>
+        <div class="hb-type-card" onclick="startCreate('species')">
+          <div class="hb-type-card-icon">♦</div>
+          <div class="hb-type-card-name">Species</div>
         </div>
       </div>
     </div>
@@ -331,6 +346,113 @@
         <button class="hb-btn hb-btn-primary" onclick="submitBackground()">Create Background</button>
         <div class="hb-form-status" id="bg-status"></div>
       </div>
+
+      <div id="hb-form-class" style="display:none">
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:2"><label>Name</label><input type="text" id="cl-name"></div>
+          <div class="hb-form-field"><label>Hit Die</label>
+            <select id="cl-hitdie">
+              <option>D6</option><option selected>D8</option><option>D10</option><option>D12</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field"><label>Caster Type</label>
+            <select id="cl-caster" onchange="document.getElementById('cl-spell-ability-row').style.display=this.value==='NONE'?'none':'flex'">
+              <option value="NONE" selected>None</option>
+              <option value="HALF">Half</option>
+              <option value="FULL">Full</option>
+              <option value="PACT">Pact</option>
+            </select>
+          </div>
+          <div class="hb-form-field" id="cl-spell-ability-row" style="display:none"><label>Spellcasting Ability</label>
+            <select id="cl-spell-ability">
+              <option value="">— choose —</option>
+              <option>Intelligence</option><option>Wisdom</option><option>Charisma</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field"><label>Saving Throw 1</label>
+            <select id="cl-save1">
+              <option>Strength</option><option selected>Dexterity</option><option>Constitution</option>
+              <option>Intelligence</option><option>Wisdom</option><option>Charisma</option>
+            </select>
+          </div>
+          <div class="hb-form-field"><label>Saving Throw 2</label>
+            <select id="cl-save2">
+              <option>Strength</option><option>Dexterity</option><option selected>Constitution</option>
+              <option>Intelligence</option><option>Wisdom</option><option>Charisma</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Skill Proficiencies</label><input type="text" id="cl-skills" placeholder="Choose 2 from Acrobatics, Athletics, ..."></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Armor Training</label><input type="text" id="cl-armor" placeholder="Light armor"></div>
+          <div class="hb-form-field" style="flex:1"><label>Weapon Proficiencies</label><input type="text" id="cl-weapons" placeholder="Simple and Martial weapons"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Starting Equipment</label><input type="text" id="cl-equipment" placeholder="Choose A or B: (A) ...; or (B) 60 GP"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Description</label><textarea id="cl-desc"></textarea></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1">
+            <label>Features (one per line: Level | Name | Description)</label>
+            <textarea id="cl-features" placeholder="1 | Dancing Style | You adopt a particular style of combat..."></textarea>
+          </div>
+        </div>
+        <button class="hb-btn hb-btn-primary" onclick="submitClass()">Create Class</button>
+        <div class="hb-form-status" id="cl-status"></div>
+      </div>
+
+      <div id="hb-form-subclass" style="display:none">
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:2"><label>Name</label><input type="text" id="sc-name"></div>
+          <div class="hb-form-field"><label>Parent Class Name</label><input type="text" id="sc-parent" placeholder="Paladin"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><span style="font-size:.68rem;color:var(--text-dim);font-style:italic">Must exactly match the class name (case-insensitive).</span></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Description</label><textarea id="sc-desc"></textarea></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Subclass Spell List (comma-separated, optional)</label><input type="text" id="sc-spells" placeholder="Misty Step, Blink, Plane Shift"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1">
+            <label>Features (one per line: Level | Name | Description)</label>
+            <textarea id="sc-features" placeholder="3 | Void Smite | Your Divine Smite deals force damage instead of radiant."></textarea>
+          </div>
+        </div>
+        <button class="hb-btn hb-btn-primary" onclick="submitSubclass()">Create Subclass</button>
+        <div class="hb-form-status" id="sc-status"></div>
+      </div>
+
+      <div id="hb-form-species" style="display:none">
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:2"><label>Name</label><input type="text" id="spc-name"></div>
+          <div class="hb-form-field"><label>Size</label>
+            <select id="spc-size">
+              <option>Tiny</option><option>Small</option><option selected>Medium</option>
+              <option>Large</option><option>Huge</option><option>Gargantuan</option>
+            </select>
+          </div>
+          <div class="hb-form-field"><label>Speed</label><input type="number" id="spc-speed" value="30"></div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1">
+            <label>Traits (one per line: Name | Description)</label>
+            <textarea id="spc-traits" placeholder="Darkvision | You can see in dim light within 60 feet of you as if it were bright light..."></textarea>
+          </div>
+        </div>
+        <button class="hb-btn hb-btn-primary" onclick="submitSpecies()">Create Species</button>
+        <div class="hb-form-status" id="spc-status"></div>
+      </div>
     </div>
   </section>
 </div>
@@ -398,6 +520,68 @@ function renderBackgroundCard(bg) {
            '<div><h3 class="sl-card-name">' + bg.name + '</h3><div class="sl-card-sub">Background</div></div>' +
          '</div>' +
          '<div class="sl-card-body">' + rows + '</div>';
+}
+
+function renderClassCard(cl) {
+  var descHtml = cl.desc ? '<p class="cr-trait">' + cl.desc + '</p>' : '';
+
+  var coreTraitFeature = (cl.features || []).find(function(f){ return f.feature_type === 'CORE_TRAITS_TABLE'; });
+  var traitsHtml = '';
+  if (coreTraitFeature && coreTraitFeature.desc) {
+    var SKIP = { '': true, '||': true, 'primary ability': true };
+    var rows = coreTraitFeature.desc.split('\n').filter(function(l){ return l.startsWith('|') && !l.startsWith('|---'); });
+    traitsHtml = rows.map(function(row){
+      var cells = row.split('|').map(function(c){ return c.trim(); }).filter(Boolean);
+      if (cells.length < 2) return '';
+      if (SKIP[cells[0].toLowerCase()]) return '';
+      return '<p class="cr-trait"><strong>' + cells[0] + '.</strong> ' + cells[1] + '</p>';
+    }).join('');
+  }
+
+  var featuresHtml = (cl.features || []).filter(function(f){ return f.feature_type === 'CLASS_LEVEL_FEATURE'; }).map(function(f){
+    var level = (f.gained_at && f.gained_at[0] && f.gained_at[0].level) || 1;
+    return '<p class="cr-trait"><strong>' + f.name + ' (Level ' + level + ').</strong> ' + f.desc + '</p>';
+  }).join('');
+
+  return '<div class="sl-card-head" style="border-bottom-color:var(--gold)">' +
+           '<div><h3 class="sl-card-name">' + cl.name + '</h3>' +
+           '<div class="sl-card-sub">Hit Die ' + (cl.hit_dice || '') + ' · ' + (cl.caster_type || 'NONE') + ' caster</div></div>' +
+         '</div>' +
+         '<div class="sl-card-body">' + descHtml +
+           (traitsHtml ? '<div class="cr-section-title">Core Traits</div>' + traitsHtml : '') +
+           (featuresHtml ? '<div class="cr-section-title">Features</div>' + featuresHtml : '') +
+         '</div>';
+}
+
+function renderSubclassCard(sc) {
+  var hb = sc._hbData || {};
+  var descHtml = hb.description ? '<p class="cr-trait">' + hb.description + '</p>' : '';
+  var spellsHtml = (hb.subclass_spell_list && hb.subclass_spell_list.length)
+    ? '<div class="cr-section-title">Subclass Spells</div><p class="cr-trait">' + hb.subclass_spell_list.join(', ') + '</p>'
+    : '';
+  var featuresHtml = Object.entries(hb.features || {})
+    .sort(function(a, b){ return parseInt(a[0], 10) - parseInt(b[0], 10); })
+    .map(function(entry){
+      var level = entry[0], feats = entry[1] || [];
+      return '<div class="cr-section-title">Level ' + level + '</div>' +
+        feats.map(function(f){ return '<p class="cr-trait"><strong>' + f.name + '.</strong> ' + f.description + '</p>'; }).join('');
+    }).join('');
+
+  return '<div class="sl-card-head" style="border-bottom-color:var(--gold)">' +
+           '<div><h3 class="sl-card-name">' + sc.name + '</h3>' +
+           '<div class="sl-card-sub">Subclass of ' + ((sc.subclass_of && sc.subclass_of.name) || '') + '</div></div>' +
+         '</div>' +
+         '<div class="sl-card-body">' + descHtml + spellsHtml + featuresHtml + '</div>';
+}
+
+function renderSpeciesCard(sp) {
+  var traitsHtml = (sp.traits || []).map(function(t){
+    return '<p class="cr-trait"><strong>' + t.name + '.</strong> ' + t.desc + '</p>';
+  }).join('');
+  return '<div class="sl-card-head" style="border-bottom-color:var(--gold)">' +
+           '<div><h3 class="sl-card-name">' + sp.name + '</h3><div class="sl-card-sub">Species</div></div>' +
+         '</div>' +
+         '<div class="sl-card-body">' + traitsHtml + '</div>';
 }
 
 function renderCreatureCard(m) {
@@ -474,11 +658,10 @@ function renderList() {
   }
   el.innerHTML = items.map(it => {
     const date = new Date(it.created_at).toLocaleDateString();
+    const OTHER_TYPE_ICONS = { creature: '⚔', background: '❖', class: '⬡', subclass: '⬡', species: '♦' };
     const icon = it.type === 'spell'
       ? '<span class="hb-row-icon sl-' + (it.data.school_index || 'evocation') + '">' + (speSchoolIcons[it.data.school_index] || '') + '</span>'
-      : it.type === 'creature'
-        ? '<span class="hb-row-icon hb-creature-icon">⚔</span>'
-        : '<span class="hb-row-icon hb-creature-icon">❖</span>';
+      : '<span class="hb-row-icon hb-creature-icon">' + (OTHER_TYPE_ICONS[it.type] || '?') + '</span>';
     return '<div class="hb-row hb-clickable" data-id="' + it.id + '">' +
       '<div class="hb-row-info">' + icon +
         '<div class="hb-row-text"><span class="hb-row-name">' + it.name + '</span>' +
@@ -519,9 +702,11 @@ document.addEventListener('click', function (e) {
   row.classList.add('hb-open');
   const panel = document.createElement('div');
   panel.className = 'spe-detail';
-  panel.innerHTML = item.type === 'spell' ? speRenderCard(item.data)
-    : item.type === 'creature' ? renderCreatureCard(item.data)
-    : renderBackgroundCard(item.data);
+  const RENDERERS = {
+    spell: speRenderCard, creature: renderCreatureCard, background: renderBackgroundCard,
+    class: renderClassCard, subclass: renderSubclassCard, species: renderSpeciesCard,
+  };
+  panel.innerHTML = (RENDERERS[item.type] || renderBackgroundCard)(item.data);
   row.insertAdjacentElement('afterend', panel);
 });
 
@@ -531,11 +716,17 @@ function startCreate(type) {
   document.querySelector('#hb-form-spell button.hb-btn-primary').textContent = 'Create Spell';
   document.querySelector('#hb-form-creature button.hb-btn-primary').textContent = 'Create Creature';
   document.querySelector('#hb-form-background button.hb-btn-primary').textContent = 'Create Background';
+  document.querySelector('#hb-form-class button.hb-btn-primary').textContent = 'Create Class';
+  document.querySelector('#hb-form-subclass button.hb-btn-primary').textContent = 'Create Subclass';
+  document.querySelector('#hb-form-species button.hb-btn-primary').textContent = 'Create Species';
   document.getElementById('hb-step1').classList.remove('active');
   document.getElementById('hb-step2').classList.add('active');
   document.getElementById('hb-form-spell').style.display = type === 'spell' ? '' : 'none';
   document.getElementById('hb-form-creature').style.display = type === 'creature' ? '' : 'none';
   document.getElementById('hb-form-background').style.display = type === 'background' ? '' : 'none';
+  document.getElementById('hb-form-class').style.display = type === 'class' ? '' : 'none';
+  document.getElementById('hb-form-subclass').style.display = type === 'subclass' ? '' : 'none';
+  document.getElementById('hb-form-species').style.display = type === 'species' ? '' : 'none';
 }
 
 const ACTION_TYPE_LABELS = { ACTION: 'Action', BONUS_ACTION: 'Bonus Action', REACTION: 'Reaction',
@@ -593,7 +784,7 @@ function startEdit(event, id) {
     document.getElementById('cr-traits').value = (d.traits || []).map(t => t.name + ' | ' + t.desc).join('\n');
     document.getElementById('cr-actions').value = (d.actions || [])
       .map(a => a.name + ' | ' + (ACTION_TYPE_LABELS[a.action_type] || 'Action') + ' | ' + a.desc).join('\n');
-  } else {
+  } else if (item.type === 'background') {
     document.querySelector('#hb-form-background button.hb-btn-primary').textContent = 'Save Changes';
     const benefits = d.benefits || [];
     const find = t => (benefits.find(b => b.type === t) || {}).desc || '';
@@ -607,6 +798,47 @@ function startEdit(event, id) {
     const trait = benefits.find(b => b.type === 'trait');
     document.getElementById('bg-trait-name').value = trait ? trait.name : '';
     document.getElementById('bg-trait-desc').value = trait ? trait.desc : '';
+  } else if (item.type === 'class') {
+    document.querySelector('#hb-form-class button.hb-btn-primary').textContent = 'Save Changes';
+    const hb = d._hbData || {};
+    document.getElementById('cl-name').value = d.name || '';
+    document.getElementById('cl-hitdie').value = hb.hit_dice || 'D8';
+    document.getElementById('cl-caster').value = hb.caster_type || 'NONE';
+    document.getElementById('cl-spell-ability-row').style.display = (hb.caster_type || 'NONE') === 'NONE' ? 'none' : 'flex';
+    document.getElementById('cl-spell-ability').value = hb.spellcasting_ability || '';
+    const saves = hb.saving_throws || ['Dexterity', 'Constitution'];
+    document.getElementById('cl-save1').value = saves[0] || 'Dexterity';
+    document.getElementById('cl-save2').value = saves[1] || 'Constitution';
+    document.getElementById('cl-skills').value = hb.skill_proficiencies || '';
+    document.getElementById('cl-armor').value = hb.armor_training || '';
+    document.getElementById('cl-weapons').value = hb.weapon_proficiencies || '';
+    document.getElementById('cl-equipment').value = hb.starting_equipment || '';
+    document.getElementById('cl-desc').value = hb.description || '';
+    document.getElementById('cl-features').value = (hb.features || [])
+      .map(f => f.level + ' | ' + f.name + ' | ' + f.description).join('\n');
+  } else if (item.type === 'subclass') {
+    document.querySelector('#hb-form-subclass button.hb-btn-primary').textContent = 'Save Changes';
+    const hb = d._hbData || {};
+    document.getElementById('sc-name').value = d.name || '';
+    document.getElementById('sc-parent').value = (d.subclass_of && d.subclass_of.name) || '';
+    document.getElementById('sc-desc').value = hb.description || '';
+    document.getElementById('sc-spells').value = (hb.subclass_spell_list || []).join(', ');
+    const lines = [];
+    Object.entries(hb.features || {}).sort(([a], [b]) => parseInt(a, 10) - parseInt(b, 10)).forEach(([level, feats]) => {
+      (feats || []).forEach(f => lines.push(level + ' | ' + f.name + ' | ' + f.description));
+    });
+    document.getElementById('sc-features').value = lines.join('\n');
+  } else {
+    document.querySelector('#hb-form-species button.hb-btn-primary').textContent = 'Save Changes';
+    const traits = d.traits || [];
+    const sizeTrait = traits.find(t => t.name === 'Size');
+    const speedTrait = traits.find(t => t.type === 'SPEED');
+    document.getElementById('spc-name').value = d.name || '';
+    document.getElementById('spc-size').value = sizeTrait ? sizeTrait.desc : 'Medium';
+    document.getElementById('spc-speed').value = speedTrait ? parseInt(speedTrait.desc, 10) || 30 : 30;
+    document.getElementById('spc-traits').value = traits
+      .filter(t => t.name !== 'Size' && t.type !== 'SPEED')
+      .map(t => t.name + ' | ' + t.desc).join('\n');
   }
 }
 
@@ -781,6 +1013,182 @@ async function submitBackground() {
   status.style.color = '#2d7a3a';
   status.textContent = editingId ? '✓ Saved' : '✓ Created';
   ['bg-name','bg-asi','bg-skills','bg-tool','bg-languages','bg-equipment','bg-feat','bg-trait-name','bg-trait-desc'].forEach(id => document.getElementById(id).value = '');
+  await loadItems();
+  setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
+}
+
+async function submitClass() {
+  const status = document.getElementById('cl-status');
+  const name = document.getElementById('cl-name').value.trim();
+  if (!name) { status.textContent = 'Name is required.'; return; }
+
+  const hitDice = document.getElementById('cl-hitdie').value;
+  const casterType = document.getElementById('cl-caster').value;
+  const spellAbility = document.getElementById('cl-spell-ability').value;
+  if (casterType !== 'NONE' && !spellAbility) {
+    status.textContent = 'Spellcasting ability is required for a casting class.';
+    return;
+  }
+  const savingThrows = [document.getElementById('cl-save1').value, document.getElementById('cl-save2').value];
+  const skillProficiencies = document.getElementById('cl-skills').value.trim();
+  const armorTraining = document.getElementById('cl-armor').value.trim();
+  const weaponProficiencies = document.getElementById('cl-weapons').value.trim();
+  const startingEquipment = document.getElementById('cl-equipment').value.trim();
+  const description = document.getElementById('cl-desc').value.trim();
+
+  const rawFeatures = document.getElementById('cl-features').value.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+    const [lvl, fname, ...rest] = line.split('|');
+    return { level: parseInt(lvl, 10) || 1, name: (fname || '').trim(), description: rest.join('|').trim() };
+  });
+
+  const coreDesc = [
+    `||`,
+    `|---|---|`,
+    `|Primary Ability|${savingThrows.join(' and ')}|`,
+    `|Hit Point Die|${hitDice} per ${name} level|`,
+    `|Saving Throw Proficiencies|${savingThrows.join(' and ')}|`,
+    `|Skill Proficiencies|${skillProficiencies}|`,
+    `|Weapon Proficiencies|${weaponProficiencies}|`,
+    `|Armor Training|${armorTraining}|`,
+    `|Starting Equipment|${startingEquipment}|`,
+  ].join('\n');
+
+  const features = [
+    { name: `Core ${name} Traits`, feature_type: 'CORE_TRAITS_TABLE',
+      desc: coreDesc, gained_at: [], data_for_class_table: [] },
+    ...rawFeatures.map(f => ({
+      name: f.name, desc: f.description, feature_type: 'CLASS_LEVEL_FEATURE',
+      gained_at: [{ level: f.level }],
+    })),
+  ];
+
+  if (casterType !== 'NONE' && spellAbility) {
+    const featName = casterType === 'PACT' ? 'Pact Magic' : 'Spellcasting';
+    features.push({
+      name: featName,
+      desc: `${spellAbility} is your spellcasting ability for your ${name} spells. Your spell save DC equals 8 + your proficiency bonus + your ${spellAbility} modifier.`,
+      feature_type: 'CLASS_LEVEL_FEATURE', gained_at: [{ level: 1 }],
+    });
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const data = {
+    key: editingId ? 'hb-' + editingId : null, name,
+    hit_dice: hitDice, caster_type: casterType,
+    saving_throws: savingThrows.map(s => ({ name: s })),
+    desc: description,
+    features,
+    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    _homebrew: true,
+    _hbData: {
+      hit_dice: hitDice, caster_type: casterType, spellcasting_ability: spellAbility,
+      saving_throws: savingThrows, skill_proficiencies: skillProficiencies,
+      armor_training: armorTraining, weapon_proficiencies: weaponProficiencies,
+      starting_equipment: startingEquipment, description, features: rawFeatures,
+    },
+  };
+
+  let error;
+  if (editingId) {
+    ({ error } = await supabase.from('homebrew_items').update({ name, data }).eq('id', editingId));
+  } else {
+    const { data: row, error: insertErr } = await supabase.from('homebrew_items')
+      .insert({ owner_id: user.id, type: 'class', name, data }).select('id').single();
+    error = insertErr;
+    if (!error) { data.key = 'hb-' + row.id; await supabase.from('homebrew_items').update({ data }).eq('id', row.id); }
+  }
+  if (error) { status.textContent = 'Failed: ' + error.message; return; }
+
+  status.style.color = '#2d7a3a';
+  status.textContent = editingId ? '✓ Saved' : '✓ Created';
+  ['cl-name','cl-skills','cl-armor','cl-weapons','cl-equipment','cl-desc','cl-features'].forEach(id => document.getElementById(id).value = '');
+  await loadItems();
+  setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
+}
+
+async function submitSubclass() {
+  const status = document.getElementById('sc-status');
+  const name = document.getElementById('sc-name').value.trim();
+  const parent = document.getElementById('sc-parent').value.trim();
+  if (!name) { status.textContent = 'Name is required.'; return; }
+  if (!parent) { status.textContent = 'Parent class name is required.'; return; }
+
+  const description = document.getElementById('sc-desc').value.trim();
+  const subclassSpellList = document.getElementById('sc-spells').value.split(',').map(s => s.trim()).filter(Boolean);
+
+  const grouped = {};
+  document.getElementById('sc-features').value.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
+    const [lvl, fname, ...rest] = line.split('|');
+    const level = String(parseInt(lvl, 10) || 1);
+    (grouped[level] = grouped[level] || []).push({ name: (fname || '').trim(), description: rest.join('|').trim() });
+  });
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const data = {
+    key: editingId ? 'hb-' + editingId : null, name,
+    subclass_of: { key: parent, name: parent },
+    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    _homebrew: true,
+    _hbData: { features: grouped, subclass_spell_list: subclassSpellList, description },
+  };
+
+  let error;
+  if (editingId) {
+    ({ error } = await supabase.from('homebrew_items').update({ name, data }).eq('id', editingId));
+  } else {
+    const { data: row, error: insertErr } = await supabase.from('homebrew_items')
+      .insert({ owner_id: user.id, type: 'subclass', name, data }).select('id').single();
+    error = insertErr;
+    if (!error) { data.key = 'hb-' + row.id; await supabase.from('homebrew_items').update({ data }).eq('id', row.id); }
+  }
+  if (error) { status.textContent = 'Failed: ' + error.message; return; }
+
+  status.style.color = '#2d7a3a';
+  status.textContent = editingId ? '✓ Saved' : '✓ Created';
+  ['sc-name','sc-parent','sc-desc','sc-spells','sc-features'].forEach(id => document.getElementById(id).value = '');
+  await loadItems();
+  setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
+}
+
+async function submitSpecies() {
+  const status = document.getElementById('spc-status');
+  const name = document.getElementById('spc-name').value.trim();
+  if (!name) { status.textContent = 'Name is required.'; return; }
+
+  const size = document.getElementById('spc-size').value;
+  const speed = document.getElementById('spc-speed').value.trim() || '30';
+
+  const traits = [
+    { name: 'Size', desc: size, type: 'trait' },
+    { name: 'Speed', desc: speed + ' feet', type: 'SPEED' },
+    ...document.getElementById('spc-traits').value.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+      const [tname, ...rest] = line.split('|');
+      return { name: (tname || '').trim(), desc: rest.join('|').trim(), type: 'trait' };
+    }),
+  ];
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const data = {
+    key: editingId ? 'hb-' + editingId : null, name,
+    traits,
+    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    _homebrew: true,
+  };
+
+  let error;
+  if (editingId) {
+    ({ error } = await supabase.from('homebrew_items').update({ name, data }).eq('id', editingId));
+  } else {
+    const { data: row, error: insertErr } = await supabase.from('homebrew_items')
+      .insert({ owner_id: user.id, type: 'species', name, data }).select('id').single();
+    error = insertErr;
+    if (!error) { data.key = 'hb-' + row.id; await supabase.from('homebrew_items').update({ data }).eq('id', row.id); }
+  }
+  if (error) { status.textContent = 'Failed: ' + error.message; return; }
+
+  status.style.color = '#2d7a3a';
+  status.textContent = editingId ? '✓ Saved' : '✓ Created';
+  ['spc-name','spc-traits'].forEach(id => document.getElementById(id).value = '');
   await loadItems();
   setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
 }
