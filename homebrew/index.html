@@ -196,7 +196,7 @@
           <div class="hb-type-card-name">Class</div>
         </div>
         <div class="hb-type-card" onclick="startCreate('subclass')">
-          <div class="hb-type-card-icon">⬡</div>
+          <div class="hb-type-card-icon">ꙮ</div>
           <div class="hb-type-card-name">Subclass</div>
         </div>
         <div class="hb-type-card" onclick="startCreate('species')">
@@ -658,7 +658,7 @@ function renderList() {
   }
   el.innerHTML = items.map(it => {
     const date = new Date(it.created_at).toLocaleDateString();
-    const OTHER_TYPE_ICONS = { creature: '⚔', background: '❖', class: '⬡', subclass: '⬡', species: '♦' };
+    const OTHER_TYPE_ICONS = { creature: '⚔', background: '❖', class: '⬡', subclass: 'ꙮ', species: '♦' };
     const icon = it.type === 'spell'
       ? '<span class="hb-row-icon sl-' + (it.data.school_index || 'evocation') + '">' + (speSchoolIcons[it.data.school_index] || '') + '</span>'
       : '<span class="hb-row-icon hb-creature-icon">' + (OTHER_TYPE_ICONS[it.type] || '?') + '</span>';
