@@ -24,6 +24,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "3459"],
       "port": 3459
+    },
+    {
+      "name": "timeline",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3460", "--directory", "timeline"],
+      "port": 3460
     }
   ]
 }

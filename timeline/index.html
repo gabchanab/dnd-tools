@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timeline Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../character builder/static/css/sheet.css">
+  <style>
+    body { padding: 3rem 1.2rem; }
+    .back-btn{position:fixed;top:1.2rem;left:1.2rem;z-index:100;
+      font-family:var(--font-heading);font-size:.60rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+      padding:.45rem 1.1rem;background:rgba(255,250,248,.90);border:1px solid var(--border);
+      border-radius:20px;color:var(--text-dim);text-decoration:none;transition:all .2s;
+      backdrop-filter:blur(6px)}
+    .back-btn:hover{border-color:var(--gold);color:var(--gold-dim);box-shadow:0 0 12px var(--gold-glow)}
+
+    .tl-wrap { max-width: 900px; margin: 0 auto; }
+    .tl-header { text-align: center; margin-bottom: 2rem; }
+    .tl-ornament { font-size: 1.4rem; color: var(--gold); opacity: .55;
+                   letter-spacing: .5em; display: block; margin-bottom: .8rem; }
+    .tl-title { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700;
+                color: var(--gold); letter-spacing: .1em;
+                text-shadow: 0 0 32px var(--gold-glow), 0 0 8px rgba(185,155,80,.2);
+                margin: 0 0 .4rem; }
+    .tl-sub { font-size: .82rem; color: var(--text-dim); font-style: italic; font-family: var(--font-body); }
+
+    .tl-tabs { display: flex; gap: .6rem; justify-content: center; margin-bottom: 1.6rem; }
+    .tl-tab-btn { font-family: var(--font-heading); font-size: .70rem; font-weight: 700; letter-spacing: .10em;
+      text-transform: uppercase; padding: 8px 20px; border-radius: 20px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border-mid); color: var(--gold-dim); }
+    .tl-tab-btn:hover { border-color: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
+    .tl-tab-btn.active { background: var(--gold-glow); border-color: var(--gold); }
+
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    .panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+             padding: 1.4rem 1.3rem; margin-bottom: 1.5rem; }
+    .panel-title { font-family: var(--font-heading); font-size: .75rem; font-weight: 700;
+                   letter-spacing: .1em; text-transform: uppercase; color: var(--gold-dim);
+                   margin: 0 0 1rem; }
+
+    /* ── Jump nav ── */
+    .tl-jump-row { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1.4rem;
+      position: sticky; top: .5rem; z-index: 5; }
+    .tl-jump-chip { font-family: var(--font-heading); font-size: .60rem; font-weight: 600; letter-spacing: .08em;
+      padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); cursor: pointer;
+      background: rgba(255,248,245,.90); color: var(--text-dim); transition: all .15s; user-select: none;
+      backdrop-filter: blur(4px); }
+    .tl-jump-chip:hover { border-color: var(--gold); color: var(--gold-dim); }
+
+    /* ── Timeline canvas + connector overlay ── */
+    #tl-canvas { position: relative; max-width: 640px; margin: 0 auto; padding-right: 190px; box-sizing: border-box; overflow: visible; }
+    #tl-connectors { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+    .tl-age-section { margin-bottom: 2.2rem; position: relative; z-index: 2; }
+    .tl-age-heading { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--gold-dim);
+      border-bottom: 2px solid var(--gold); padding-bottom: .35rem; margin-bottom: .8rem; }
+    .tl-age-range { font-size: .68rem; color: var(--text-dim); font-style: italic; font-weight: 400;
+      margin-left: .6rem; font-family: var(--font-body); }
+    .tl-age-desc { font-size: .8rem; color: var(--text-mid); font-style: italic; margin-bottom: .8rem; }
+
+    .tl-event-card { background: var(--bg-inset); border: 1px solid var(--border); border-radius: 8px;
+      padding: .7rem .9rem; margin-bottom: .7rem; }
+    .tl-event-year { font-family: var(--font-heading); font-size: .62rem; font-weight: 700; color: var(--gold-dim);
+      text-transform: uppercase; letter-spacing: .08em; }
+    .tl-event-title { font-size: .92rem; font-weight: 700; color: var(--text); margin: .15rem 0 .3rem; }
+    .tl-event-desc { font-size: .82rem; color: var(--text-mid); line-height: 1.55; }
+
+    .tl-empty { font-size: .8rem; color: var(--text-dim); font-style: italic; padding: 1rem 0; text-align: center; }
+
+    /* ── List rows (Manage tab) ── */
+    .tl-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+      padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg-inset); margin-bottom: 6px; }
+    .tl-row-info { display: flex; align-items: center; gap: .55rem; min-width: 0; }
+    .tl-row-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .tl-row-name { font-size: .85rem; font-weight: 600; color: var(--text); white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; }
+    .tl-row-sub { font-size: .68rem; color: var(--text-dim); font-style: italic; }
+    .tl-row-actions { display: flex; gap: 2px; flex-shrink: 0; }
+    .tl-delete-btn { font-size: .85rem; padding: 4px 8px; border-radius: 4px; flex-shrink: 0;
+      cursor: pointer; transition: background .1s; }
+    .tl-delete-btn:hover { background: rgba(180,50,50,.15); color: #a33; }
+
+    #ev-search { width: 100%; font-family: var(--font-body); font-size: .82rem;
+      padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-mid);
+      background: var(--bg-inset); color: var(--text); margin-bottom: .8rem; }
+
+    /* ── Forms ── */
+    .tl-form-row { display: flex; gap: .6rem; margin-bottom: .7rem; flex-wrap: wrap; }
+    .tl-form-field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 110px; }
+    .tl-form-field label { font-size: .6rem; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-dim); font-family: var(--font-heading); }
+    .tl-form-field input, .tl-form-field select, .tl-form-field textarea {
+      font-family: var(--font-body); font-size: .82rem; padding: 6px 8px; border-radius: 6px;
+      border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); }
+    .tl-form-field textarea { min-height: 70px; resize: vertical; }
+    .tl-btn { font-family: var(--font-heading); font-size: .68rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: 7px 16px; border-radius: 16px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border-mid); color: var(--gold-dim); }
+    .tl-btn:hover { border-color: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
+    .tl-btn-primary { background: var(--gold-glow); border-color: var(--gold); }
+    .tl-form-status { font-size: .78rem; margin-top: .6rem; }
+    .tl-form-hint { font-size: .68rem; color: var(--text-dim); font-style: italic; }
+
+    /* ── Linked-events sub-list ── */
+    #ev-link-rows { margin-bottom: .5rem; }
+    .tl-link-row { display: flex; gap: .5rem; align-items: center; margin-bottom: .4rem; }
+    .tl-link-row select { flex: 2; font-family: var(--font-body); font-size: .8rem; padding: 5px 7px;
+      border-radius: 6px; border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); }
+    .tl-link-row input { flex: 1; font-family: var(--font-body); font-size: .8rem; padding: 5px 7px;
+      border-radius: 6px; border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="page-texture"></div>
+
+<a class="back-btn" href="../index.html">← Homepage</a>
+
+<div class="tl-wrap">
+  <header class="tl-header">
+    <span class="tl-ornament">✦ ── ✦ ── ✦</span>
+    <h1 class="tl-title">Timeline Builder</h1>
+    <p class="tl-sub">Chart the ages and events of your world</p>
+  </header>
+
+  <div class="tl-tabs">
+    <button class="tl-tab-btn active" onclick="switchTab('timeline', this)">Timeline</button>
+    <button class="tl-tab-btn" onclick="switchTab('manage', this)">Manage</button>
+  </div>
+
+  <div class="step-panel active" id="tab-timeline">
+    <div class="tl-jump-row" id="tl-jump-row"></div>
+    <div id="tl-canvas">
+      <svg id="tl-connectors">
+        <defs>
+          <marker id="tl-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--purple-bright)"/>
+          </marker>
+        </defs>
+        <g id="tl-links-group"></g>
+      </svg>
+      <div id="tl-sections"></div>
+    </div>
+  </div>
+
+  <div class="step-panel" id="tab-manage">
+    <section class="panel">
+      <div class="panel-title">Ages</div>
+      <div id="age-list"></div>
+      <hr style="border:none;border-top:1px dashed var(--border);margin:1rem 0">
+      <div id="age-form">
+        <div class="tl-form-row">
+          <div class="tl-form-field" style="flex:2"><label>Name</label><input type="text" id="age-name"></div>
+          <div class="tl-form-field"><label>Start Year</label><input type="number" id="age-start"></div>
+          <div class="tl-form-field"><label>End Year (optional)</label><input type="number" id="age-end" placeholder="ongoing"></div>
+        </div>
+        <div class="tl-form-row">
+          <div class="tl-form-field" style="flex:1"><label>Description</label><textarea id="age-desc"></textarea></div>
+        </div>
+        <button class="tl-btn tl-btn-primary" onclick="submitAge()">Add Age</button>
+        <div class="tl-form-status" id="age-status"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">Events</div>
+      <input type="text" id="ev-search" placeholder="Search by title" oninput="renderEventList()">
+      <div id="event-list"></div>
+      <hr style="border:none;border-top:1px dashed var(--border);margin:1rem 0">
+      <div id="event-form">
+        <div class="tl-form-row">
+          <div class="tl-form-field" style="flex:2"><label>Title</label><input type="text" id="ev-title"></div>
+          <div class="tl-form-field"><label>Year</label><input type="number" id="ev-year"></div>
+        </div>
+        <div class="tl-form-row">
+          <div class="tl-form-field"><label>Age</label><select id="ev-age"></select></div>
+        </div>
+        <div class="tl-form-row">
+          <div class="tl-form-field" style="flex:1"><label>Description</label><textarea id="ev-desc"></textarea></div>
+        </div>
+        <div class="tl-form-row">
+          <div class="tl-form-field" style="flex:1">
+            <label>Linked Events (causal / related)</label>
+            <div id="ev-link-rows"></div>
+            <button type="button" class="tl-btn" onclick="addLinkRow()">+ Add Link</button>
+            <div id="ev-linked-from" style="margin-top:.5rem"></div>
+          </div>
+        </div>
+        <button class="tl-btn tl-btn-primary" onclick="submitEvent()">Add Event</button>
+        <div class="tl-form-status" id="ev-status"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js?v=1"></script>
+<script src="js/auth.js?v=1"></script>
+<script>
+let ages = [];
+let events = [];
+let links = [];
+let editingAgeId = null;
+let editingEventId = null;
+let formLinks = [];
+
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tl-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-timeline').classList.toggle('active', tab === 'timeline');
+  document.getElementById('tab-manage').classList.toggle('active', tab === 'manage');
+  if (tab === 'timeline') {
+    requestAnimationFrame(() => requestAnimationFrame(drawConnectors));
+  }
+}
+
+// ─── Load ────────────────────────────────────────────────────────────────────
+async function loadAll() {
+  const [agesRes, eventsRes, linksRes] = await Promise.all([
+    supabase.from('timeline_ages').select('*').order('start_year', { ascending: true }),
+    supabase.from('timeline_events').select('*').order('year', { ascending: true }).order('created_at', { ascending: true }),
+    supabase.from('timeline_links').select('*'),
+  ]);
+  ages = agesRes.data || [];
+  events = eventsRes.data || [];
+  links = linksRes.data || [];
+  renderAgeList();
+  populateAgeSelect();
+  renderEventList();
+  renderTimeline();
+}
+
+// ─── Ages ────────────────────────────────────────────────────────────────────
+function renderAgeList() {
+  const el = document.getElementById('age-list');
+  if (!ages.length) { el.innerHTML = '<div class="tl-empty">No ages yet.</div>'; return; }
+  el.innerHTML = ages.slice().sort((a, b) => a.start_year - b.start_year).map(a => {
+    const range = a.end_year != null ? (a.start_year + ' – ' + a.end_year) : (a.start_year + ' – present');
+    return '<div class="tl-row">' +
+      '<div class="tl-row-info"><div class="tl-row-text"><span class="tl-row-name">' + a.name + '</span>' +
+      '<span class="tl-row-sub">' + range + '</span></div></div>' +
+      '<div class="tl-row-actions">' +
+        '<span class="tl-delete-btn" title="Edit" onclick="startEditAge(\'' + a.id + '\')">✏</span>' +
+        '<span class="tl-delete-btn" title="Delete" onclick="deleteAge(\'' + a.id + '\')">🗑</span>' +
+      '</div></div>';
+  }).join('');
+}
+
+function resetAgeForm() {
+  editingAgeId = null;
+  document.getElementById('age-name').value = '';
+  document.getElementById('age-start').value = '';
+  document.getElementById('age-end').value = '';
+  document.getElementById('age-desc').value = '';
+  document.querySelector('#age-form button.tl-btn-primary').textContent = 'Add Age';
+  document.getElementById('age-status').textContent = '';
+}
+
+function startEditAge(id) {
+  const a = ages.find(x => x.id === id);
+  if (!a) return;
+  editingAgeId = id;
+  document.getElementById('age-name').value = a.name;
+  document.getElementById('age-start').value = a.start_year;
+  document.getElementById('age-end').value = a.end_year ?? '';
+  document.getElementById('age-desc').value = a.description || '';
+  document.querySelector('#age-form button.tl-btn-primary').textContent = 'Save Changes';
+}
+
+async function submitAge() {
+  const status = document.getElementById('age-status');
+  status.style.color = '';
+  const name = document.getElementById('age-name').value.trim();
+  const startRaw = document.getElementById('age-start').value;
+  const startYear = parseInt(startRaw, 10);
+  const endRaw = document.getElementById('age-end').value.trim();
+  const endYear = endRaw === '' ? null : parseInt(endRaw, 10);
+  const description = document.getElementById('age-desc').value.trim();
+
+  if (!name) { status.textContent = 'Name is required.'; return; }
+  if (startRaw.trim() === '' || isNaN(startYear)) { status.textContent = 'Start year is required.'; return; }
+  if (endYear !== null && endYear < startYear) { status.textContent = 'End year must be after start year.'; return; }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const row = { owner_id: user.id, name, start_year: startYear, end_year: endYear, description };
+
+  let error;
+  if (editingAgeId) {
+    ({ error } = await supabase.from('timeline_ages').update(row).eq('id', editingAgeId));
+  } else {
+    ({ error } = await supabase.from('timeline_ages').insert(row));
+  }
+  if (error) { status.textContent = 'Failed: ' + error.message; return; }
+
+  status.style.color = '#2d7a3a';
+  status.textContent = editingAgeId ? '✓ Saved' : '✓ Created';
+  const wasEditing = editingAgeId;
+  await loadAll();
+  setTimeout(() => { resetAgeForm(); }, 900);
+}
+
+async function deleteAge(id) {
+  const count = events.filter(e => e.age_id === id).length;
+  const msg = count
+    ? ('Delete this Age? ' + count + ' event(s) will become Unassigned (they will not be deleted).')
+    : 'Delete this Age?';
+  if (!confirm(msg)) return;
+  const { error } = await supabase.from('timeline_ages').delete().eq('id', id);
+  if (error) { alert('Failed to delete: ' + error.message); return; }
+  await loadAll();
+}
+
+// ─── Events ──────────────────────────────────────────────────────────────────
+function populateAgeSelect() {
+  const sel = document.getElementById('ev-age');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Unassigned —</option>' +
+    ages.slice().sort((a, b) => a.start_year - b.start_year)
+      .map(a => '<option value="' + a.id + '">' + a.name + '</option>').join('');
+  if (current) sel.value = current;
+}
+
+function renderEventList() {
+  const q = document.getElementById('ev-search').value.trim().toLowerCase();
+  const el = document.getElementById('event-list');
+  const filtered = events.filter(e => !q || e.title.toLowerCase().includes(q));
+  if (!filtered.length) { el.innerHTML = '<div class="tl-empty">No events match.</div>'; return; }
+  el.innerHTML = filtered.map(e => {
+    const age = ages.find(a => a.id === e.age_id);
+    return '<div class="tl-row">' +
+      '<div class="tl-row-info"><div class="tl-row-text"><span class="tl-row-name">' + e.title + '</span>' +
+      '<span class="tl-row-sub">Year ' + e.year + ' · ' + (age ? age.name : 'Unassigned') + '</span></div></div>' +
+      '<div class="tl-row-actions">' +
+        '<span class="tl-delete-btn" title="Edit" onclick="startEditEvent(\'' + e.id + '\')">✏</span>' +
+        '<span class="tl-delete-btn" title="Delete" onclick="deleteEvent(\'' + e.id + '\')">🗑</span>' +
+      '</div></div>';
+  }).join('');
+}
+
+function resetEventForm() {
+  editingEventId = null;
+  formLinks = [];
+  document.getElementById('ev-title').value = '';
+  document.getElementById('ev-year').value = '';
+  document.getElementById('ev-desc').value = '';
+  document.getElementById('ev-age').value = '';
+  document.getElementById('ev-linked-from').innerHTML = '';
+  renderLinkRows();
+  document.querySelector('#event-form button.tl-btn-primary').textContent = 'Add Event';
+  document.getElementById('ev-status').textContent = '';
+}
+
+function renderLinkRows() {
+  const el = document.getElementById('ev-link-rows');
+  el.innerHTML = formLinks.map((l, i) => {
+    const usedIds = formLinks.map(fl => fl.toEventId);
+    const options = events
+      .filter(e => e.id !== editingEventId && (e.id === l.toEventId || !usedIds.includes(e.id)))
+      .map(e => '<option value="' + e.id + '"' + (e.id === l.toEventId ? ' selected' : '') + '>' + e.title + '</option>')
+      .join('');
+    return '<div class="tl-link-row">' +
+      '<select onchange="updateLinkTarget(' + i + ', this.value)"><option value="">— choose event —</option>' + options + '</select>' +
+      '<input type="text" placeholder="e.g. caused, led to" value="' + (l.label || '') + '" oninput="updateLinkLabel(' + i + ', this.value)">' +
+      '<span class="tl-delete-btn" onclick="removeLinkRow(' + i + ')">✕</span>' +
+    '</div>';
+  }).join('');
+}
+
+function addLinkRow() { formLinks.push({ toEventId: '', label: '' }); renderLinkRows(); }
+function updateLinkTarget(i, val) { formLinks[i].toEventId = val; renderLinkRows(); }
+function updateLinkLabel(i, val) { formLinks[i].label = val; }
+function removeLinkRow(i) { formLinks.splice(i, 1); renderLinkRows(); }
+
+async function startEditEvent(id) {
+  const e = events.find(x => x.id === id);
+  if (!e) return;
+  editingEventId = id;
+  document.getElementById('ev-title').value = e.title;
+  document.getElementById('ev-year').value = e.year;
+  document.getElementById('ev-desc').value = e.description || '';
+  document.getElementById('ev-age').value = e.age_id || '';
+  formLinks = links.filter(l => l.from_event_id === id).map(l => ({ toEventId: l.to_event_id, label: l.label || '' }));
+  renderLinkRows();
+  document.querySelector('#event-form button.tl-btn-primary').textContent = 'Save Changes';
+
+  const { data: incoming } = await supabase.from('timeline_links').select('from_event_id, label').eq('to_event_id', id);
+  const fromEl = document.getElementById('ev-linked-from');
+  if (incoming && incoming.length) {
+    const parts = incoming.map(l => {
+      const src = events.find(ev => ev.id === l.from_event_id);
+      return (src ? src.title : 'Unknown') + (l.label ? ' (' + l.label + ')' : '');
+    });
+    fromEl.innerHTML = '<span class="tl-form-hint">Linked from: ' + parts.join(', ') + '</span>';
+  } else {
+    fromEl.innerHTML = '';
+  }
+}
+
+async function submitEvent() {
+  const status = document.getElementById('ev-status');
+  status.style.color = '';
+  const title = document.getElementById('ev-title').value.trim();
+  const yearRaw = document.getElementById('ev-year').value;
+  const year = parseInt(yearRaw, 10);
+  const description = document.getElementById('ev-desc').value.trim();
+  const ageId = document.getElementById('ev-age').value || null;
+
+  if (!title) { status.textContent = 'Title is required.'; return; }
+  if (yearRaw.trim() === '' || isNaN(year)) { status.textContent = 'Year is required.'; return; }
+
+  const age = ages.find(a => a.id === ageId);
+  if (age && (year < age.start_year || (age.end_year != null && year > age.end_year))) {
+    const rangeText = age.start_year + '–' + (age.end_year ?? 'present');
+    if (!confirm("This event's year (" + year + ') falls outside ' + age.name + "'s range (" + rangeText + '). Save anyway?')) return;
+  }
+
+  const validLinks = formLinks.filter(l => l.toEventId);
+  const targetIds = validLinks.map(l => l.toEventId);
+  if (new Set(targetIds).size !== targetIds.length) {
+    status.textContent = 'Duplicate linked event — remove the repeat.';
+    return;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const row = { owner_id: user.id, age_id: ageId, title, year, description };
+
+  let error, eventId;
+  if (editingEventId) {
+    eventId = editingEventId;
+    ({ error } = await supabase.from('timeline_events').update(row).eq('id', eventId));
+  } else {
+    const { data: inserted, error: insertErr } = await supabase.from('timeline_events').insert(row).select('id').single();
+    error = insertErr;
+    eventId = inserted ? inserted.id : null;
+  }
+  if (error) { status.textContent = 'Failed: ' + error.message; return; }
+
+  await supabase.from('timeline_links').delete().eq('from_event_id', eventId);
+  if (validLinks.length) {
+    const linkRows = validLinks.map(l => ({ owner_id: user.id, from_event_id: eventId, to_event_id: l.toEventId, label: l.label.trim() || null }));
+    const { error: linkErr } = await supabase.from('timeline_links').insert(linkRows);
+    if (linkErr) { status.textContent = 'Event saved, but links failed: ' + linkErr.message; await loadAll(); return; }
+  }
+
+  status.style.color = '#2d7a3a';
+  status.textContent = editingEventId ? '✓ Saved' : '✓ Created';
+  await loadAll();
+  setTimeout(() => { resetEventForm(); }, 900);
+}
+
+async function deleteEvent(id) {
+  if (!confirm('Delete this event? Any causal links to or from it will also be removed.')) return;
+  const { error } = await supabase.from('timeline_events').delete().eq('id', id);
+  if (error) { alert('Failed to delete: ' + error.message); return; }
+  await loadAll();
+}
+
+// ─── Timeline visual view ────────────────────────────────────────────────────
+function renderEventCard(e) {
+  return '<div class="tl-event-card" data-event-id="' + e.id + '">' +
+    '<div class="tl-event-year">Year ' + e.year + '</div>' +
+    '<div class="tl-event-title">' + e.title + '</div>' +
+    (e.description ? '<div class="tl-event-desc">' + e.description + '</div>' : '') +
+  '</div>';
+}
+
+function renderTimeline() {
+  const el = document.getElementById('tl-sections');
+  const jump = document.getElementById('tl-jump-row');
+
+  if (!ages.length && !events.length) {
+    el.innerHTML = '<div class="tl-empty">No ages or events yet — head to Manage to start building your world\'s history.</div>';
+    jump.innerHTML = '';
+    return;
+  }
+
+  const sortedAges = ages.slice().sort((a, b) => a.start_year - b.start_year);
+  const unassigned = events.filter(e => !e.age_id).sort((a, b) => a.year - b.year || new Date(a.created_at) - new Date(b.created_at));
+
+  jump.innerHTML = sortedAges.map(a => '<span class="tl-jump-chip" onclick="jumpToAge(\'' + a.id + '\')">' + a.name + '</span>').join('') +
+    (unassigned.length ? '<span class="tl-jump-chip" onclick="jumpToAge(\'unassigned\')">Unassigned</span>' : '');
+
+  const ageSections = sortedAges.map(a => {
+    const ageEvents = events.filter(e => e.age_id === a.id).sort((x, y) => x.year - y.year || new Date(x.created_at) - new Date(y.created_at));
+    const range = a.end_year != null ? (a.start_year + ' – ' + a.end_year) : (a.start_year + ' – present');
+    return '<div class="tl-age-section" id="age-section-' + a.id + '">' +
+      '<div class="tl-age-heading">' + a.name + '<span class="tl-age-range">' + range + '</span></div>' +
+      (a.description ? '<div class="tl-age-desc">' + a.description + '</div>' : '') +
+      (ageEvents.length ? ageEvents.map(renderEventCard).join('') : '<div class="tl-empty">No events in this age yet.</div>') +
+    '</div>';
+  }).join('');
+
+  const unassignedSection = unassigned.length
+    ? '<div class="tl-age-section" id="age-section-unassigned"><div class="tl-age-heading">Unassigned</div>' +
+      unassigned.map(renderEventCard).join('') + '</div>'
+    : '';
+
+  el.innerHTML = ageSections + unassignedSection;
+  drawConnectors();
+}
+
+function jumpToAge(id) {
+  const el = document.getElementById('age-section-' + id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── SVG connector overlay ────────────────────────────────────────────────────
+function hashCode(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function drawConnectors() {
+  const container = document.getElementById('tl-canvas');
+  const sections = document.getElementById('tl-sections');
+  const svg = document.getElementById('tl-connectors');
+  if (!container || !svg) return;
+  const cRect = container.getBoundingClientRect();
+  // Measure height from the content div, not the canvas itself — the canvas's own
+  // scrollHeight includes this absolutely-positioned svg, which would otherwise
+  // feed back into its own size on every redraw.
+  const contentHeight = sections.scrollHeight;
+  svg.setAttribute('width', container.clientWidth);
+  svg.setAttribute('height', contentHeight);
+  svg.setAttribute('viewBox', '0 0 ' + container.clientWidth + ' ' + contentHeight);
+
+  const group = svg.querySelector('#tl-links-group');
+  group.innerHTML = links.map(link => {
+    const fromEl = container.querySelector('[data-event-id="' + link.from_event_id + '"]');
+    const toEl = container.querySelector('[data-event-id="' + link.to_event_id + '"]');
+    if (!fromEl || !toEl) return '';
+
+    const fr = fromEl.getBoundingClientRect(), tr = toEl.getBoundingClientRect();
+    const x1 = fr.right - cRect.left, y1 = fr.top + fr.height / 2 - cRect.top;
+    const x2 = tr.right - cRect.left, y2 = tr.top + tr.height / 2 - cRect.top;
+
+    const dy = Math.abs(y2 - y1);
+    let bulge = Math.min(160, Math.max(40, 40 + dy * 0.15));
+    bulge += (hashCode(link.id) % 5) * 8;
+
+    return '<path d="M ' + x1 + ' ' + y1 + ' C ' + (x1 + bulge) + ' ' + y1 + ', ' + (x2 + bulge) + ' ' + y2 + ', ' + x2 + ' ' + y2 + '"' +
+      ' fill="none" stroke="var(--purple-bright)" stroke-width="2"' +
+      ' marker-end="url(#tl-arrow)" pointer-events="auto"' +
+      ' data-link-id="' + link.id + '" data-from="' + link.from_event_id + '" data-to="' + link.to_event_id + '"></path>';
+  }).join('');
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(drawConnectors, 150);
+});
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+(async function init() {
+  await requireAuth();
+  await loadAll();
+})();
+</script>
+</body>
+</html>
