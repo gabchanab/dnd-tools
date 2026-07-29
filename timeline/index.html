@@ -157,6 +157,7 @@
           <div class="tl-form-field" style="flex:2"><label>Name</label><input type="text" id="age-name"></div>
           <div class="tl-form-field"><label>Start Year</label><input type="number" id="age-start"></div>
           <div class="tl-form-field"><label>End Year (optional)</label><input type="number" id="age-end" placeholder="ongoing"></div>
+          <div class="tl-form-field"><label>Abbreviation (optional)</label><input type="text" id="age-abbr" placeholder="PAA"></div>
         </div>
         <div class="tl-form-row">
           <div class="tl-form-field" style="flex:1"><label>Description</label><textarea id="age-desc"></textarea></div>
@@ -174,10 +175,14 @@
       <div id="event-form">
         <div class="tl-form-row">
           <div class="tl-form-field" style="flex:2"><label>Title</label><input type="text" id="ev-title"></div>
-          <div class="tl-form-field"><label>Year</label><input type="number" id="ev-year"></div>
+          <div class="tl-form-field">
+            <label id="ev-year-label">Year</label>
+            <input type="number" id="ev-year" oninput="updateYearHint()">
+            <span class="tl-form-hint" id="ev-year-hint"></span>
+          </div>
         </div>
         <div class="tl-form-row">
-          <div class="tl-form-field"><label>Age</label><select id="ev-age"></select></div>
+          <div class="tl-form-field"><label>Age</label><select id="ev-age" onchange="updateYearHint()"></select></div>
         </div>
         <div class="tl-form-row">
           <div class="tl-form-field" style="flex:1"><label>Description</label><textarea id="ev-desc"></textarea></div>
@@ -207,6 +212,42 @@ let links = [];
 let editingAgeId = null;
 let editingEventId = null;
 let formLinks = [];
+
+// ─── Year/range formatting ─────────────────────────────────────────────────
+function formatAgeRange(a) {
+  if (a.abbreviation) {
+    const endRel = a.end_year != null ? (a.end_year - a.start_year) : null;
+    return '0 – ' + (endRel != null ? endRel : 'present') + ' ' + a.abbreviation;
+  }
+  return a.start_year + ' – ' + (a.end_year != null ? a.end_year : 'present');
+}
+
+function formatEventYear(e) {
+  const age = ages.find(a => a.id === e.age_id);
+  if (age && age.abbreviation) return (e.year - age.start_year) + ' ' + age.abbreviation;
+  return 'Year ' + e.year;
+}
+
+function updateYearHint() {
+  const ageId = document.getElementById('ev-age').value;
+  const yearRaw = document.getElementById('ev-year').value;
+  const yearVal = parseInt(yearRaw, 10);
+  const label = document.getElementById('ev-year-label');
+  const hint = document.getElementById('ev-year-hint');
+  const age = ages.find(a => a.id === ageId);
+  if (age) {
+    label.textContent = 'Year (relative to ' + age.name + ')';
+    if (!isNaN(yearVal)) {
+      const abs = age.start_year + yearVal;
+      hint.textContent = '= absolute year ' + abs + (age.abbreviation ? ' · displays as "' + yearVal + ' ' + age.abbreviation + '"' : '');
+    } else {
+      hint.textContent = '';
+    }
+  } else {
+    label.textContent = 'Year (absolute)';
+    hint.textContent = '';
+  }
+}
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 function switchTab(tab, btn) {
@@ -240,10 +281,10 @@ function renderAgeList() {
   const el = document.getElementById('age-list');
   if (!ages.length) { el.innerHTML = '<div class="tl-empty">No ages yet.</div>'; return; }
   el.innerHTML = ages.slice().sort((a, b) => a.start_year - b.start_year).map(a => {
-    const range = a.end_year != null ? (a.start_year + ' – ' + a.end_year) : (a.start_year + ' – present');
+    const name = a.name + (a.abbreviation ? ' (' + a.abbreviation + ')' : '');
     return '<div class="tl-row">' +
-      '<div class="tl-row-info"><div class="tl-row-text"><span class="tl-row-name">' + a.name + '</span>' +
-      '<span class="tl-row-sub">' + range + '</span></div></div>' +
+      '<div class="tl-row-info"><div class="tl-row-text"><span class="tl-row-name">' + name + '</span>' +
+      '<span class="tl-row-sub">' + formatAgeRange(a) + '</span></div></div>' +
       '<div class="tl-row-actions">' +
         '<span class="tl-delete-btn" title="Edit" onclick="startEditAge(\'' + a.id + '\')">✏</span>' +
         '<span class="tl-delete-btn" title="Delete" onclick="deleteAge(\'' + a.id + '\')">🗑</span>' +
@@ -256,6 +297,7 @@ function resetAgeForm() {
   document.getElementById('age-name').value = '';
   document.getElementById('age-start').value = '';
   document.getElementById('age-end').value = '';
+  document.getElementById('age-abbr').value = '';
   document.getElementById('age-desc').value = '';
   document.querySelector('#age-form button.tl-btn-primary').textContent = 'Add Age';
   document.getElementById('age-status').textContent = '';
@@ -268,6 +310,7 @@ function startEditAge(id) {
   document.getElementById('age-name').value = a.name;
   document.getElementById('age-start').value = a.start_year;
   document.getElementById('age-end').value = a.end_year ?? '';
+  document.getElementById('age-abbr').value = a.abbreviation || '';
   document.getElementById('age-desc').value = a.description || '';
   document.querySelector('#age-form button.tl-btn-primary').textContent = 'Save Changes';
 }
@@ -280,6 +323,7 @@ async function submitAge() {
   const startYear = parseInt(startRaw, 10);
   const endRaw = document.getElementById('age-end').value.trim();
   const endYear = endRaw === '' ? null : parseInt(endRaw, 10);
+  const abbreviation = document.getElementById('age-abbr').value.trim() || null;
   const description = document.getElementById('age-desc').value.trim();
 
   if (!name) { status.textContent = 'Name is required.'; return; }
@@ -287,7 +331,7 @@ async function submitAge() {
   if (endYear !== null && endYear < startYear) { status.textContent = 'End year must be after start year.'; return; }
 
   const { data: { user } } = await supabase.auth.getUser();
-  const row = { owner_id: user.id, name, start_year: startYear, end_year: endYear, description };
+  const row = { owner_id: user.id, name, start_year: startYear, end_year: endYear, abbreviation, description };
 
   let error;
   if (editingAgeId) {
@@ -334,7 +378,7 @@ function renderEventList() {
     const age = ages.find(a => a.id === e.age_id);
     return '<div class="tl-row">' +
       '<div class="tl-row-info"><div class="tl-row-text"><span class="tl-row-name">' + e.title + '</span>' +
-      '<span class="tl-row-sub">Year ' + e.year + ' · ' + (age ? age.name : 'Unassigned') + '</span></div></div>' +
+      '<span class="tl-row-sub">' + formatEventYear(e) + ' · ' + (age ? age.name : 'Unassigned') + '</span></div></div>' +
       '<div class="tl-row-actions">' +
         '<span class="tl-delete-btn" title="Edit" onclick="startEditEvent(\'' + e.id + '\')">✏</span>' +
         '<span class="tl-delete-btn" title="Delete" onclick="deleteEvent(\'' + e.id + '\')">🗑</span>' +
@@ -351,6 +395,7 @@ function resetEventForm() {
   document.getElementById('ev-age').value = '';
   document.getElementById('ev-linked-from').innerHTML = '';
   renderLinkRows();
+  updateYearHint();
   document.querySelector('#event-form button.tl-btn-primary').textContent = 'Add Event';
   document.getElementById('ev-status').textContent = '';
 }
@@ -381,9 +426,11 @@ async function startEditEvent(id) {
   if (!e) return;
   editingEventId = id;
   document.getElementById('ev-title').value = e.title;
-  document.getElementById('ev-year').value = e.year;
   document.getElementById('ev-desc').value = e.description || '';
   document.getElementById('ev-age').value = e.age_id || '';
+  const age = ages.find(a => a.id === e.age_id);
+  document.getElementById('ev-year').value = age ? (e.year - age.start_year) : e.year;
+  updateYearHint();
   formLinks = links.filter(l => l.from_event_id === id).map(l => ({ toEventId: l.to_event_id, label: l.label || '' }));
   renderLinkRows();
   document.querySelector('#event-form button.tl-btn-primary').textContent = 'Save Changes';
@@ -406,17 +453,19 @@ async function submitEvent() {
   status.style.color = '';
   const title = document.getElementById('ev-title').value.trim();
   const yearRaw = document.getElementById('ev-year').value;
-  const year = parseInt(yearRaw, 10);
+  const enteredYear = parseInt(yearRaw, 10);
   const description = document.getElementById('ev-desc').value.trim();
   const ageId = document.getElementById('ev-age').value || null;
 
   if (!title) { status.textContent = 'Title is required.'; return; }
-  if (yearRaw.trim() === '' || isNaN(year)) { status.textContent = 'Year is required.'; return; }
+  if (yearRaw.trim() === '' || isNaN(enteredYear)) { status.textContent = 'Year is required.'; return; }
 
   const age = ages.find(a => a.id === ageId);
+  const year = age ? (age.start_year + enteredYear) : enteredYear;
+
   if (age && (year < age.start_year || (age.end_year != null && year > age.end_year))) {
-    const rangeText = age.start_year + '–' + (age.end_year ?? 'present');
-    if (!confirm("This event's year (" + year + ') falls outside ' + age.name + "'s range (" + rangeText + '). Save anyway?')) return;
+    const shownYear = age.abbreviation ? (enteredYear + ' ' + age.abbreviation) : year;
+    if (!confirm("This event's year (" + shownYear + ') falls outside ' + age.name + "'s range (" + formatAgeRange(age) + '). Save anyway?')) return;
   }
 
   const validLinks = formLinks.filter(l => l.toEventId);
@@ -463,7 +512,7 @@ async function deleteEvent(id) {
 // ─── Timeline visual view ────────────────────────────────────────────────────
 function renderEventCard(e) {
   return '<div class="tl-event-card" data-event-id="' + e.id + '">' +
-    '<div class="tl-event-year">Year ' + e.year + '</div>' +
+    '<div class="tl-event-year">' + formatEventYear(e) + '</div>' +
     '<div class="tl-event-title">' + e.title + '</div>' +
     (e.description ? '<div class="tl-event-desc">' + e.description + '</div>' : '') +
   '</div>';
@@ -487,9 +536,8 @@ function renderTimeline() {
 
   const ageSections = sortedAges.map(a => {
     const ageEvents = events.filter(e => e.age_id === a.id).sort((x, y) => x.year - y.year || new Date(x.created_at) - new Date(y.created_at));
-    const range = a.end_year != null ? (a.start_year + ' – ' + a.end_year) : (a.start_year + ' – present');
     return '<div class="tl-age-section" id="age-section-' + a.id + '">' +
-      '<div class="tl-age-heading">' + a.name + '<span class="tl-age-range">' + range + '</span></div>' +
+      '<div class="tl-age-heading">' + a.name + '<span class="tl-age-range">' + formatAgeRange(a) + '</span></div>' +
       (a.description ? '<div class="tl-age-desc">' + a.description + '</div>' : '') +
       (ageEvents.length ? ageEvents.map(renderEventCard).join('') : '<div class="tl-empty">No events in this age yet.</div>') +
     '</div>';
