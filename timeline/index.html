@@ -51,6 +51,37 @@
       backdrop-filter: blur(4px); }
     .tl-jump-chip:hover { border-color: var(--gold); color: var(--gold-dim); }
 
+    /* ── Timeline sub-view toggle ── */
+    .tl-subtabs { display: flex; gap: .4rem; justify-content: center; margin-bottom: 1.2rem; }
+    .tl-subtab-btn { font-family: var(--font-heading); font-size: .62rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: 5px 14px; border-radius: 16px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border-mid); color: var(--gold-dim); }
+    .tl-subtab-btn:hover { border-color: var(--gold); box-shadow: 0 0 6px var(--gold-glow); }
+    .tl-subtab-btn.active { background: var(--gold-glow); border-color: var(--gold); }
+
+    /* ── Constellation view ── */
+    #tl-constellation-scroll { overflow-x: auto; padding: 2rem 0 1rem; }
+    #tl-const-track { position: relative; }
+    #tl-const-connectors { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+    .tl-const-divider { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--border-mid); }
+    .tl-const-divider-label { position: absolute; top: -1.4rem; font-size: .68rem; font-weight: 600;
+      color: var(--text-dim); font-family: var(--font-heading); white-space: nowrap; }
+
+    .tl-const-node { position: absolute; width: 68px; height: 68px; border-radius: 50%;
+      background: var(--bg-inset); border: 2px solid; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center; padding: 4px 6px;
+      box-sizing: border-box; cursor: pointer; transition: box-shadow .15s; }
+    .tl-const-node:hover { box-shadow: 0 0 10px var(--gold-glow); }
+    .tl-const-node-active { box-shadow: 0 0 0 3px var(--gold-glow-md); }
+    .tl-const-star { width: 13px; height: 13px; }
+    .tl-const-title { font-size: .62rem; font-weight: 700; color: var(--text); line-height: 1.15;
+      margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .tl-const-year { font-size: .55rem; color: var(--text-dim); margin-top: 2px; }
+
+    .tl-const-detail-card { background: var(--bg-inset); border: 1px solid var(--border); border-radius: 8px;
+      border-left: 4px solid var(--border-mid); padding: .8rem 1rem; margin-top: 1rem; max-width: 640px; margin-left: auto; margin-right: auto; }
+
     /* ── Timeline canvas + connector overlay ── */
     #tl-canvas { position: relative; max-width: 640px; margin: 0 auto; padding-right: 190px; box-sizing: border-box; overflow: visible; }
     #tl-connectors { position: absolute; top: 0; left: 0; pointer-events: none; }
@@ -145,6 +176,10 @@
   </div>
 
   <div class="step-panel active" id="tab-timeline">
+    <div class="tl-subtabs">
+      <button class="tl-subtab-btn active" onclick="switchTimelineView('classic', this)">Classic</button>
+      <button class="tl-subtab-btn" onclick="switchTimelineView('constellation', this)">Constellation</button>
+    </div>
     <div class="tl-jump-row" id="tl-jump-row"></div>
     <div id="tl-canvas">
       <svg id="tl-connectors">
@@ -157,6 +192,24 @@
       </svg>
       <div id="tl-legend"></div>
       <div id="tl-sections"></div>
+    </div>
+
+    <div id="tl-constellation" style="display:none">
+      <div id="tl-constellation-scroll">
+        <div id="tl-const-track">
+          <svg id="tl-const-connectors">
+            <defs>
+              <marker id="tl-const-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0,0 L10,5 L0,10 Z" fill="var(--purple-bright)"/>
+              </marker>
+            </defs>
+            <g id="tl-const-links-group"></g>
+          </svg>
+          <div id="tl-const-dividers"></div>
+          <div id="tl-const-nodes"></div>
+        </div>
+      </div>
+      <div id="tl-const-detail"></div>
     </div>
   </div>
 
@@ -226,6 +279,7 @@ let links = [];
 let editingAgeId = null;
 let editingEventId = null;
 let formLinks = [];
+let timelineView = 'classic';
 
 const EVENT_TYPES = {
   cosmic:     { label: 'Cosmic Events',       color: '#5b4b9e' },
@@ -236,6 +290,7 @@ const EVENT_TYPES = {
   societal:   { label: 'Societal Events',     color: '#2f8f9e' },
 };
 const STAR_PATH = 'M12 2 L14.9 8.9 L22 9.3 L16.5 14 L18.2 21 L12 17.3 L5.8 21 L7.5 14 L2 9.3 L9.1 8.9 Z';
+const CONST_X_STEP = 170, CONST_BASELINE_Y = 150, CONST_AMP_MIN = 55, CONST_AMP_RANGE = 45, CONST_NODE_R = 34;
 
 function starIcon(color, title) {
   return '<svg viewBox="0 0 24 24" style="fill:' + color + '"' + (title ? ' title="' + title + '"' : '') + '><path d="' + STAR_PATH + '"/></svg>';
@@ -306,6 +361,17 @@ function switchTab(tab, btn) {
   }
 }
 
+function switchTimelineView(view, btn) {
+  timelineView = view;
+  document.querySelectorAll('.tl-subtab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tl-canvas').style.display = view === 'classic' ? '' : 'none';
+  document.getElementById('tl-constellation').style.display = view === 'constellation' ? '' : 'none';
+  if (view === 'classic') {
+    requestAnimationFrame(() => requestAnimationFrame(drawConnectors));
+  }
+}
+
 // ─── Load ────────────────────────────────────────────────────────────────────
 async function loadAll() {
   const [agesRes, eventsRes, linksRes] = await Promise.all([
@@ -320,6 +386,7 @@ async function loadAll() {
   populateAgeSelect();
   renderEventList();
   renderTimeline();
+  renderConstellation();
 }
 
 // ─── Ages ────────────────────────────────────────────────────────────────────
@@ -603,6 +670,14 @@ function renderTimeline() {
 }
 
 function jumpToAge(id) {
+  if (timelineView === 'constellation') {
+    const wrapper = document.getElementById('tl-constellation-scroll');
+    const { dividers } = buildConstellationLayout();
+    const label = id === 'unassigned' ? 'Unassigned' : ((ages.find(a => a.id === id) || {}).name || '');
+    const d = dividers.find(dv => dv.label === label);
+    if (wrapper && d) wrapper.scrollTo({ left: Math.max(0, d.x - 40), behavior: 'smooth' });
+    return;
+  }
   const el = document.getElementById('age-section-' + id);
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -612,6 +687,104 @@ function hashCode(str) {
   let h = 0;
   for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
   return Math.abs(h);
+}
+
+// ─── Constellation view ──────────────────────────────────────────────────────
+function buildConstellationLayout() {
+  const sortedAges = ages.slice().sort((a, b) => a.start_year - b.start_year);
+  const positions = {};
+  const dividers = [];
+  let i = 0;
+
+  sortedAges.forEach(age => {
+    const ageEvents = events.filter(e => e.age_id === age.id).sort((x, y) => x.year - y.year || new Date(x.created_at) - new Date(y.created_at));
+    dividers.push({ x: i === 0 ? 20 : (i * CONST_X_STEP - CONST_X_STEP / 2), label: age.name });
+    ageEvents.forEach(e => {
+      const amp = CONST_AMP_MIN + (hashCode(e.id) % CONST_AMP_RANGE);
+      positions[e.id] = { x: i * CONST_X_STEP + 100, y: CONST_BASELINE_Y + (i % 2 === 0 ? -amp : amp) };
+      i++;
+    });
+  });
+
+  const unassigned = events.filter(e => !e.age_id).sort((a, b) => a.year - b.year || new Date(a.created_at) - new Date(b.created_at));
+  if (unassigned.length) {
+    dividers.push({ x: i === 0 ? 20 : (i * CONST_X_STEP - CONST_X_STEP / 2), label: 'Unassigned' });
+    unassigned.forEach(e => {
+      const amp = CONST_AMP_MIN + (hashCode(e.id) % CONST_AMP_RANGE);
+      positions[e.id] = { x: i * CONST_X_STEP + 100, y: CONST_BASELINE_Y + (i % 2 === 0 ? -amp : amp) };
+      i++;
+    });
+  }
+
+  const totalWidth = Math.max(i * CONST_X_STEP + 200, 400);
+  const totalHeight = (CONST_BASELINE_Y + CONST_AMP_MIN + CONST_AMP_RANGE + CONST_NODE_R) * 2;
+  return { positions, dividers, totalWidth, totalHeight };
+}
+
+function renderConstellationNode(e, pos) {
+  const t = EVENT_TYPES[e.event_type];
+  const color = t ? t.color : 'var(--border-mid)';
+  return '<div class="tl-const-node" data-event-id="' + e.id + '" style="left:' + (pos.x - CONST_NODE_R) + 'px; top:' + (pos.y - CONST_NODE_R) + 'px; border-color:' + color + '" onclick="showConstellationDetail(\'' + e.id + '\')">' +
+    (t ? '<svg class="tl-const-star" viewBox="0 0 24 24" style="fill:' + color + '"><path d="' + STAR_PATH + '"/></svg>' : '') +
+    '<span class="tl-const-title">' + e.title + '</span>' +
+    '<span class="tl-const-year">' + formatEventYear(e) + '</span>' +
+  '</div>';
+}
+
+function renderConstellation() {
+  const track = document.getElementById('tl-const-track');
+  if (!track) return;
+
+  if (!events.length) {
+    track.style.width = '100%';
+    track.style.height = '80px';
+    document.getElementById('tl-const-dividers').innerHTML = '';
+    document.getElementById('tl-const-nodes').innerHTML = '<div class="tl-empty">No events yet — head to Manage to start building your world\'s history.</div>';
+    document.getElementById('tl-const-connectors').querySelector('#tl-const-links-group').innerHTML = '';
+    return;
+  }
+
+  const { positions, dividers, totalWidth, totalHeight } = buildConstellationLayout();
+  track.style.width = totalWidth + 'px';
+  track.style.height = totalHeight + 'px';
+
+  document.getElementById('tl-const-dividers').innerHTML = dividers.map(d =>
+    '<div class="tl-const-divider" style="left:' + d.x + 'px"></div>' +
+    '<div class="tl-const-divider-label" style="left:' + d.x + 'px">' + d.label + '</div>'
+  ).join('');
+
+  document.getElementById('tl-const-nodes').innerHTML = events
+    .filter(e => positions[e.id])
+    .map(e => renderConstellationNode(e, positions[e.id]))
+    .join('');
+
+  const svg = document.getElementById('tl-const-connectors');
+  svg.setAttribute('width', totalWidth);
+  svg.setAttribute('height', totalHeight);
+  svg.setAttribute('viewBox', '0 0 ' + totalWidth + ' ' + totalHeight);
+  svg.querySelector('#tl-const-links-group').innerHTML = links.map(link => {
+    const p1 = positions[link.from_event_id], p2 = positions[link.to_event_id];
+    if (!p1 || !p2) return '';
+    const dx = p2.x - p1.x, dy = p2.y - p1.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const ux = dx / dist, uy = dy / dist;
+    const x1 = p1.x + ux * CONST_NODE_R, y1 = p1.y + uy * CONST_NODE_R;
+    const x2 = p2.x - ux * CONST_NODE_R, y2 = p2.y - uy * CONST_NODE_R;
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="var(--purple-bright)" stroke-width="1.5" marker-end="url(#tl-const-arrow)"></line>';
+  }).join('');
+}
+
+function showConstellationDetail(id) {
+  const e = events.find(x => x.id === id);
+  if (!e) return;
+  const t = EVENT_TYPES[e.event_type];
+  document.getElementById('tl-const-detail').innerHTML =
+    '<div class="tl-const-detail-card" style="border-left-color:' + (t ? t.color : 'var(--border-mid)') + '">' +
+      '<div class="tl-event-title">' + e.title + '</div>' +
+      '<div class="tl-event-year">' + formatEventYear(e) + '</div>' +
+      (e.description ? '<div class="tl-event-desc" style="margin-top:.4rem">' + e.description + '</div>' : '') +
+    '</div>';
+  document.querySelectorAll('.tl-const-node').forEach(n => n.classList.toggle('tl-const-node-active', n.dataset.eventId === id));
 }
 
 function drawConnectors() {
