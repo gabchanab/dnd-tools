@@ -66,7 +66,9 @@
 
     .tl-const-divider { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--border-mid); }
     .tl-const-divider-label { position: absolute; top: -1.4rem; font-size: .68rem; font-weight: 600;
-      color: var(--text-dim); font-family: var(--font-heading); white-space: nowrap; }
+      color: var(--text-dim); font-family: var(--font-heading); white-space: nowrap; transform: translateX(-50%); }
+    .tl-const-divider-label-clickable { cursor: pointer; }
+    .tl-const-divider-label-clickable:hover { color: var(--gold-dim); }
 
     .tl-const-node { position: absolute; width: 68px; height: 68px; border-radius: 50%;
       background: var(--bg-inset); border: 2px solid; display: flex; flex-direction: column;
@@ -673,8 +675,7 @@ function jumpToAge(id) {
   if (timelineView === 'constellation') {
     const wrapper = document.getElementById('tl-constellation-scroll');
     const { dividers } = buildConstellationLayout();
-    const label = id === 'unassigned' ? 'Unassigned' : ((ages.find(a => a.id === id) || {}).name || '');
-    const d = dividers.find(dv => dv.label === label);
+    const d = id === 'unassigned' ? dividers.find(dv => dv.id === null) : dividers.find(dv => dv.id === id);
     if (wrapper && d) wrapper.scrollTo({ left: Math.max(0, d.x - 40), behavior: 'smooth' });
     return;
   }
@@ -698,7 +699,7 @@ function buildConstellationLayout() {
 
   sortedAges.forEach(age => {
     const ageEvents = events.filter(e => e.age_id === age.id).sort((x, y) => x.year - y.year || new Date(x.created_at) - new Date(y.created_at));
-    dividers.push({ x: i === 0 ? 20 : (i * CONST_X_STEP - CONST_X_STEP / 2), label: age.name });
+    dividers.push({ x: i === 0 ? 20 : (i * CONST_X_STEP - CONST_X_STEP / 2), label: age.name, id: age.id });
     ageEvents.forEach(e => {
       const amp = CONST_AMP_MIN + (hashCode(e.id) % CONST_AMP_RANGE);
       positions[e.id] = { x: i * CONST_X_STEP + 100, y: CONST_BASELINE_Y + (i % 2 === 0 ? -amp : amp) };
@@ -708,7 +709,7 @@ function buildConstellationLayout() {
 
   const unassigned = events.filter(e => !e.age_id).sort((a, b) => a.year - b.year || new Date(a.created_at) - new Date(b.created_at));
   if (unassigned.length) {
-    dividers.push({ x: i === 0 ? 20 : (i * CONST_X_STEP - CONST_X_STEP / 2), label: 'Unassigned' });
+    dividers.push({ x: i === 0 ? 20 : (i * CONST_X_STEP - CONST_X_STEP / 2), label: 'Unassigned', id: null });
     unassigned.forEach(e => {
       const amp = CONST_AMP_MIN + (hashCode(e.id) % CONST_AMP_RANGE);
       positions[e.id] = { x: i * CONST_X_STEP + 100, y: CONST_BASELINE_Y + (i % 2 === 0 ? -amp : amp) };
@@ -748,10 +749,12 @@ function renderConstellation() {
   track.style.width = totalWidth + 'px';
   track.style.height = totalHeight + 'px';
 
-  document.getElementById('tl-const-dividers').innerHTML = dividers.map(d =>
-    '<div class="tl-const-divider" style="left:' + d.x + 'px"></div>' +
-    '<div class="tl-const-divider-label" style="left:' + d.x + 'px">' + d.label + '</div>'
-  ).join('');
+  document.getElementById('tl-const-dividers').innerHTML = dividers.map(d => {
+    const labelStyle = 'left:' + d.x + 'px' + (d.x < 80 ? '; transform:none' : '');
+    return '<div class="tl-const-divider" style="left:' + d.x + 'px"></div>' +
+      '<div class="tl-const-divider-label' + (d.id ? ' tl-const-divider-label-clickable' : '') + '" style="' + labelStyle + '"' +
+        (d.id ? ' onclick="showConstellationAgeDetail(\'' + d.id + '\')"' : '') + '>✦ ' + d.label + ' ✦</div>';
+  }).join('');
 
   document.getElementById('tl-const-nodes').innerHTML = events
     .filter(e => positions[e.id])
@@ -785,6 +788,19 @@ function showConstellationDetail(id) {
       (e.description ? '<div class="tl-event-desc" style="margin-top:.4rem">' + e.description + '</div>' : '') +
     '</div>';
   document.querySelectorAll('.tl-const-node').forEach(n => n.classList.toggle('tl-const-node-active', n.dataset.eventId === id));
+}
+
+function showConstellationAgeDetail(id) {
+  const a = ages.find(x => x.id === id);
+  if (!a) return;
+  document.querySelectorAll('.tl-const-node').forEach(n => n.classList.remove('tl-const-node-active'));
+  document.getElementById('tl-const-detail').innerHTML =
+    '<div class="tl-const-detail-card" style="border-left-color:var(--gold)">' +
+      '<div class="tl-event-title">' + a.name + '</div>' +
+      '<div class="tl-event-year">' + formatAgeRange(a) + '</div>' +
+      (a.description ? '<div class="tl-event-desc" style="margin-top:.4rem">' + a.description + '</div>'
+        : '<div class="tl-event-desc" style="margin-top:.4rem;font-style:italic">No description yet.</div>') +
+    '</div>';
 }
 
 function drawConnectors() {
