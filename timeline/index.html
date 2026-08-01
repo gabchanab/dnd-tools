@@ -63,13 +63,25 @@
     .tl-age-desc { font-size: .8rem; color: var(--text-mid); font-style: italic; margin-bottom: .8rem; }
 
     .tl-event-card { background: var(--bg-inset); border: 1px solid var(--border); border-radius: 8px;
-      padding: .7rem .9rem; margin-bottom: .7rem; }
+      padding: .7rem .9rem; margin-bottom: .7rem; position: relative; }
     .tl-event-year { font-family: var(--font-heading); font-size: .62rem; font-weight: 700; color: var(--gold-dim);
       text-transform: uppercase; letter-spacing: .08em; }
-    .tl-event-title { font-size: .92rem; font-weight: 700; color: var(--text); margin: .15rem 0 .3rem; }
+    .tl-event-title { font-size: .92rem; font-weight: 700; color: var(--text); margin: .15rem 0 .3rem; padding-right: 1.4rem; }
     .tl-event-desc { font-size: .82rem; color: var(--text-mid); line-height: 1.55; }
+    .tl-event-star { position: absolute; top: .55rem; right: .6rem; width: 16px; height: 16px; }
 
     .tl-empty { font-size: .8rem; color: var(--text-dim); font-style: italic; padding: 1rem 0; text-align: center; }
+
+    /* ── Legend ── */
+    #tl-legend { position: absolute; top: 0; right: 0; width: 168px; z-index: 3;
+      background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px;
+      padding: .7rem .8rem; }
+    .tl-legend-title { font-family: var(--font-heading); font-size: .60rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: .5rem; }
+    .tl-legend-item { display: flex; align-items: center; gap: .4rem; margin-bottom: .35rem; }
+    .tl-legend-item:last-child { margin-bottom: 0; }
+    .tl-legend-item svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .tl-legend-item span { font-size: .68rem; color: var(--text-mid); line-height: 1.2; }
 
     /* ── List rows (Manage tab) ── */
     .tl-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem;
@@ -143,6 +155,7 @@
         </defs>
         <g id="tl-links-group"></g>
       </svg>
+      <div id="tl-legend"></div>
       <div id="tl-sections"></div>
     </div>
   </div>
@@ -183,6 +196,7 @@
         </div>
         <div class="tl-form-row">
           <div class="tl-form-field"><label>Age</label><select id="ev-age" onchange="updateYearHint()"></select></div>
+          <div class="tl-form-field"><label>Event Type (optional)</label><select id="ev-type"></select></div>
         </div>
         <div class="tl-form-row">
           <div class="tl-form-field" style="flex:1"><label>Description</label><textarea id="ev-desc"></textarea></div>
@@ -212,6 +226,38 @@ let links = [];
 let editingAgeId = null;
 let editingEventId = null;
 let formLinks = [];
+
+const EVENT_TYPES = {
+  cosmic:     { label: 'Cosmic Events',       color: '#5b4b9e' },
+  geological: { label: 'Geological Events',   color: '#8b5a2b' },
+  settlement: { label: 'Settlement Founding', color: '#d4a017' },
+  origins:    { label: 'Origins',             color: '#4a9b5e' },
+  conflict:   { label: 'Conflicts',           color: '#b8283a' },
+  societal:   { label: 'Societal Events',     color: '#2f8f9e' },
+};
+const STAR_PATH = 'M12 2 L14.9 8.9 L22 9.3 L16.5 14 L18.2 21 L12 17.3 L5.8 21 L7.5 14 L2 9.3 L9.1 8.9 Z';
+
+function starIcon(color, title) {
+  return '<svg viewBox="0 0 24 24" style="fill:' + color + '"' + (title ? ' title="' + title + '"' : '') + '><path d="' + STAR_PATH + '"/></svg>';
+}
+
+function starBadge(e) {
+  const t = EVENT_TYPES[e.event_type];
+  if (!t) return '';
+  return '<svg class="tl-event-star" viewBox="0 0 24 24" style="fill:' + t.color + '"><title>' + t.label + '</title><path d="' + STAR_PATH + '"/></svg>';
+}
+
+function populateEventTypeSelect() {
+  const sel = document.getElementById('ev-type');
+  sel.innerHTML = '<option value="">— none —</option>' +
+    Object.entries(EVENT_TYPES).map(([key, t]) => '<option value="' + key + '">' + t.label + '</option>').join('');
+}
+
+function renderLegend() {
+  const el = document.getElementById('tl-legend');
+  el.innerHTML = '<div class="tl-legend-title">Event Types</div>' +
+    Object.values(EVENT_TYPES).map(t => '<div class="tl-legend-item">' + starIcon(t.color) + '<span>' + t.label + '</span></div>').join('');
+}
 
 // ─── Year/range formatting ─────────────────────────────────────────────────
 function formatAgeRange(a) {
@@ -393,6 +439,7 @@ function resetEventForm() {
   document.getElementById('ev-year').value = '';
   document.getElementById('ev-desc').value = '';
   document.getElementById('ev-age').value = '';
+  document.getElementById('ev-type').value = '';
   document.getElementById('ev-linked-from').innerHTML = '';
   renderLinkRows();
   updateYearHint();
@@ -428,6 +475,7 @@ async function startEditEvent(id) {
   document.getElementById('ev-title').value = e.title;
   document.getElementById('ev-desc').value = e.description || '';
   document.getElementById('ev-age').value = e.age_id || '';
+  document.getElementById('ev-type').value = e.event_type || '';
   const age = ages.find(a => a.id === e.age_id);
   document.getElementById('ev-year').value = age ? (e.year - age.start_year) : e.year;
   updateYearHint();
@@ -456,6 +504,7 @@ async function submitEvent() {
   const enteredYear = parseInt(yearRaw, 10);
   const description = document.getElementById('ev-desc').value.trim();
   const ageId = document.getElementById('ev-age').value || null;
+  const eventType = document.getElementById('ev-type').value || null;
 
   if (!title) { status.textContent = 'Title is required.'; return; }
   if (yearRaw.trim() === '' || isNaN(enteredYear)) { status.textContent = 'Year is required.'; return; }
@@ -476,7 +525,7 @@ async function submitEvent() {
   }
 
   const { data: { user } } = await supabase.auth.getUser();
-  const row = { owner_id: user.id, age_id: ageId, title, year, description };
+  const row = { owner_id: user.id, age_id: ageId, title, year, description, event_type: eventType };
 
   let error, eventId;
   if (editingEventId) {
@@ -512,6 +561,7 @@ async function deleteEvent(id) {
 // ─── Timeline visual view ────────────────────────────────────────────────────
 function renderEventCard(e) {
   return '<div class="tl-event-card" data-event-id="' + e.id + '">' +
+    starBadge(e) +
     '<div class="tl-event-year">' + formatEventYear(e) + '</div>' +
     '<div class="tl-event-title">' + e.title + '</div>' +
     (e.description ? '<div class="tl-event-desc">' + e.description + '</div>' : '') +
@@ -608,6 +658,8 @@ window.addEventListener('resize', () => {
 // ─── Init ────────────────────────────────────────────────────────────────────
 (async function init() {
   await requireAuth();
+  populateEventTypeSelect();
+  renderLegend();
   await loadAll();
 })();
 </script>
