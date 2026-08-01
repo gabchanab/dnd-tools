@@ -734,7 +734,7 @@ function buildConstellationLayout() {
   }
 
   const totalWidth = Math.max(i * CONST_X_STEP + 200, 400);
-  const totalHeight = (CONST_BASELINE_Y + CONST_AMP_MIN + CONST_AMP_RANGE + CONST_NODE_R) * 2;
+  const totalHeight = CONST_BASELINE_Y + CONST_AMP_MIN + CONST_AMP_RANGE + CONST_NODE_R + 24;
   return { positions, dividers, totalWidth, totalHeight };
 }
 
