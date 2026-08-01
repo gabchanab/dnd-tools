@@ -699,8 +699,24 @@ function buildConstellationLayout() {
 
   sortedAges.forEach(age => {
     const ageEvents = events.filter(e => e.age_id === age.id).sort((x, y) => x.year - y.year || new Date(x.created_at) - new Date(y.created_at));
-    dividers.push({ x: i === 0 ? 20 : (i * CONST_X_STEP - CONST_X_STEP / 2), label: age.name, id: age.id });
-    ageEvents.forEach(e => {
+    const dividerX = i === 0 ? 20 : (i * CONST_X_STEP - CONST_X_STEP / 2);
+    dividers.push({ x: dividerX, label: age.name, id: age.id });
+
+    // Events that fall exactly on the age's start year snap onto the divider
+    // line itself, stacked one above/below the other if there's more than one.
+    const onLine = ageEvents.filter(e => e.year === age.start_year);
+    const rest = ageEvents.filter(e => e.year !== age.start_year);
+
+    if (onLine.length) {
+      onLine.forEach((e, idx) => {
+        const dir = idx % 2 === 0 ? -1 : 1;
+        const step = Math.ceil((idx + 1) / 2);
+        positions[e.id] = { x: dividerX, y: CONST_BASELINE_Y + dir * step * 46 };
+      });
+      i++;
+    }
+
+    rest.forEach(e => {
       const amp = CONST_AMP_MIN + (hashCode(e.id) % CONST_AMP_RANGE);
       positions[e.id] = { x: i * CONST_X_STEP + 100, y: CONST_BASELINE_Y + (i % 2 === 0 ? -amp : amp) };
       i++;
