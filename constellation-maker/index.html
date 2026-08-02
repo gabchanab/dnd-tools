@@ -41,6 +41,9 @@
     .cm-type-card-name { font-family: var(--font-heading); font-size: .9rem; font-weight: 700; color: var(--text); }
     .cm-type-card-desc { font-size: .74rem; color: var(--text-dim); font-style: italic; }
 
+    .cm-mode-title { font-family: var(--font-heading); font-size: .8rem; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--gold-dim); margin: 0 0 .8rem; }
+
     .cm-form-row { display: flex; gap: .6rem; margin-bottom: 1rem; flex-wrap: wrap; }
     .cm-form-field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 200px; }
     .cm-form-field label { font-size: .6rem; text-transform: uppercase; letter-spacing: .08em;
@@ -90,6 +93,7 @@
 
     <div class="step-panel" id="cm-step2">
       <button class="cm-btn" style="margin-bottom:1rem" onclick="backToStep1()">← Back</button>
+      <h2 class="cm-mode-title" id="cm-mode-title"></h2>
       <div class="cm-form-row">
         <div class="cm-form-field">
           <label>Word or Phrase</label>
@@ -116,16 +120,43 @@
 let mode = null;
 const STAR_PATH = 'M12 2 L14.9 8.9 L22 9.3 L16.5 14 L18.2 21 L12 17.3 L5.8 21 L7.5 14 L2 9.3 L9.1 8.9 Z';
 
-function hashCode(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
-  return Math.abs(h);
+// Four concentric rings, alternating direction: A-L clockwise on the outermost,
+// M-S anticlockwise on the next ring in, T-W clockwise, X-Z anticlockwise on the
+// innermost. Shared by both modes — Sigil and Constellation place letters
+// identically, differing only in how each point and the connecting line are styled.
+const ALPHABET_RINGS = [
+  { letters: 'ABCDEFGHIJKL', clockwise: true },
+  { letters: 'MNOPQRS', clockwise: false },
+  { letters: 'TUVW', clockwise: true },
+  { letters: 'XYZ', clockwise: false },
+];
+
+function alphabetPoint(ch, size) {
+  const cx = size / 2, cy = size / 2;
+  const maxR = size * 0.42;
+  for (let ringIndex = 0; ringIndex < ALPHABET_RINGS.length; ringIndex++) {
+    const ring = ALPHABET_RINGS[ringIndex];
+    const pos = ring.letters.indexOf(ch);
+    if (pos === -1) continue;
+    const R = maxR * (ALPHABET_RINGS.length - ringIndex) / ALPHABET_RINGS.length;
+    const step = (Math.PI * 2) / ring.letters.length;
+    // In screen coordinates (y grows downward), increasing angle with plain
+    // cos/sin already reads as clockwise — so anticlockwise rings just negate it.
+    const angle = (ring.clockwise ? pos * step : -pos * step) - Math.PI / 2;
+    return { x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) };
+  }
+  return { x: cx, y: cy };
+}
+
+function alphabetPoints(letters, size) {
+  return letters.map(ch => alphabetPoint(ch, size));
 }
 
 function startCreate(m) {
   mode = m;
   document.getElementById('cm-step1').classList.remove('active');
   document.getElementById('cm-step2').classList.add('active');
+  document.getElementById('cm-mode-title').textContent = m === 'sigil' ? 'Spell Sigil' : 'Constellation';
   clearOutput();
 }
 
@@ -155,16 +186,8 @@ function extractLetters(phrase) {
 }
 
 // ─── Spell Sigil ────────────────────────────────────────────────────────────
-function sigilPoints(letters, size) {
-  const R = size * 0.36, cx = size / 2, cy = size / 2;
-  return letters.map(ch => {
-    const angle = ((ch.charCodeAt(0) - 65) / 26) * Math.PI * 2 - Math.PI / 2;
-    return { x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) };
-  });
-}
-
 function renderSigil(letters, size) {
-  const pts = sigilPoints(letters, size);
+  const pts = alphabetPoints(letters, size);
   const poly = pts.map(p => p.x + ',' + p.y).join(' ');
   const dots = pts.map(p => '<circle cx="' + p.x + '" cy="' + p.y + '" r="4" fill="var(--gold)"></circle>').join('');
   return '<rect x="0" y="0" width="' + size + '" height="' + size + '" fill="var(--bg-inset)"></rect>' +
@@ -173,26 +196,8 @@ function renderSigil(letters, size) {
 }
 
 // ─── Constellation ──────────────────────────────────────────────────────────
-function constellationPoints(letters, size) {
-  // Short inputs (a letter + a 1-digit index) produce a small hashCode() value, too
-  // small for splitting into two "digits" to actually decorrelate — the second digit
-  // ends up truncated rather than well-mixed. Instead, hash once, then scramble that
-  // single value two different ways using large odd multiplicative constants (the
-  // standard integer-hash "avalanche" trick), which spreads it across the full 32-bit
-  // range regardless of how short the input was, before reducing each independently.
-  const range = size - 80;
-  return letters.map((ch, i) => {
-    const h = hashCode(ch + '-' + i);
-    const hx = Math.abs(Math.imul(h ^ (h >>> 15), 2654435761));
-    const hy = Math.abs(Math.imul(h ^ (h >>> 7), 2246822519));
-    const x = 40 + (hx % range);
-    const y = 40 + (hy % range);
-    return { x, y };
-  });
-}
-
 function renderConstellation(letters, size) {
-  const pts = constellationPoints(letters, size);
+  const pts = alphabetPoints(letters, size);
   const poly = pts.map(p => p.x + ',' + p.y).join(' ');
   const stars = pts.map(p =>
     '<g transform="translate(' + (p.x - 7) + ',' + (p.y - 7) + ') scale(0.6)">' +
