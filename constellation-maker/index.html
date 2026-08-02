@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constellation Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../character builder/static/css/sheet.css">
+  <style>
+    body { padding: 3rem 1.2rem; }
+    .back-btn{position:fixed;top:1.2rem;left:1.2rem;z-index:100;
+      font-family:var(--font-heading);font-size:.60rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+      padding:.45rem 1.1rem;background:rgba(255,250,248,.90);border:1px solid var(--border);
+      border-radius:20px;color:var(--text-dim);text-decoration:none;transition:all .2s;
+      backdrop-filter:blur(6px)}
+    .back-btn:hover{border-color:var(--gold);color:var(--gold-dim);box-shadow:0 0 12px var(--gold-glow)}
+
+    .cm-wrap { max-width: 640px; margin: 0 auto; }
+    .cm-header { text-align: center; margin-bottom: 2rem; }
+    .cm-ornament { font-size: 1.4rem; color: var(--gold); opacity: .55;
+                   letter-spacing: .5em; display: block; margin-bottom: .8rem; }
+    .cm-title { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700;
+                color: var(--gold); letter-spacing: .1em;
+                text-shadow: 0 0 32px var(--gold-glow), 0 0 8px rgba(185,155,80,.2);
+                margin: 0 0 .4rem; }
+    .cm-sub { font-size: .82rem; color: var(--text-dim); font-style: italic; font-family: var(--font-body); }
+
+    .panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+             padding: 1.4rem 1.3rem; margin-bottom: 1.5rem; }
+
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    .cm-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 1rem; }
+    .cm-type-card { background: var(--bg-inset); border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.6rem 1rem; display: flex; flex-direction: column; align-items: center; gap: .5rem;
+      cursor: pointer; transition: all .15s; text-align: center; }
+    .cm-type-card:hover { border-color: var(--gold); box-shadow: 0 0 14px var(--gold-glow); }
+    .cm-type-card-icon { font-size: 1.8rem; color: var(--gold); }
+    .cm-type-card-name { font-family: var(--font-heading); font-size: .9rem; font-weight: 700; color: var(--text); }
+    .cm-type-card-desc { font-size: .74rem; color: var(--text-dim); font-style: italic; }
+
+    .cm-form-row { display: flex; gap: .6rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .cm-form-field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 200px; }
+    .cm-form-field label { font-size: .6rem; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-dim); font-family: var(--font-heading); }
+    .cm-form-field input {
+      font-family: var(--font-body); font-size: .9rem; padding: 8px 10px; border-radius: 6px;
+      border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); }
+    .cm-btn { font-family: var(--font-heading); font-size: .68rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: 7px 16px; border-radius: 16px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border-mid); color: var(--gold-dim); }
+    .cm-btn:hover { border-color: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
+    .cm-btn-primary { background: var(--gold-glow); border-color: var(--gold); }
+    .cm-form-status { font-size: .78rem; margin-top: .6rem; color: var(--rose); }
+
+    .cm-output-wrap { text-align: center; }
+    #cm-output { width: 100%; max-width: 420px; height: auto; border-radius: 10px; border: 1px solid var(--border); }
+    #cm-download-btn { display: none; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+<div class="page-texture"></div>
+
+<a class="back-btn" href="../index.html">← Homepage</a>
+
+<div class="cm-wrap">
+  <header class="cm-header">
+    <span class="cm-ornament">✦ ── ✦ ── ✦</span>
+    <h1 class="cm-title">Constellation Maker</h1>
+    <p class="cm-sub">Turn a word into a sigil or a constellation</p>
+  </header>
+
+  <section class="panel">
+    <div class="step-panel active" id="cm-step1">
+      <div class="cm-type-grid">
+        <div class="cm-type-card" onclick="startCreate('sigil')">
+          <div class="cm-type-card-icon">◈</div>
+          <div class="cm-type-card-name">Spell Sigil</div>
+          <div class="cm-type-card-desc">A classic circular glyph</div>
+        </div>
+        <div class="cm-type-card" onclick="startCreate('constellation')">
+          <div class="cm-type-card-icon">✵</div>
+          <div class="cm-type-card-name">Constellation</div>
+          <div class="cm-type-card-desc">A scattered star-field</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="cm-step2">
+      <button class="cm-btn" style="margin-bottom:1rem" onclick="backToStep1()">← Back</button>
+      <div class="cm-form-row">
+        <div class="cm-form-field">
+          <label>Word or Phrase</label>
+          <input type="text" id="cm-phrase" placeholder="e.g. Fireball" oninput="clearOutput()">
+        </div>
+      </div>
+      <button class="cm-btn cm-btn-primary" onclick="generate()">Generate</button>
+      <div class="cm-form-status" id="cm-status"></div>
+
+      <div class="cm-output-wrap" style="margin-top:1.5rem">
+        <svg id="cm-output" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div>
+          <button class="cm-btn" id="cm-download-btn" onclick="downloadSvg()">Download SVG</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js?v=1"></script>
+<script src="js/auth.js?v=1"></script>
+<script>
+let mode = null;
+const STAR_PATH = 'M12 2 L14.9 8.9 L22 9.3 L16.5 14 L18.2 21 L12 17.3 L5.8 21 L7.5 14 L2 9.3 L9.1 8.9 Z';
+
+function hashCode(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function startCreate(m) {
+  mode = m;
+  document.getElementById('cm-step1').classList.remove('active');
+  document.getElementById('cm-step2').classList.add('active');
+  clearOutput();
+}
+
+function backToStep1() {
+  mode = null;
+  document.getElementById('cm-step2').classList.remove('active');
+  document.getElementById('cm-step1').classList.add('active');
+}
+
+function clearOutput() {
+  document.getElementById('cm-output').innerHTML = '';
+  document.getElementById('cm-download-btn').style.display = 'none';
+  document.getElementById('cm-status').textContent = '';
+}
+
+// ─── Letter extraction ────────────────────────────────────────────────────
+function extractLetters(phrase) {
+  const seen = new Set();
+  const letters = [];
+  phrase.toUpperCase().split('').forEach(ch => {
+    if (ch >= 'A' && ch <= 'Z' && !seen.has(ch)) {
+      seen.add(ch);
+      letters.push(ch);
+    }
+  });
+  return letters;
+}
+
+// ─── Spell Sigil ────────────────────────────────────────────────────────────
+function sigilPoints(letters, size) {
+  const R = size * 0.36, cx = size / 2, cy = size / 2;
+  return letters.map(ch => {
+    const angle = ((ch.charCodeAt(0) - 65) / 26) * Math.PI * 2 - Math.PI / 2;
+    return { x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) };
+  });
+}
+
+function renderSigil(letters, size) {
+  const pts = sigilPoints(letters, size);
+  const poly = pts.map(p => p.x + ',' + p.y).join(' ');
+  const dots = pts.map(p => '<circle cx="' + p.x + '" cy="' + p.y + '" r="4" fill="var(--gold)"></circle>').join('');
+  return '<rect x="0" y="0" width="' + size + '" height="' + size + '" fill="var(--bg-inset)"></rect>' +
+    '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + (size * 0.42) + '" fill="none" stroke="var(--gold)" stroke-width="1.5"></circle>' +
+    '<polyline points="' + poly + '" fill="none" stroke="var(--purple-bright)" stroke-width="2"></polyline>' + dots;
+}
+
+// ─── Constellation ──────────────────────────────────────────────────────────
+function constellationPoints(letters, size) {
+  // Short inputs (a letter + a 1-digit index) produce a small hashCode() value, too
+  // small for splitting into two "digits" to actually decorrelate — the second digit
+  // ends up truncated rather than well-mixed. Instead, hash once, then scramble that
+  // single value two different ways using large odd multiplicative constants (the
+  // standard integer-hash "avalanche" trick), which spreads it across the full 32-bit
+  // range regardless of how short the input was, before reducing each independently.
+  const range = size - 80;
+  return letters.map((ch, i) => {
+    const h = hashCode(ch + '-' + i);
+    const hx = Math.abs(Math.imul(h ^ (h >>> 15), 2654435761));
+    const hy = Math.abs(Math.imul(h ^ (h >>> 7), 2246822519));
+    const x = 40 + (hx % range);
+    const y = 40 + (hy % range);
+    return { x, y };
+  });
+}
+
+function renderConstellation(letters, size) {
+  const pts = constellationPoints(letters, size);
+  const poly = pts.map(p => p.x + ',' + p.y).join(' ');
+  const stars = pts.map(p =>
+    '<g transform="translate(' + (p.x - 7) + ',' + (p.y - 7) + ') scale(0.6)">' +
+      '<path d="' + STAR_PATH + '" fill="var(--gold-bright)"></path>' +
+    '</g>'
+  ).join('');
+  return '<rect x="0" y="0" width="' + size + '" height="' + size + '" fill="#1a1a2e"></rect>' +
+    '<polyline points="' + poly + '" fill="none" stroke="rgba(217,191,119,.5)" stroke-width="1"></polyline>' + stars;
+}
+
+// ─── Generate + download ────────────────────────────────────────────────────
+function generate() {
+  const status = document.getElementById('cm-status');
+  const phrase = document.getElementById('cm-phrase').value.trim();
+  if (!phrase) { status.textContent = 'Enter a word or phrase first.'; return; }
+  status.textContent = '';
+
+  const letters = extractLetters(phrase);
+  if (!letters.length) { status.textContent = 'That phrase has no letters to work with.'; return; }
+
+  const size = 420;
+  const svg = document.getElementById('cm-output');
+  svg.innerHTML = mode === 'sigil' ? renderSigil(letters, size) : renderConstellation(letters, size);
+  document.getElementById('cm-download-btn').style.display = '';
+}
+
+function downloadSvg() {
+  const svg = document.getElementById('cm-output');
+  const xml = new XMLSerializer().serializeToString(svg);
+  const blob = new Blob([xml], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const phrase = document.getElementById('cm-phrase').value.trim() || 'sigil';
+  a.download = phrase.replace(/\s+/g, '-').toLowerCase() + '.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+(async function init() {
+  await requireAuth();
+})();
+</script>
+</body>
+</html>

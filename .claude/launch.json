@@ -30,6 +30,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "3460", "--directory", "timeline"],
       "port": 3460
+    },
+    {
+      "name": "constellation-maker",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3461", "--directory", "constellation-maker"],
+      "port": 3461
     }
   ]
 }
