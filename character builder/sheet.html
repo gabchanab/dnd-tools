@@ -80,6 +80,14 @@
     .spe-item.spe-clickable:hover .spe-name{color:var(--text)}
     .spe-item.spe-clickable:hover .spe-chevron{opacity:.9}
     .spe-item.spe-open .spe-chevron{transform:rotate(90deg)}
+    /* ── Magic items accordion (reuses .spe-item/.spe-detail styling above) ── */
+    .mi-clickable{cursor:pointer;transition:color .15s}
+    .mi-clickable:hover .spe-name{color:var(--text)}
+    .mi-clickable.spe-open .spe-chevron{transform:rotate(90deg)}
+    .mi-remove-btn{cursor:pointer;opacity:.5;font-size:.85rem;margin-left:.3rem;transition:opacity .15s,color .15s}
+    .mi-remove-btn:hover{opacity:1;color:#a33}
+    .mi-attune-label{display:flex;align-items:center;gap:4px;font-size:.68rem;color:var(--text-dim);
+      margin-left:.5rem;flex-shrink:0;white-space:nowrap}
     .spe-detail{overflow:hidden;border:1px solid var(--border-mid);border-radius:4px;
       margin:.25rem 0 .4rem;background:rgba(255,250,248,.97);
       animation:spe-in .2s ease both}
@@ -313,6 +321,15 @@
           <div id="wealth-body"></div>
         </section>
 
+        <section class="panel" id="magic-items-section" style="display:none">
+          <h2 class="panel-title">Magic Items</h2>
+          <div id="magic-items-body"></div>
+          <div class="resource-add-row">
+            <select id="mi-select"></select>
+            <button type="button" class="resource-use-btn" onclick="addMagicItem()">+ Add</button>
+          </div>
+        </section>
+
       </div>
 
       <!-- Right column (2/3): Ability Scores → Class Features → Subclass → Resources → Notes -->
@@ -403,6 +420,7 @@ function renderSheet(ctx) {
   renderProficiencies(ctx);
   renderTraits(ctx);
   renderWealth(ctx);
+  renderMagicItems(ctx);
   renderAbilities(ctx);
   renderSpellSlots(ctx);
   renderPreparedSpells(ctx);
@@ -596,6 +614,96 @@ function renderWealth(ctx) {
   }
 }
 
+// ─── Magic items ──────────────────────────────────────────────────────────
+var magicItemCatalog = [];
+
+function populateMagicItemSelect() {
+  var sel = document.getElementById('mi-select');
+  if (!sel) return;
+  var owned = (window.__CTX.magic_items || []).map(function (m) { return m.item_id; });
+  var options = magicItemCatalog.filter(function (mi) { return owned.indexOf(mi.key) === -1; })
+    .map(function (mi) { return '<option value="' + mi.key + '">' + mi.name + '</option>'; });
+  sel.innerHTML = '<option value="">— choose an item —</option>' + options.join('');
+}
+
+function renderMagicItems(ctx) {
+  document.getElementById('magic-items-section').style.display = '';
+  populateMagicItemSelect();
+  var list = ctx.magic_items || [];
+  var attunedCount = list.filter(function (m) { return m.attuned; }).length;
+  document.getElementById('magic-items-body').innerHTML = list.length ? list.map(function (m, i) {
+    var mi = magicItemCatalog.find(function (x) { return x.key === m.item_id; });
+    if (!mi) return '';
+    var disableAttune = !m.attuned && attunedCount >= 3;
+    return '<div class="spe-item mi-clickable" data-mi-index="' + i + '">' +
+      '<span class="spe-name">' + mi.name + '</span>' +
+      '<span class="spell-lvl-tag">' + mi.rarity + '</span>' +
+      '<label class="mi-attune-label" onclick="event.stopPropagation()">' +
+        '<input type="checkbox" ' + (m.attuned ? 'checked' : '') + (disableAttune ? ' disabled' : '') +
+          ' onchange="toggleAttune(' + i + ', this.checked)"> Attuned' +
+      '</label>' +
+      '<span class="mi-remove-btn" title="Remove" onclick="event.stopPropagation(); removeMagicItem(' + i + ')">🗑</span>' +
+      '<span class="spe-chevron">›</span>' +
+    '</div>';
+  }).join('') : '<p class="notes-text" style="opacity:.6">No magic items yet — add one below.</p>';
+}
+
+async function loadMagicItemCatalog() {
+  var { data } = await supabase.from('homebrew_items').select('id,data').eq('type', 'magic_item');
+  magicItemCatalog = (data || []).map(function (row) { return row.data; });
+}
+
+function addMagicItem() {
+  var sel = document.getElementById('mi-select');
+  var id = sel.value;
+  if (!id) return;
+  window.__CTX.magic_items = window.__CTX.magic_items || [];
+  window.__CTX.magic_items.push({ item_id: id, attuned: false });
+  renderMagicItems(window.__CTX);
+}
+
+function removeMagicItem(i) {
+  miClose();
+  window.__CTX.magic_items.splice(i, 1);
+  renderMagicItems(window.__CTX);
+}
+
+function toggleAttune(i, checked) {
+  var list = window.__CTX.magic_items || [];
+  if (checked && list.filter(function (m) { return m.attuned; }).length >= 3) {
+    renderMagicItems(window.__CTX);
+    return;
+  }
+  list[i].attuned = checked;
+  renderMagicItems(window.__CTX);
+}
+
+function miClose() {
+  var open = document.querySelector('.mi-clickable.spe-open');
+  if (!open) return;
+  open.classList.remove('spe-open');
+  var detail = open.nextElementSibling;
+  if (detail && detail.classList.contains('spe-detail')) detail.remove();
+}
+
+document.addEventListener('click', function (e) {
+  var item = e.target.closest('.mi-clickable');
+  if (!item) return;
+  if (item.classList.contains('spe-open')) { miClose(); return; }
+  miClose();
+
+  var i = parseInt(item.dataset.miIndex, 10);
+  var m = (window.__CTX.magic_items || [])[i];
+  var mi = m ? magicItemCatalog.find(function (x) { return x.key === m.item_id; }) : null;
+  item.classList.add('spe-open');
+
+  var panel = document.createElement('div');
+  panel.className = 'spe-detail';
+  panel.innerHTML = '<div class="sl-card-body" style="font-size:.85rem;color:var(--text-mid)">' +
+    (mi && mi.description ? mi.description : '<em>No description available.</em>') + '</div>';
+  item.insertAdjacentElement('afterend', panel);
+});
+
 function renderAbilities(ctx) {
   document.getElementById('ability-grid').innerHTML = ctx.abilities.map(function (ab) {
     return '<div class="ability-block">' +
@@ -738,6 +846,7 @@ async function loadAndRender() {
   document.getElementById('edit-link').href = 'build.html?edit=' + id;
   document.getElementById('edit-link-2').href = 'build.html?edit=' + id;
 
+  await loadMagicItemCatalog();
   renderSheet(window.__CTX);
   statusEl.style.display = 'none';
   document.getElementById('sheet-main').style.display = '';

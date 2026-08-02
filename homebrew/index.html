@@ -169,6 +169,7 @@
       <span class="filter-chip" data-type="class" onclick="setFilter('class')">Class</span>
       <span class="filter-chip" data-type="subclass" onclick="setFilter('subclass')">Subclass</span>
       <span class="filter-chip" data-type="species" onclick="setFilter('species')">Species</span>
+      <span class="filter-chip" data-type="magic_item" onclick="setFilter('magic_item')">Magic Item</span>
       <input type="text" id="hb-search" placeholder="Search by name" oninput="renderList()">
     </div>
     <div id="hb-list"></div>
@@ -202,6 +203,10 @@
         <div class="hb-type-card" onclick="startCreate('species')">
           <div class="hb-type-card-icon">♦</div>
           <div class="hb-type-card-name">Species</div>
+        </div>
+        <div class="hb-type-card" onclick="startCreate('magic_item')">
+          <div class="hb-type-card-icon">◈</div>
+          <div class="hb-type-card-name">Magic Item</div>
         </div>
       </div>
     </div>
@@ -453,6 +458,31 @@
         <button class="hb-btn hb-btn-primary" onclick="submitSpecies()">Create Species</button>
         <div class="hb-form-status" id="spc-status"></div>
       </div>
+
+      <div id="hb-form-magic_item" style="display:none">
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:2"><label>Name</label><input type="text" id="mi-name"></div>
+          <div class="hb-form-field"><label>Rarity</label>
+            <select id="mi-rarity">
+              <option>Common</option><option>Uncommon</option><option selected>Rare</option>
+              <option>Very Rare</option><option>Legendary</option><option>Artifact</option>
+            </select>
+          </div>
+          <div class="hb-form-field"><label>Type</label>
+            <select id="mi-type">
+              <option>Weapon</option><option>Armor</option><option>Potion</option>
+              <option>Ring</option><option>Rod</option><option>Scroll</option>
+              <option>Staff</option><option>Wand</option><option selected>Wondrous Item</option>
+              <option>Ammunition</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field" style="flex:1"><label>Description</label><textarea id="mi-desc"></textarea></div>
+        </div>
+        <button class="hb-btn hb-btn-primary" onclick="submitMagicItem()">Create Magic Item</button>
+        <div class="hb-form-status" id="mi-status"></div>
+      </div>
     </div>
   </section>
 </div>
@@ -584,6 +614,13 @@ function renderSpeciesCard(sp) {
          '<div class="sl-card-body">' + traitsHtml + '</div>';
 }
 
+function renderMagicItemCard(mi) {
+  return '<div class="sl-card-head" style="border-bottom-color:var(--gold)">' +
+           '<div><h3 class="sl-card-name">' + mi.name + '</h3><div class="sl-card-sub">' + mi.rarity + ' ' + mi.item_type + '</div></div>' +
+         '</div>' +
+         '<div class="sl-card-body"><p class="cr-trait">' + (mi.description || '') + '</p></div>';
+}
+
 function renderCreatureCard(m) {
   var speed = m.speed_all || {};
   var speedParts = [
@@ -658,7 +695,7 @@ function renderList() {
   }
   el.innerHTML = items.map(it => {
     const date = new Date(it.created_at).toLocaleDateString();
-    const OTHER_TYPE_ICONS = { creature: '⚔', background: '❖', class: '⬡', subclass: 'ꙮ', species: '♦' };
+    const OTHER_TYPE_ICONS = { creature: '⚔', background: '❖', class: '⬡', subclass: 'ꙮ', species: '♦', magic_item: '◈' };
     const icon = it.type === 'spell'
       ? '<span class="hb-row-icon sl-' + (it.data.school_index || 'evocation') + '">' + (speSchoolIcons[it.data.school_index] || '') + '</span>'
       : '<span class="hb-row-icon hb-creature-icon">' + (OTHER_TYPE_ICONS[it.type] || '?') + '</span>';
@@ -705,6 +742,7 @@ document.addEventListener('click', function (e) {
   const RENDERERS = {
     spell: speRenderCard, creature: renderCreatureCard, background: renderBackgroundCard,
     class: renderClassCard, subclass: renderSubclassCard, species: renderSpeciesCard,
+    magic_item: renderMagicItemCard,
   };
   panel.innerHTML = (RENDERERS[item.type] || renderBackgroundCard)(item.data);
   row.insertAdjacentElement('afterend', panel);
@@ -719,6 +757,7 @@ function startCreate(type) {
   document.querySelector('#hb-form-class button.hb-btn-primary').textContent = 'Create Class';
   document.querySelector('#hb-form-subclass button.hb-btn-primary').textContent = 'Create Subclass';
   document.querySelector('#hb-form-species button.hb-btn-primary').textContent = 'Create Species';
+  document.querySelector('#hb-form-magic_item button.hb-btn-primary').textContent = 'Create Magic Item';
   document.getElementById('hb-step1').classList.remove('active');
   document.getElementById('hb-step2').classList.add('active');
   document.getElementById('hb-form-spell').style.display = type === 'spell' ? '' : 'none';
@@ -727,6 +766,7 @@ function startCreate(type) {
   document.getElementById('hb-form-class').style.display = type === 'class' ? '' : 'none';
   document.getElementById('hb-form-subclass').style.display = type === 'subclass' ? '' : 'none';
   document.getElementById('hb-form-species').style.display = type === 'species' ? '' : 'none';
+  document.getElementById('hb-form-magic_item').style.display = type === 'magic_item' ? '' : 'none';
 }
 
 const ACTION_TYPE_LABELS = { ACTION: 'Action', BONUS_ACTION: 'Bonus Action', REACTION: 'Reaction',
@@ -828,7 +868,7 @@ function startEdit(event, id) {
       (feats || []).forEach(f => lines.push(level + ' | ' + f.name + ' | ' + f.description));
     });
     document.getElementById('sc-features').value = lines.join('\n');
-  } else {
+  } else if (item.type === 'species') {
     document.querySelector('#hb-form-species button.hb-btn-primary').textContent = 'Save Changes';
     const traits = d.traits || [];
     const sizeTrait = traits.find(t => t.name === 'Size');
@@ -839,6 +879,12 @@ function startEdit(event, id) {
     document.getElementById('spc-traits').value = traits
       .filter(t => t.name !== 'Size' && t.type !== 'SPEED')
       .map(t => t.name + ' | ' + t.desc).join('\n');
+  } else {
+    document.querySelector('#hb-form-magic_item button.hb-btn-primary').textContent = 'Save Changes';
+    document.getElementById('mi-name').value = d.name || '';
+    document.getElementById('mi-rarity').value = d.rarity || 'Rare';
+    document.getElementById('mi-type').value = d.item_type || 'Wondrous Item';
+    document.getElementById('mi-desc').value = d.description || '';
   }
 }
 
@@ -1189,6 +1235,41 @@ async function submitSpecies() {
   status.style.color = '#2d7a3a';
   status.textContent = editingId ? '✓ Saved' : '✓ Created';
   ['spc-name','spc-traits'].forEach(id => document.getElementById(id).value = '');
+  await loadItems();
+  setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
+}
+
+async function submitMagicItem() {
+  const status = document.getElementById('mi-status');
+  const name = document.getElementById('mi-name').value.trim();
+  if (!name) { status.textContent = 'Name is required.'; return; }
+
+  const rarity = document.getElementById('mi-rarity').value;
+  const itemType = document.getElementById('mi-type').value;
+  const description = document.getElementById('mi-desc').value.trim();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const data = {
+    key: editingId ? 'hb-' + editingId : null, name,
+    rarity, item_type: itemType, description,
+    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    _homebrew: true,
+  };
+
+  let error;
+  if (editingId) {
+    ({ error } = await supabase.from('homebrew_items').update({ name, data }).eq('id', editingId));
+  } else {
+    const { data: row, error: insertErr } = await supabase.from('homebrew_items')
+      .insert({ owner_id: user.id, type: 'magic_item', name, data }).select('id').single();
+    error = insertErr;
+    if (!error) { data.key = 'hb-' + row.id; await supabase.from('homebrew_items').update({ data }).eq('id', row.id); }
+  }
+  if (error) { status.textContent = 'Failed: ' + error.message; return; }
+
+  status.style.color = '#2d7a3a';
+  status.textContent = editingId ? '✓ Saved' : '✓ Created';
+  ['mi-name','mi-desc'].forEach(id => document.getElementById(id).value = '');
   await loadItems();
   setTimeout(() => { status.textContent = ''; backToStep1(); }, 900);
 }
