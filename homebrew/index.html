@@ -57,6 +57,12 @@
     .hb-row-name { font-size: .85rem; font-weight: 600; color: var(--text); white-space: nowrap;
       overflow: hidden; text-overflow: ellipsis; }
     .hb-row-sub { font-size: .68rem; color: var(--text-dim); font-style: italic; }
+    .hb-source-tag { display: inline-block; font-family: var(--font-heading); font-size: .50rem; font-weight: 700;
+      letter-spacing: .10em; text-transform: uppercase; border: 1px solid; padding: 1px 5px;
+      border-radius: 20px; margin-left: 4px; vertical-align: middle; }
+    .hb-source-homebrew { color: #3a6ea8; border-color: rgba(58,110,168,.40); }
+    .hb-source-nebulan { color: var(--purple); border-color: rgba(107,79,154,.40); }
+    .hb-source-dnd-extras { color: var(--rose); border-color: rgba(196,112,112,.45); }
     .hb-row-actions { display: flex; gap: 2px; flex-shrink: 0; }
     .hb-delete-btn { font-size: .85rem; padding: 4px 8px; border-radius: 4px; flex-shrink: 0;
       transition: background .1s; }
@@ -239,6 +245,15 @@
           </div>
         </div>
         <div class="hb-form-row">
+          <div class="hb-form-field"><label>Source</label>
+            <select id="sp-source">
+              <option value="Homebrew" selected>Homebrew</option>
+              <option value="Nebulan">Nebulan</option>
+              <option value="D&amp;D Extras">D&amp;D Extras</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
           <div class="hb-form-field"><label>Casting Time</label><input type="text" id="sp-casting" placeholder="1 action"></div>
           <div class="hb-form-field"><label>Range</label><input type="text" id="sp-range" placeholder="60 feet"></div>
           <div class="hb-form-field"><label>Duration</label><input type="text" id="sp-duration" placeholder="Instantaneous"></div>
@@ -285,6 +300,15 @@
           <div class="hb-form-field"><label>Alignment</label><input type="text" id="cr-alignment" placeholder="Unaligned"></div>
         </div>
         <div class="hb-form-row">
+          <div class="hb-form-field"><label>Source</label>
+            <select id="cr-source">
+              <option value="Homebrew" selected>Homebrew</option>
+              <option value="Nebulan">Nebulan</option>
+              <option value="D&amp;D Extras">D&amp;D Extras</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
           <div class="hb-form-field"><label>Challenge Rating</label><input type="number" id="cr-cr" step="0.125" min="0" value="1"></div>
           <div class="hb-form-field"><label>Armour Class</label><input type="number" id="cr-ac" value="12"></div>
           <div class="hb-form-field"><label>Hit Points</label><input type="number" id="cr-hp" value="20"></div>
@@ -327,6 +351,15 @@
           <div class="hb-form-field" style="flex:1"><label>Name</label><input type="text" id="bg-name"></div>
         </div>
         <div class="hb-form-row">
+          <div class="hb-form-field"><label>Source</label>
+            <select id="bg-source">
+              <option value="Homebrew" selected>Homebrew</option>
+              <option value="Nebulan">Nebulan</option>
+              <option value="D&amp;D Extras">D&amp;D Extras</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
           <div class="hb-form-field" style="flex:1"><label>Ability Score Increases</label><input type="text" id="bg-asi" placeholder="+2 to one ability score, +1 to another"></div>
         </div>
         <div class="hb-form-row">
@@ -358,6 +391,15 @@
           <div class="hb-form-field"><label>Hit Die</label>
             <select id="cl-hitdie">
               <option>D6</option><option selected>D8</option><option>D10</option><option>D12</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field"><label>Source</label>
+            <select id="cl-source">
+              <option value="Homebrew" selected>Homebrew</option>
+              <option value="Nebulan">Nebulan</option>
+              <option value="D&amp;D Extras">D&amp;D Extras</option>
             </select>
           </div>
         </div>
@@ -423,6 +465,15 @@
           <div class="hb-form-field" style="flex:1"><span style="font-size:.68rem;color:var(--text-dim);font-style:italic">Must exactly match the class name (case-insensitive).</span></div>
         </div>
         <div class="hb-form-row">
+          <div class="hb-form-field"><label>Source</label>
+            <select id="sc-source">
+              <option value="Homebrew" selected>Homebrew</option>
+              <option value="Nebulan">Nebulan</option>
+              <option value="D&amp;D Extras">D&amp;D Extras</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
           <div class="hb-form-field" style="flex:1"><label>Description</label><textarea id="sc-desc"></textarea></div>
         </div>
         <div class="hb-form-row">
@@ -450,6 +501,15 @@
           <div class="hb-form-field"><label>Speed</label><input type="number" id="spc-speed" value="30"></div>
         </div>
         <div class="hb-form-row">
+          <div class="hb-form-field"><label>Source</label>
+            <select id="spc-source">
+              <option value="Homebrew" selected>Homebrew</option>
+              <option value="Nebulan">Nebulan</option>
+              <option value="D&amp;D Extras">D&amp;D Extras</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
           <div class="hb-form-field" style="flex:1">
             <label>Traits (one per line: Name | Description)</label>
             <textarea id="spc-traits" placeholder="Darkvision | You can see in dim light within 60 feet of you as if it were bright light..."></textarea>
@@ -474,6 +534,15 @@
               <option>Ring</option><option>Rod</option><option>Scroll</option>
               <option>Staff</option><option>Wand</option><option selected>Wondrous Item</option>
               <option>Ammunition</option>
+            </select>
+          </div>
+        </div>
+        <div class="hb-form-row">
+          <div class="hb-form-field"><label>Source</label>
+            <select id="mi-source">
+              <option value="Homebrew" selected>Homebrew</option>
+              <option value="Nebulan">Nebulan</option>
+              <option value="D&amp;D Extras">D&amp;D Extras</option>
             </select>
           </div>
         </div>
@@ -682,6 +751,18 @@ function setFilter(type) {
   renderList();
 }
 
+const SOURCE_TAGS = {
+  'Homebrew': 'hb-source-homebrew',
+  'Nebulan': 'hb-source-nebulan',
+  'D&D Extras': 'hb-source-dnd-extras',
+};
+
+function sourceTagHtml(displayName) {
+  const cls = SOURCE_TAGS[displayName];
+  if (!cls) return '';
+  return '<span class="hb-source-tag ' + cls + '">' + displayName + '</span>';
+}
+
 function renderList() {
   const q = document.getElementById('hb-search').value.trim().toLowerCase();
   const items = allItems.filter(it =>
@@ -702,6 +783,7 @@ function renderList() {
     return '<div class="hb-row hb-clickable" data-id="' + it.id + '">' +
       '<div class="hb-row-info">' + icon +
         '<div class="hb-row-text"><span class="hb-row-name">' + it.name + '</span>' +
+        sourceTagHtml(it.data.document && it.data.document.display_name) +
         '<span class="hb-row-sub">' + it.type + ' · ' + date + '</span></div>' +
       '</div>' +
       '<div class="hb-row-actions">' +
@@ -801,6 +883,7 @@ function startEdit(event, id) {
     document.getElementById('sp-desc').value = (d.desc || []).join('\n');
     document.getElementById('sp-higher').value = (d.higher_level || []).join('\n');
     document.getElementById('sp-classes').value = (d.classes || []).join(', ');
+    document.getElementById('sp-source').value = (d.document && d.document.display_name) || 'Homebrew';
   } else if (item.type === 'creature') {
     document.querySelector('#hb-form-creature button.hb-btn-primary').textContent = 'Save Changes';
     document.getElementById('cr-name').value = d.name || '';
@@ -824,6 +907,7 @@ function startEdit(event, id) {
     document.getElementById('cr-traits').value = (d.traits || []).map(t => t.name + ' | ' + t.desc).join('\n');
     document.getElementById('cr-actions').value = (d.actions || [])
       .map(a => a.name + ' | ' + (ACTION_TYPE_LABELS[a.action_type] || 'Action') + ' | ' + a.desc).join('\n');
+    document.getElementById('cr-source').value = (d.document && d.document.display_name) || 'Homebrew';
   } else if (item.type === 'background') {
     document.querySelector('#hb-form-background button.hb-btn-primary').textContent = 'Save Changes';
     const benefits = d.benefits || [];
@@ -838,6 +922,7 @@ function startEdit(event, id) {
     const trait = benefits.find(b => b.type === 'trait');
     document.getElementById('bg-trait-name').value = trait ? trait.name : '';
     document.getElementById('bg-trait-desc').value = trait ? trait.desc : '';
+    document.getElementById('bg-source').value = (d.document && d.document.display_name) || 'Homebrew';
   } else if (item.type === 'class') {
     document.querySelector('#hb-form-class button.hb-btn-primary').textContent = 'Save Changes';
     const hb = d._hbData || {};
@@ -856,6 +941,7 @@ function startEdit(event, id) {
     document.getElementById('cl-desc').value = hb.description || '';
     document.getElementById('cl-features').value = (hb.features || [])
       .map(f => f.level + ' | ' + f.name + ' | ' + f.description).join('\n');
+    document.getElementById('cl-source').value = (d.document && d.document.display_name) || 'Homebrew';
   } else if (item.type === 'subclass') {
     document.querySelector('#hb-form-subclass button.hb-btn-primary').textContent = 'Save Changes';
     const hb = d._hbData || {};
@@ -868,6 +954,7 @@ function startEdit(event, id) {
       (feats || []).forEach(f => lines.push(level + ' | ' + f.name + ' | ' + f.description));
     });
     document.getElementById('sc-features').value = lines.join('\n');
+    document.getElementById('sc-source').value = (d.document && d.document.display_name) || 'Homebrew';
   } else if (item.type === 'species') {
     document.querySelector('#hb-form-species button.hb-btn-primary').textContent = 'Save Changes';
     const traits = d.traits || [];
@@ -879,12 +966,14 @@ function startEdit(event, id) {
     document.getElementById('spc-traits').value = traits
       .filter(t => t.name !== 'Size' && t.type !== 'SPEED')
       .map(t => t.name + ' | ' + t.desc).join('\n');
+    document.getElementById('spc-source').value = (d.document && d.document.display_name) || 'Homebrew';
   } else {
     document.querySelector('#hb-form-magic_item button.hb-btn-primary').textContent = 'Save Changes';
     document.getElementById('mi-name').value = d.name || '';
     document.getElementById('mi-rarity').value = d.rarity || 'Rare';
     document.getElementById('mi-type').value = d.item_type || 'Wondrous Item';
     document.getElementById('mi-desc').value = d.description || '';
+    document.getElementById('mi-source').value = (d.document && d.document.display_name) || 'Homebrew';
   }
 }
 
@@ -905,6 +994,7 @@ async function submitSpell() {
   if (isNaN(level) || level < 0 || level > 9) { status.textContent = 'Level must be 0-9.'; return; }
 
   const school = document.getElementById('sp-school').value;
+  const source = document.getElementById('sp-source').value;
   const comps = [
     document.getElementById('sp-verbal').checked && 'V',
     document.getElementById('sp-somatic').checked && 'S',
@@ -925,6 +1015,7 @@ async function submitSpell() {
     desc: document.getElementById('sp-desc').value.split('\n').map(s => s.trim()).filter(Boolean),
     higher_level: document.getElementById('sp-higher').value.split('\n').map(s => s.trim()).filter(Boolean),
     classes: document.getElementById('sp-classes').value.split(',').map(s => s.trim()).filter(Boolean),
+    document: { display_name: source, key: 'homebrew', gamesystem: { key: 'homebrew' } },
     _homebrew: true,
   };
 
@@ -975,6 +1066,7 @@ async function submitCreature() {
     return { name: (parts[0] || '').trim(), action_type: VALID_ACTION_TYPES.includes(actionType) ? actionType : 'ACTION', desc: (parts[2] || '').trim() };
   });
 
+  const source = document.getElementById('cr-source').value;
   const { data: { user } } = await supabase.auth.getUser();
   const data = {
     key: editingId ? 'hb-' + editingId : null, name,
@@ -996,6 +1088,7 @@ async function submitCreature() {
     ability_scores, modifiers, saving_throws,
     passive_perception: 10 + modifiers.wisdom,
     traits, actions,
+    document: { display_name: source, key: 'homebrew', gamesystem: { key: 'homebrew' } },
     _homebrew: true,
   };
 
@@ -1037,11 +1130,12 @@ async function submitBackground() {
   const traitDesc = document.getElementById('bg-trait-desc').value.trim();
   if (traitName && traitDesc) benefits.push({ name: traitName, desc: traitDesc, type: 'trait' });
 
+  const source = document.getElementById('bg-source').value;
   const { data: { user } } = await supabase.auth.getUser();
   const data = {
     key: editingId ? 'hb-' + editingId : null, name,
     benefits,
-    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    document: { display_name: source, key: 'homebrew', gamesystem: { key: 'homebrew' } },
     _homebrew: true,
   };
 
@@ -1117,6 +1211,7 @@ async function submitClass() {
     });
   }
 
+  const source = document.getElementById('cl-source').value;
   const { data: { user } } = await supabase.auth.getUser();
   const data = {
     key: editingId ? 'hb-' + editingId : null, name,
@@ -1124,7 +1219,7 @@ async function submitClass() {
     saving_throws: savingThrows.map(s => ({ name: s })),
     desc: description,
     features,
-    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    document: { display_name: source, key: 'homebrew', gamesystem: { key: 'homebrew' } },
     _homebrew: true,
     _hbData: {
       hit_dice: hitDice, caster_type: casterType, spellcasting_ability: spellAbility,
@@ -1169,11 +1264,12 @@ async function submitSubclass() {
     (grouped[level] = grouped[level] || []).push({ name: (fname || '').trim(), description: rest.join('|').trim() });
   });
 
+  const source = document.getElementById('sc-source').value;
   const { data: { user } } = await supabase.auth.getUser();
   const data = {
     key: editingId ? 'hb-' + editingId : null, name,
     subclass_of: { key: parent, name: parent },
-    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    document: { display_name: source, key: 'homebrew', gamesystem: { key: 'homebrew' } },
     _homebrew: true,
     _hbData: { features: grouped, subclass_spell_list: subclassSpellList, description },
   };
@@ -1213,11 +1309,12 @@ async function submitSpecies() {
     }),
   ];
 
+  const source = document.getElementById('spc-source').value;
   const { data: { user } } = await supabase.auth.getUser();
   const data = {
     key: editingId ? 'hb-' + editingId : null, name,
     traits,
-    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    document: { display_name: source, key: 'homebrew', gamesystem: { key: 'homebrew' } },
     _homebrew: true,
   };
 
@@ -1247,12 +1344,13 @@ async function submitMagicItem() {
   const rarity = document.getElementById('mi-rarity').value;
   const itemType = document.getElementById('mi-type').value;
   const description = document.getElementById('mi-desc').value.trim();
+  const source = document.getElementById('mi-source').value;
 
   const { data: { user } } = await supabase.auth.getUser();
   const data = {
     key: editingId ? 'hb-' + editingId : null, name,
     rarity, item_type: itemType, description,
-    document: { display_name: 'Homebrew', key: 'homebrew', gamesystem: { key: 'homebrew' } },
+    document: { display_name: source, key: 'homebrew', gamesystem: { key: 'homebrew' } },
     _homebrew: true,
   };
 
