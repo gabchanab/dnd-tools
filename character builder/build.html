@@ -87,8 +87,12 @@ select{cursor:pointer;appearance:none;
 .pick-card:hover{border-color:var(--border-mid);background:rgba(255,250,248,.92)}
 .pick-card.selected{border-color:var(--gold);background:var(--gold-glow);
   box-shadow:0 0 0 1px rgba(185,155,80,.20)}
-.pick-card.hb{border-left:3px solid var(--purple)}
-.pick-card.hb.selected{border-color:var(--purple);background:var(--purple-glow)}
+.pick-card.card-src-homebrew{border-left:3px solid #3a6ea8}
+.pick-card.card-src-homebrew.selected{border-color:#3a6ea8;background:rgba(58,110,168,.10)}
+.pick-card.card-src-nebulan{border-left:3px solid var(--purple)}
+.pick-card.card-src-nebulan.selected{border-color:var(--purple);background:var(--purple-glow)}
+.pick-card.card-src-dnd-extras{border-left:3px solid #c47070}
+.pick-card.card-src-dnd-extras.selected{border-color:#c47070;background:rgba(196,112,112,.10)}
 .card-name{font-family:var(--fh);font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:.15rem}
 .card-src{font-size:.65rem;color:var(--text-dim);font-family:var(--fb)}
 .hb-tag{display:inline-block;font-family:var(--fh);font-size:.50rem;font-weight:700;letter-spacing:.10em;
@@ -615,6 +619,16 @@ function sourceTag(displayName) {
   return `<span class="hb-tag ${cls}">${displayName}</span>`;
 }
 
+const SOURCE_CARD_CLASSES = {
+  'Homebrew': 'card-src-homebrew',
+  'Nebulan': 'card-src-nebulan',
+  'D&D Extras': 'card-src-dnd-extras',
+};
+function sourceCardClass(displayName) {
+  const cls = SOURCE_CARD_CLASSES[displayName];
+  return cls ? ' ' + cls : '';
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Navigation
 // ═══════════════════════════════════════════════════════════════════════════
@@ -702,7 +716,7 @@ function renderSpecies() {
     return;
   }
   grid.innerHTML = items.map(s => `
-    <div class="pick-card${S.spKey === s.key ? ' selected' : ''}${s._homebrew ? ' hb' : ''}"
+    <div class="pick-card${S.spKey === s.key ? ' selected' : ''}${sourceCardClass(s.document?.display_name)}"
          onclick="pickSpecies('${s.key}')">
       <div class="card-name">${s.name}${sourceTag(s.document?.display_name)}</div>
       <div class="card-src">${s.document?.display_name || ''}</div>
@@ -746,7 +760,7 @@ function renderClasses() {
     return;
   }
   grid.innerHTML = items.map(c => `
-    <div class="pick-card${S.clKey === c.key ? ' selected' : ''}${c._homebrew ? ' hb' : ''}"
+    <div class="pick-card${S.clKey === c.key ? ' selected' : ''}${sourceCardClass(c.document?.display_name)}"
          onclick="pickClass('${c.key}')">
       <div class="card-name">${c.name}${sourceTag(c.document?.display_name)}</div>
       <div class="card-src">${c.document?.display_name || ''}</div>
@@ -835,7 +849,7 @@ function renderSubclasses() {
     return;
   }
   grid.innerHTML = subs.map(s => `
-    <div class="pick-card${S.subKey === s.key ? ' selected' : ''}${s._homebrew ? ' hb' : ''}"
+    <div class="pick-card${S.subKey === s.key ? ' selected' : ''}${sourceCardClass(s.document?.display_name)}"
          onclick="pickSubclass('${s.key}', ${!!s._homebrew})">
       <div class="card-name">${s.name}${sourceTag(s.document?.display_name)}</div>
       <div class="card-src">${s.document?.display_name || 'Official'}</div>
@@ -907,7 +921,7 @@ function renderBg() {
     return;
   }
   grid.innerHTML = items.map(b => `
-    <div class="pick-card${S.bgKey === b.key ? ' selected' : ''}${b._homebrew ? ' hb' : ''}"
+    <div class="pick-card${S.bgKey === b.key ? ' selected' : ''}${sourceCardClass(b.document?.display_name)}"
          onclick="pickBg('${b.key}')">
       <div class="card-name">${b.name}${sourceTag(b.document?.display_name)}</div>
       <div class="card-src">${b.document?.display_name || ''}</div>
