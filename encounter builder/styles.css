@@ -400,8 +400,11 @@ h1 {
 .result-row:hover .result-icon { opacity: 1; }
 .result-name { font-size: 0.88rem; flex: 1; }
 .hb-tag { display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
-  text-transform: uppercase; color: #f5f0e6; border: 1px solid rgba(245,240,230,0.45);
+  text-transform: uppercase; border: 1px solid;
   padding: 1px 5px; border-radius: 20px; margin-left: 6px; vertical-align: middle; }
+.hb-tag-homebrew { color: #5b9bd5; border-color: rgba(91,155,213,0.45); }
+.hb-tag-nebulan { color: #b39ddb; border-color: rgba(179,157,219,0.45); }
+.hb-tag-dnd-extras { color: var(--red); border-color: rgba(244,67,54,0.45); }
 .result-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .result-type { font-size: 0.72rem; color: var(--text-muted); font-style: italic; }
 .result-cr {

@@ -92,8 +92,11 @@ select{cursor:pointer;appearance:none;
 .card-name{font-family:var(--fh);font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:.15rem}
 .card-src{font-size:.65rem;color:var(--text-dim);font-family:var(--fb)}
 .hb-tag{display:inline-block;font-family:var(--fh);font-size:.50rem;font-weight:700;letter-spacing:.10em;
-  text-transform:uppercase;color:var(--purple);border:1px solid rgba(107,79,154,.40);
+  text-transform:uppercase;border:1px solid;
   padding:1px 5px;border-radius:20px;margin-left:3px;vertical-align:middle}
+.hb-tag-homebrew{color:#3a6ea8;border-color:rgba(58,110,168,.40)}
+.hb-tag-nebulan{color:var(--purple);border-color:rgba(107,79,154,.40)}
+.hb-tag-dnd-extras{color:#c47070;border-color:rgba(196,112,112,.45)}
 /* ── Detail panes ── */
 .detail-pane{background:rgba(255,250,248,.94);
   border:1px solid var(--border);border-radius:4px;padding:.85rem 1rem;margin-top:.85rem;display:none}
@@ -601,6 +604,17 @@ const S = {
   selectedSpells: [],
 };
 
+const SOURCE_TAG_CLASSES = {
+  'Homebrew': 'hb-tag-homebrew',
+  'Nebulan': 'hb-tag-nebulan',
+  'D&D Extras': 'hb-tag-dnd-extras',
+};
+function sourceTag(displayName) {
+  const cls = SOURCE_TAG_CLASSES[displayName];
+  if (!cls) return '';
+  return `<span class="hb-tag ${cls}">${displayName}</span>`;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Navigation
 // ═══════════════════════════════════════════════════════════════════════════
@@ -690,7 +704,7 @@ function renderSpecies() {
   grid.innerHTML = items.map(s => `
     <div class="pick-card${S.spKey === s.key ? ' selected' : ''}${s._homebrew ? ' hb' : ''}"
          onclick="pickSpecies('${s.key}')">
-      <div class="card-name">${s.name}${s._homebrew ? '<span class="hb-tag">HB</span>' : ''}</div>
+      <div class="card-name">${s.name}${sourceTag(s.document?.display_name)}</div>
       <div class="card-src">${s.document?.display_name || ''}</div>
     </div>`).join('');
 }
@@ -734,7 +748,7 @@ function renderClasses() {
   grid.innerHTML = items.map(c => `
     <div class="pick-card${S.clKey === c.key ? ' selected' : ''}${c._homebrew ? ' hb' : ''}"
          onclick="pickClass('${c.key}')">
-      <div class="card-name">${c.name}${c._homebrew ? '<span class="hb-tag">HB</span>' : ''}</div>
+      <div class="card-name">${c.name}${sourceTag(c.document?.display_name)}</div>
       <div class="card-src">${c.document?.display_name || ''}</div>
       <div class="card-src" style="margin-top:2px">Hit Die: ${c.hit_dice || c.hit_die || '—'}</div>
     </div>`).join('');
@@ -823,7 +837,7 @@ function renderSubclasses() {
   grid.innerHTML = subs.map(s => `
     <div class="pick-card${S.subKey === s.key ? ' selected' : ''}${s._homebrew ? ' hb' : ''}"
          onclick="pickSubclass('${s.key}', ${!!s._homebrew})">
-      <div class="card-name">${s.name}${s._homebrew ? '<span class="hb-tag">HB</span>' : ''}</div>
+      <div class="card-name">${s.name}${sourceTag(s.document?.display_name)}</div>
       <div class="card-src">${s.document?.display_name || 'Official'}</div>
     </div>`).join('');
 }
@@ -895,7 +909,7 @@ function renderBg() {
   grid.innerHTML = items.map(b => `
     <div class="pick-card${S.bgKey === b.key ? ' selected' : ''}${b._homebrew ? ' hb' : ''}"
          onclick="pickBg('${b.key}')">
-      <div class="card-name">${b.name}${b._homebrew ? '<span class="hb-tag">HB</span>' : ''}</div>
+      <div class="card-name">${b.name}${sourceTag(b.document?.display_name)}</div>
       <div class="card-src">${b.document?.display_name || ''}</div>
     </div>`).join('');
 }
@@ -1206,7 +1220,7 @@ function slRenderList(list) {
     return `<div class="sl-result-item" data-idx="${s.index}" data-school="${school}">
       <div class="sl-result-left">
         <span class="sl-badge sl-${school}">${icon}</span>
-        <span class="sl-spell-name">${s.name}</span>${s._homebrew ? '<span class="hb-tag">HB</span>' : ''}
+        <span class="sl-spell-name">${s.name}</span>${sourceTag(s.document?.display_name)}
       </div>
       <span class="sl-lvl">${lvlLabel}</span>
     </div>`;

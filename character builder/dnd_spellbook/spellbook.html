@@ -131,8 +131,11 @@
     }
     .lvl { font-size: 12px; color: var(--muted); font-style: italic; }
     .hb-tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: #6b4f9a; border: 1px solid rgba(107,79,154,.40);
+      text-transform: uppercase; border: 1px solid;
       padding: 1px 5px; border-radius: 20px; margin-left: 4px; vertical-align: middle; }
+    .hb-tag-homebrew { color: #3a6ea8; border-color: rgba(58,110,168,.40); }
+    .hb-tag-nebulan { color: #6b4f9a; border-color: rgba(107,79,154,.40); }
+    .hb-tag-dnd-extras { color: #c47070; border-color: rgba(196,112,112,.45); }
 
     .status { padding: 1.5rem; text-align: center; color: var(--muted); font-style: italic; }
 
@@ -339,6 +342,17 @@ const $ = (id) => document.getElementById(id);
 const API_BASE = 'https://api.open5e.com/v2';
 const FETCH_TIMEOUT_MS = 12000;
 
+const SOURCE_TAG_CLASSES = {
+  'Homebrew': 'hb-tag-homebrew',
+  'Nebulan': 'hb-tag-nebulan',
+  'D&D Extras': 'hb-tag-dnd-extras',
+};
+function sourceTag(displayName) {
+  const cls = SOURCE_TAG_CLASSES[displayName];
+  if (!cls) return '';
+  return `<span class="hb-tag ${cls}">${displayName}</span>`;
+}
+
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -454,7 +468,7 @@ function renderList(list, knownSchool) {
     return `<div class="result-item" data-idx="${s.index}">
       <div class="result-left">
         <span class="school-badge school-${school}">${schoolIcons[school] || ''}</span>
-        <span>${s.name}</span>${s._homebrew ? '<span class="hb-tag">HB</span>' : ''}
+        <span>${s.name}</span>${sourceTag(s.document?.display_name)}
       </div>
       <span class="lvl">${lvlLabel}</span>
     </div>`;
