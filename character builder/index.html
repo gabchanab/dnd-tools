@@ -120,6 +120,21 @@
       color: var(--gold-dim);
       box-shadow: 0 0 8px var(--gold-glow);
     }
+    .card-delete-btn {
+      opacity: 0;
+      pointer-events: none;
+      cursor: pointer;
+      transition: opacity .18s, border-color .18s, color .18s, box-shadow .18s;
+    }
+    .char-card:hover .card-delete-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .card-delete-btn:hover {
+      border-color: #a33;
+      color: #a33;
+      box-shadow: 0 0 8px rgba(180,50,50,.25);
+    }
 
     /* ── New character card ── */
     .new-card {
@@ -207,9 +222,19 @@ function cardHtml(c) {
     subclass + bg +
     '<div class="card-actions">' +
       '<a class="card-btn" href="build.html?edit=' + c.id + '">✏ Edit</a>' +
+      '<span class="card-btn card-delete-btn" onclick="deleteCharacter(event, \'' + c.id + '\')">🗑 Delete</span>' +
       '<a class="card-btn" href="sheet.html?id=' + c.id + '">Open Sheet →</a>' +
     '</div>' +
   '</div>';
+}
+
+async function deleteCharacter(event, id) {
+  event.stopPropagation();
+  if (!confirm("Delete this character? This can't be undone.")) return;
+  var { error } = await supabase.from('characters').delete().eq('id', id);
+  if (error) { alert('Failed to delete: ' + error.message); return; }
+  var card = event.target.closest('.char-card');
+  if (card) card.remove();
 }
 
 async function loadVault() {
