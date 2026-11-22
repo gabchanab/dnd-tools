@@ -35,6 +35,8 @@ See [`schema.sql`](schema.sql) for the full, runnable version.
   `distance_unit`).
 - **`map_pins`** — `map_id`, `x`/`y`, `title`, `pin_type`, `description`,
   `child_map_id`.
+- **`map_events`** / **`map_event_pins`** — per-map events with start/end years
+  and their many-to-many links to pins (see the Year view section).
 - **`map_pin_events`** — join table `(pin_id, event_id)` (primary key on the
   pair, both cascade-delete) linking a pin to any number of timeline events.
   Existing databases get it from
@@ -91,41 +93,54 @@ size on zoom, so no counter-scaling code is needed.
 - **Optional:** highlight the hex under the cursor (draw one hexagon polygon
   from the calibration maths) to confirm calibration is correct.
 
-## Pin years & "Year view" (Phase 3b, ✅ done)
+## Pin dates, map events & "Year view" (Phase 3b, ✅ done — redesigned)
 
-Goal: show the map as it was in a chosen year. Pins that did not exist yet (or
-no longer exist) in that year fade but stay slightly visible and clickable.
+Locations/items on the map and things that *happen* in the world are different
+things, so they are modelled separately. The first version derived a pin's
+lifetime from its timeline events, which blurred the two.
+
+- **Pins** are places/things. Each has its own optional **start year** and **end
+  year** (`map_pins.start_year/end_year`, absolute). Blank start = always
+  existed; blank end = still exists today. Outside the range the pin fades in
+  the Year view. Linking a pin to timeline events stays as a plain reference.
+- **Map events** (`map_events`, per map) are things that happen: a title,
+  description, **start and end year** (blank end = single year) and an optional
+  link to a timeline event (just a reference; picking one fills an empty title
+  and start year). They live in an **Events key**, a bubble in the top-right
+  corner of the map, listed oldest first.
+- **Pin ↔ event links** (`map_event_pins`, many-to-many) can be edited from the
+  pin form or the event form.
 
 **Decisions:**
 
 | Question | Decision |
 |---|---|
-| Where a pin's years come from | **Its linked timeline events.** Active range = earliest linked event → latest linked event. There are no year fields on the pin; the timeline stays the single source of truth. |
-| End of the range | Per-pin **"Still exists after its last event"** checkbox, default **ticked** (a city keeps going); untick for one-off events (a battle: active only in its event year(s)). |
-| Pins with no events | **Timeless**: always shown at full strength. |
-| Selecting a year | Age select (names/periods from `timeline_ages`) + year within that Age (0 = the Age's first year), same convention as the timeline. An "Absolute year…" option covers years outside every Age. |
-| Default state | **Off**: every pin normal. A "Show all" button switches it off again. |
-
-**Data:** one column, `map_pins.still_exists boolean not null default true`
-([`migration-003-pin-still-exists.sql`](migration-003-pin-still-exists.sql); in
-`schema.sql` for fresh installs). Years are never stored on the pin; they are read
-from the linked events (stored as absolute years in `timeline_events.year`).
+| Where events live | Per map (new `map_events` table), optional timeline link. |
+| Entering years | Age + year within the Age (or an absolute year); stored as absolute years. |
+| Old event-derived range / "Still exists" | Replaced by the pin's own start/end. `still_exists` is no longer used. |
+| Clicking an event in the key | Shows its pins, fades the rest. Independent of the Year view (the event selection wins while it is active). Click again or Esc to clear. |
+| Default state | Year view **off**: every pin and event normal. |
 
 **Behaviour:**
 
-- For a selected absolute year Y and a pin with linked events: `before` if
-  Y < earliest, `after` if Y > latest and the pin does not still exist, else `active`.
-- Faded pins: marker opacity ~28% (65% when selected), sent behind active pins,
-  still clickable. The side-panel list dims them too.
-- The Year-view bar shows a summary ("120 AD — 5 active, 1 timeless, 2 faded").
-- The pin panel shows its range ("🕰 Active: 120 AD → ongoing") and its state in
-  the selected year ("Not yet — first event …" / "Ended — last event …").
-- The pin form previews the range live as you add/remove events or tick the box.
+- With a year selected, a pin is `before` if Y < start, `after` if Y > end, else
+  active; pins with neither date are "undated" and always shown. Faded pins are
+  ~28% opacity (65% when selected), still clickable.
+- Key rows: bold with a gold edge when the selected year is inside the event's
+  range, dimmed when outside, all normal when the Year view is off. Each row
+  shows its range and pin count; the header collapses the list and has a **+**.
+- Pin panel shows "Exists: …" and its state in the selected year, plus the map
+  events it belongs to (click one to highlight it). Event panel shows its
+  range, state, linked pins (click to focus) and timeline reference.
 - The selected year carries over when you open a nested map; it resets on reload.
 
-**Not built (ideas):** a slider to scrub the year; showing which of a pin's
-events had happened by the selected year ("2 of 3 so far"); remembering the year
-across reloads or putting it in the URL.
+**Data:** [`migration-004-pin-dates-and-map-events.sql`](migration-004-pin-dates-and-map-events.sql)
+(also folded into `schema.sql`). It does not copy any old derived ranges across,
+so existing pins start undated.
+
+**Not built (ideas):** a slider to scrub the year; remembering the year across
+reloads or putting it in the URL; map events shared across maps; showing events
+on the timeline page.
 
 ## Phases
 
@@ -137,7 +152,7 @@ across reloads or putting it in the URL.
    chips on timeline event cards that open the map focused on the pin
    (`#map=<id>&pin=<id>`); "View on timeline" back-link (`#event=<id>`); nested
    maps via a pin's "Opens map" (↳ badge on the pin, breadcrumbs back up).
-3b. **Pin years & Year view** — ✅ done, see the section above.
+3b. **Pin dates, map events & Year view** — ✅ done, see the section above.
 4. **Hex grid** — optional gridded image upload, overlay toggle, calibration
    flow, measure tool.
 5. **Later ideas** — pin type filters, routes/paths with travel time, secret

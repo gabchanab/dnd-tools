@@ -108,7 +108,7 @@
     .pv-link a { font-size: .74rem; color: var(--gold-dim); }
     .pv-ev + .pv-ev { border-top: 1px dashed var(--border); margin-top: .55rem; padding-top: .5rem; }
 
-    #pf-events { display: flex; flex-direction: column; gap: .35rem; }
+    #pf-events, #pf-mevents, #ef-pins { display: flex; flex-direction: column; gap: .35rem; }
     .pf-ev { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .8rem; color: var(--text);
       padding: 4px 6px 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-inset); }
     .pf-ev-x { border: none; background: transparent; cursor: pointer; color: var(--text-dim); font-size: .8rem; padding: 2px 6px; border-radius: 4px; }
@@ -132,6 +132,36 @@
     .mp-form-field label.pf-check { display: flex; align-items: center; gap: .5rem; font-family: var(--font-body); font-size: .82rem;
       text-transform: none; letter-spacing: 0; color: var(--text); cursor: pointer; }
     .mp-form-field .pf-check input { width: auto; padding: 0; }
+
+    /* Age + year picker used for pin and event dates */
+    .yf { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+    .mp-form-field .yf select { flex: 1 1 130px; min-width: 0; width: auto; }
+    .mp-form-field .yf input { flex: none; width: 5.5rem; }
+    .pv-act { color: var(--gold-dim); cursor: pointer; text-decoration: underline; }
+
+    /* ── Events key: a bubble in the corner of the map ── */
+    .mv-key { position: absolute; top: .7rem; right: .7rem; z-index: 800; width: 250px; max-width: calc(100% - 1.4rem); max-height: 60%;
+      display: flex; flex-direction: column; background: rgba(255,250,248,.95); border: 1px solid var(--border-mid);
+      border-radius: 12px; box-shadow: 0 2px 14px rgba(0,0,0,.2); backdrop-filter: blur(4px); font-family: var(--font-body); }
+    .mv-key-head { display: flex; align-items: center; gap: .4rem; padding: .45rem .5rem .45rem .75rem; flex: none; }
+    .mv-key-h { font-family: var(--font-heading); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--gold-dim); margin-right: auto; cursor: pointer; user-select: none; }
+    .mv-key-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border-mid); background: transparent; color: var(--gold-dim);
+      cursor: pointer; font-size: .95rem; line-height: 1; padding: 0; }
+    .mv-key-btn:hover:not(:disabled) { border-color: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
+    .mv-key-btn:disabled { opacity: .4; cursor: default; }
+    .mv-key-list { overflow-y: auto; padding: 0 .4rem .45rem; }
+    .mv-key-row { padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; border-left: 3px solid transparent;
+      font-size: .78rem; color: var(--text); transition: opacity .15s; }
+    .mv-key-row + .mv-key-row { margin-top: 2px; }
+    .mv-key-row:hover { background: var(--bg-inset); border-color: var(--border); }
+    .mv-key-row.in { border-left-color: var(--gold); background: var(--gold-glow); }
+    .mv-key-row.in .mv-key-ttl { font-weight: 700; }
+    .mv-key-row.out { opacity: .4; }
+    .mv-key-row.sel { border-color: var(--gold); border-left-color: var(--gold); background: var(--gold-glow-md); opacity: 1; }
+    .mv-key-ttl { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mv-key-yrs { font-size: .68rem; color: var(--text-dim); }
+    .mv-key-note { font-size: .7rem; color: var(--text-dim); font-style: italic; padding: .2rem .4rem .1rem; }
 
     .mv-filters { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; align-items: center; }
     .mv-chip { font-family: var(--font-heading); font-size: .62rem; font-weight: 600; letter-spacing: .06em;
@@ -214,6 +244,7 @@
       <div class="mv-mapbox">
         <div id="map"></div>
         <div class="mv-banner" id="mv-banner" hidden>Click the map to place the pin · Esc to cancel</div>
+        <div class="mv-key" id="mv-key" hidden></div>
       </div>
       <aside class="panel mv-side" id="side-panel"></aside>
     </div>
@@ -264,6 +295,13 @@ let resizeObs = null;         // ResizeObserver keeping Leaflet's size in sync w
 //   mode 'off' = every pin normal;  'age' = year relative to an Age's start;  'abs' = absolute year
 let timeView = { mode: 'off', ageId: null, rel: 0, abs: 0 };
 let childLinks = [];          // [{ map_id, child_map_id }] across all maps, for breadcrumbs
+// Map events: things that happen in the world (start/end year), listed in the key bubble. Each carries pin_ids.
+let mapEvents = [];
+let selectedEventId = null;   // event highlighted from the key: its pins stay bright, the rest fade
+let evForm = null;            // { mode:'new'|'edit', ev?, pinIds:[], tlId } while the event form is open
+let eventsError = null;       // error loading map events (e.g. migration 004 not run yet)
+let keyCollapsed = false;
+const formOpen = () => !!(formState || evForm);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -330,34 +368,25 @@ function eventYearLabel(ev) {
 }
 function eventLabel(ev) { return ev.title + ' — ' + eventYearLabel(ev); }
 
-// ─── Year view: a pin's active range comes from its linked timeline events ───
-// Range = earliest linked event -> latest linked event. If the pin "still exists" (default) it has no end;
-// otherwise it ends at the latest event. A pin with no linked events is timeless.
-function stillExists(pin) { return pin.still_exists !== false; }
-
-function spanOf(eventIds, still) {
-  const evs = (eventIds || []).map(id => tlEvents.find(e => e.id === id)).filter(Boolean);
-  if (!evs.length) return null;
-  let first = evs[0], last = evs[0];
-  evs.forEach(e => { if (e.year < first.year) first = e; if (e.year > last.year) last = e; });
-  return { start: first.year, end: still ? Infinity : last.year, first, last, ongoing: still };
-}
-function pinSpan(pin) { return spanOf(pin.event_ids, stillExists(pin)); }
-
-function spanText(span) {
-  if (!span.ongoing && span.start === span.end) return eventYearLabel(span.first) + ' only';
-  return eventYearLabel(span.first) + ' → ' + (span.ongoing ? 'ongoing' : eventYearLabel(span.last));
-}
+// ─── Year view ───────────────────────────────────────────────────────────────
+// A pin has its own optional start_year / end_year (absolute years): blank start = always existed,
+// blank end = still exists today. Map events have a start and end year too and live in the key bubble.
+// Linking a pin to timeline events is only a reference now; it no longer decides when the pin exists.
 
 function ageRangeLabel(a) {   // same wording as the timeline page
   if (a.abbreviation) return '0 – ' + (a.end_year != null ? a.end_year - a.start_year : 'present') + ' ' + a.abbreviation;
   return a.start_year + ' – ' + (a.end_year != null ? a.end_year : 'present');
 }
 
-// Absolute year -> label, using the Age that contains it (the latest-starting one if Ages overlap).
-function yearLabel(abs) {
-  const age = tlAges.filter(a => abs >= a.start_year && (a.end_year == null || abs <= a.end_year))
+// The Age containing an absolute year (the latest-starting one if Ages overlap), or undefined.
+function ageOf(abs) {
+  return tlAges.filter(a => abs >= a.start_year && (a.end_year == null || abs <= a.end_year))
     .sort((a, b) => b.start_year - a.start_year)[0];
+}
+
+// Absolute year -> label, using the Age that contains it.
+function yearLabel(abs) {
+  const age = ageOf(abs);
   return age && age.abbreviation ? (abs - age.start_year) + ' ' + age.abbreviation : 'Year ' + abs;
 }
 
@@ -375,11 +404,87 @@ function activeYear() {
 function pinTimeStatus(pin) {
   const Y = activeYear();
   if (Y === null) return 'off';
-  const s = pinSpan(pin);
-  if (!s) return 'timeless';
-  return Y < s.start ? 'before' : Y > s.end ? 'after' : 'active';
+  const s = pin.start_year, e = pin.end_year;
+  if (s == null && e == null) return 'timeless';
+  return s != null && Y < s ? 'before' : e != null && Y > e ? 'after' : 'active';
 }
-const isFaded = pin => { const s = pinTimeStatus(pin); return s === 'before' || s === 'after'; };
+
+// A pin is faded when it did not exist in the selected year. While an event is selected in the key that wins:
+// the event's pins stay bright and every other pin fades, whatever the year.
+function isFaded(pin) {
+  const ev = selectedEventId && mapEvents.find(e => e.id === selectedEventId);
+  if (ev) return !ev.pin_ids.includes(pin.id);
+  const s = pinTimeStatus(pin);
+  return s === 'before' || s === 'after';
+}
+
+function pinRangeText(pin) {
+  if (pin.start_year == null && pin.end_year == null) return '';
+  return (pin.start_year == null ? 'the beginning' : yearLabel(pin.start_year)) + ' → ' + (pin.end_year == null ? 'today' : yearLabel(pin.end_year));
+}
+
+function eventRangeText(ev) {
+  return ev.start_year === ev.end_year ? yearLabel(ev.start_year) : yearLabel(ev.start_year) + ' → ' + yearLabel(ev.end_year);
+}
+// 'off' | 'in' | 'out' — is the selected year inside the event's range?
+function eventStatus(ev) {
+  const Y = activeYear();
+  if (Y === null) return 'off';
+  return Y >= ev.start_year && Y <= ev.end_year ? 'in' : 'out';
+}
+const byStart = (a, b) => a.start_year - b.start_year || a.end_year - b.end_year || a.title.localeCompare(b.title);
+
+// ─── Age + year picker (used for pin and event dates) ───────────────────────
+// Entered as "year within an Age" (or an absolute year) and always stored as an absolute year.
+function splitYear(abs) {
+  if (abs == null) return { ageId: '', rel: '' };
+  const age = ageOf(abs);
+  return age ? { ageId: age.id, rel: abs - age.start_year } : { ageId: '', rel: abs };
+}
+const ageBase = id => { const a = tlAges.find(x => x.id === id); return a ? a.start_year : 0; };
+
+function yearFieldHtml(p, abs) {
+  const sp = splitYear(abs);
+  const ages = tlAges.slice().sort((a, b) => a.start_year - b.start_year);
+  return '<div class="yf"><select id="yf-' + p + '-age" data-base="' + ageBase(sp.ageId) + '" onchange="onYearBase(\'' + p + '\')">' +
+      '<option value=""' + (sp.ageId ? '' : ' selected') + '>Absolute year</option>' +
+      ages.map(a => '<option value="' + a.id + '"' + (a.id === sp.ageId ? ' selected' : '') + '>' + esc(a.name) + '</option>').join('') +
+    '</select><input type="number" step="1" id="yf-' + p + '-n" value="' + sp.rel + '" placeholder="year" oninput="updateYearHint(\'' + p + '\')">' +
+    '<span class="mp-hint" id="yf-' + p + '-hint"></span></div>';
+}
+
+// Absolute year from the field: null when blank, NaN when not a number.
+function readYearField(p) {
+  const v = $('yf-' + p + '-n').value.trim();
+  if (v === '') return null;
+  const n = parseInt(v, 10);
+  return isNaN(n) ? NaN : ageBase($('yf-' + p + '-age').value) + n;
+}
+
+function setYearField(p, abs) {
+  const sp = splitYear(abs);
+  const sel = $('yf-' + p + '-age');
+  sel.value = sp.ageId; sel.dataset.base = ageBase(sp.ageId);
+  $('yf-' + p + '-n').value = sp.rel;
+  updateYearHint(p);
+}
+
+// Changing the Age keeps the same absolute year (the number is re-expressed relative to the new Age).
+function onYearBase(p) {
+  const sel = $('yf-' + p + '-age'), inp = $('yf-' + p + '-n');
+  const oldBase = parseFloat(sel.dataset.base) || 0, newBase = ageBase(sel.value);
+  const n = parseInt(inp.value, 10);
+  if (!isNaN(n)) inp.value = oldBase + n - newBase;
+  sel.dataset.base = newBase;
+  updateYearHint(p);
+}
+
+function updateYearHint(p) {
+  const h = $('yf-' + p + '-hint');
+  if (!h) return;
+  const abs = readYearField(p);
+  h.textContent = abs === null || isNaN(abs) ? '' : '= ' + yearLabel(abs) + (ageBase($('yf-' + p + '-age').value) ? ' (absolute ' + abs + ')' : '');
+}
 
 function renderTimeControl() {
   const el = $('mv-time');
@@ -421,7 +526,7 @@ function clearTimeView() { timeView.mode = 'off'; renderTimeControl(); onTimeCha
 // Re-fade markers; refresh the side panel too unless a form is open (re-rendering it would lose typing).
 function onTimeChanged() {
   applyTimeView();
-  if (!formState) renderPanel();
+  if (!formOpen()) renderPanel();
 }
 
 function updateTimeHint() {
@@ -433,7 +538,8 @@ function updateTimeHint() {
   pins.forEach(p => { const s = pinTimeStatus(p); if (s === 'active') active++; else if (s === 'timeless') timeless++; else faded++; });
   const lab = yearLabel(Y);
   h.textContent = lab + (lab === 'Year ' + Y ? '' : ' (absolute year ' + Y + ')') + ' — ' + active + ' active' +
-    (timeless ? ', ' + timeless + ' timeless' : '') + ', ' + faded + ' faded';
+    (timeless ? ', ' + timeless + ' undated' : '') + ', ' + faded + ' faded' +
+    (selectedEventId ? ' (an event is selected, so its pins are shown instead)' : '');
 }
 
 // Fade pins that did not exist yet / no longer exist in the selected year (still visible, still clickable).
@@ -447,17 +553,18 @@ function applyTimeView() {
     mk.setZIndexOffset(p.id === selectedId ? 1000 : faded ? -500 : 0);
   });
   updateTimeHint();
+  renderKey();
 }
 
-// Panel text for a pin: its range, and where it stands in the selected year.
+// Panel text for a pin: when it existed, and where it stands in the selected year.
 function timeStateHtml(pin) {
-  const span = pinSpan(pin);
   const st = pinTimeStatus(pin);
-  let html = span ? '<div class="pv-when">🕰 Active: ' + esc(spanText(span)) + '</div>' : '';
-  if (st === 'before') html += '<div class="pv-state faded">Not yet — first event ' + esc(eventYearLabel(span.first)) + '</div>';
-  else if (st === 'after') html += '<div class="pv-state faded">Ended — last event ' + esc(eventYearLabel(span.last)) + '</div>';
-  else if (st === 'active') html += '<div class="pv-state ok">✓ Active in ' + esc(yearLabel(activeYear())) + '</div>';
-  else if (st === 'timeless') html += '<div class="pv-state">Timeless — no linked events</div>';
+  const range = pinRangeText(pin);
+  let html = range ? '<div class="pv-when">🕰 Exists: ' + esc(range) + '</div>' : '';
+  if (st === 'before') html += '<div class="pv-state faded">Not yet — appears ' + esc(yearLabel(pin.start_year)) + '</div>';
+  else if (st === 'after') html += '<div class="pv-state faded">Gone — ended ' + esc(yearLabel(pin.end_year)) + '</div>';
+  else if (st === 'active') html += '<div class="pv-state ok">✓ Exists in ' + esc(yearLabel(activeYear())) + '</div>';
+  else if (st === 'timeless') html += '<div class="pv-state">No dates set — always shown</div>';
   return html;
 }
 
@@ -592,7 +699,8 @@ function destroyMapView() {
   markers.clear();
   currentMap = null; pins = []; selectedId = null; formState = null; addMode = false;
   hiddenTypes = new Set(); pinSearch = ''; renaming = false;
-  $('mv-filters').hidden = true; $('add-pin-btn').disabled = false;
+  mapEvents = []; selectedEventId = null; evForm = null; eventsError = null;
+  $('mv-filters').hidden = true; $('mv-key').hidden = true; $('add-pin-btn').disabled = false;
 }
 
 async function openMap(id, token, focusPinId) {
@@ -620,10 +728,12 @@ async function openMap(id, token, focusPinId) {
     $('side-panel').innerHTML = '<div class="mp-empty" style="color:#a33">Could not load the map image: ' + esc(e.message || e) + '</div>';
     return;
   }
-  const [pinsRes, childRes, linksRes] = await Promise.all([
+  const [pinsRes, childRes, linksRes, eventsRes, evLinksRes] = await Promise.all([
     supabase.from('map_pins').select('*').eq('map_id', id).order('created_at', { ascending: true }),
     supabase.from('map_pins').select('map_id, child_map_id').not('child_map_id', 'is', null),   // for breadcrumbs
     supabase.from('map_pin_events').select('pin_id, event_id'),                                   // pin <-> timeline event links
+    supabase.from('map_events').select('*').eq('map_id', id),                                     // this map's events (the key)
+    supabase.from('map_event_pins').select('event_id, pin_id'),                                   // pin <-> map event links
     loadTimeline(),
     ensureMapsLoaded(),
   ]);
@@ -636,6 +746,9 @@ async function openMap(id, token, focusPinId) {
   (linksRes.data || []).forEach(r => { (evByPin[r.pin_id] = evByPin[r.pin_id] || []).push(r.event_id); });
   pins.forEach(p => { p.event_ids = evByPin[p.id] || []; });
   linksError = linksRes.error ? linksRes.error.message : null;
+  eventsError = eventsRes.error ? eventsRes.error.message : evLinksRes.error ? evLinksRes.error.message : null;
+  mapEvents = eventsRes.data || [];
+  attachEventLinks(evLinksRes.data || []);
   renderCrumbs();
 
   const W = row.image_width, H = row.image_height;
@@ -672,6 +785,19 @@ async function openMap(id, token, focusPinId) {
   if (pinsRes.error) $('side-panel').insertAdjacentHTML('afterbegin', '<div class="mp-status err">Could not load pins: ' + esc(pinsRes.error.message) + '</div>');
   if (linksError) $('side-panel').insertAdjacentHTML('afterbegin', '<div class="mp-status err">Could not load timeline links: ' + esc(linksError) +
     '<br>Have you run <code>migration-002-multi-event-pins.sql</code>?</div>');
+}
+
+// Give every map event its pin_ids from the join-table rows (rows for other maps' events are ignored).
+function attachEventLinks(rows) {
+  const by = {};
+  rows.forEach(r => { (by[r.event_id] = by[r.event_id] || []).push(r.pin_id); });
+  mapEvents.forEach(ev => { ev.pin_ids = by[ev.id] || []; });
+}
+async function reloadEventLinks() {          // best effort: resync after a failed save
+  try {
+    const r = await supabase.from('map_event_pins').select('event_id, pin_id');
+    if (!r.error) attachEventLinks(r.data || []);
+  } catch (e) { /* ignore */ }
 }
 
 // ─── Breadcrumbs (ancestor maps reached via a pin's "opens map" link) ────────
@@ -721,7 +847,7 @@ function refreshMarker(pin) {
 }
 
 function selectPin(id) {
-  if (formState) return;                       // finish or cancel the open form first
+  if (formOpen()) return;                      // finish or cancel the open form first
   const prev = pins.find(p => p.id === selectedId);
   if (prev && markers.get(prev.id)) markers.get(prev.id).dragging.disable();
   selectedId = id;
@@ -754,7 +880,7 @@ function setAddMode(on) {
 }
 
 function toggleAddMode() {
-  if (!lmap || formState) return;
+  if (!lmap || formOpen()) return;
   if (!addMode) selectPin(null);
   setAddMode(!addMode);
 }
@@ -765,12 +891,13 @@ function onMapClick(e) {
     if (f.x < 0 || f.x > 1 || f.y < 0 || f.y > 1) return;       // clicked outside the image
     setAddMode(false);
     beginForm('new', { x: f.x, y: f.y });
-  } else if (!formState && selectedId) {
+  } else if (!formOpen() && selectedId) {
     selectPin(null);
   }
 }
 
 function beginForm(mode, data) {
+  if (evForm) return;
   if (mode === 'new') {
     const mk = L.marker(toLatLng(data), { icon: pinIcon('landmark', { draft: true }), draggable: true, keyboard: false, zIndexOffset: 2000 }).addTo(lmap);
     mk.on('dragend', () => {
@@ -778,10 +905,11 @@ function beginForm(mode, data) {
       formState.x = clamp01(f.x); formState.y = clamp01(f.y);
       updateCoordsHint();
     });
-    formState = { mode, x: data.x, y: data.y, type: 'landmark', draftMarker: mk, eventIds: [] };
+    formState = { mode, x: data.x, y: data.y, type: 'landmark', draftMarker: mk, eventIds: [], mapEventIds: [] };
   } else {
     const pin = data;
-    formState = { mode, pin, x: pin.x, y: pin.y, type: pin.pin_type, eventIds: (pin.event_ids || []).slice() };
+    formState = { mode, pin, x: pin.x, y: pin.y, type: pin.pin_type, eventIds: (pin.event_ids || []).slice(),
+                  mapEventIds: mapEvents.filter(e => e.pin_ids.includes(pin.id)).map(e => e.id) };
   }
   $('add-pin-btn').disabled = true;
   renderPanel();
@@ -818,11 +946,14 @@ async function savePin() {
   const description = $('pf-desc').value.trim();
   const pin_type = $('pf-type').value;
   const child_map_id = $('pf-child').value || null;
-  const still_exists = $('pf-still').checked;
+  const start_year = readYearField('ps'), end_year = readYearField('pe');
   if (!title) return setStatus(status, 'A pin needs a title.', true);
+  if (Number.isNaN(start_year) || Number.isNaN(end_year)) return setStatus(status, 'Years must be whole numbers.', true);
+  if (start_year !== null && end_year !== null && end_year < start_year) return setStatus(status, 'The "Until" year is before the "Exists from" year.', true);
   const btn = $('pf-save'); btn.disabled = true;
   const isNew = formState.mode === 'new';
   const wanted = formState.eventIds.slice();
+  const wantedMapEvents = formState.mapEventIds.slice();
   let pin;
 
   // 1) the pin row itself
@@ -830,29 +961,40 @@ async function savePin() {
     if (isNew) {
       const { data, error } = await supabase.from('map_pins').insert({
         map_id: currentMap.id, user_id: currentUser.id,
-        x: formState.x, y: formState.y, title, pin_type, description: description || null, child_map_id, still_exists,
+        x: formState.x, y: formState.y, title, pin_type, description: description || null, child_map_id, start_year, end_year,
       }).select().single();
       if (error) throw error;
       pin = data; pin.event_ids = [];
     } else {
       pin = formState.pin;
-      const patch = { x: formState.x, y: formState.y, title, pin_type, description: description || null, child_map_id, still_exists };
+      const patch = { x: formState.x, y: formState.y, title, pin_type, description: description || null, child_map_id, start_year, end_year };
       const { error } = await supabase.from('map_pins').update(patch).eq('id', pin.id);
       if (error) throw error;
       Object.assign(pin, patch);
     }
   } catch (e) {
-    const missingCol = /still_exists/.test(e.message || '') ? ' — have you run migration-003-pin-still-exists.sql?' : '';
+    const missingCol = /start_year|end_year/.test(e.message || '') ? ' — have you run migration-004-pin-dates-and-map-events.sql?' : '';
     setStatus(status, 'Could not save: ' + (e.message || e) + missingCol, true);
     btn.disabled = false;
     return;
   }
 
-  // 2) its timeline events (separate table). If this fails the pin is still saved, so don't lose it.
-  let linkError = null;
+  // 2) its links (separate tables). If one fails the pin is still saved, so don't lose it.
+  const linkErrors = [];
   if (!sameSet(wanted, pin.event_ids || [])) {
     try { await syncPinEvents(pin.id, wanted); pin.event_ids = wanted; }
-    catch (e) { linkError = e; await refreshPinEvents(pin); }
+    catch (e) { linkErrors.push('timeline events: ' + (e.message || e)); await refreshPinEvents(pin); }
+  }
+  const haveMapEvents = mapEvents.filter(e => e.pin_ids.includes(pin.id)).map(e => e.id);
+  if (!sameSet(wantedMapEvents, haveMapEvents)) {
+    try {
+      await syncLinks('pin_id', pin.id, wantedMapEvents);
+      mapEvents.forEach(ev => {
+        const has = ev.pin_ids.includes(pin.id), want = wantedMapEvents.includes(ev.id);
+        if (want && !has) ev.pin_ids.push(pin.id);
+        if (!want && has) ev.pin_ids = ev.pin_ids.filter(x => x !== pin.id);
+      });
+    } catch (e) { linkErrors.push('map events: ' + (e.message || e)); await reloadEventLinks(); }
   }
 
   // 3) update the UI
@@ -867,7 +1009,7 @@ async function savePin() {
     refreshMarker(pin);
     renderPanel();
   }
-  if (linkError) alert('The pin was saved, but its timeline events could not be updated:\n' + (linkError.message || linkError));
+  if (linkErrors.length) alert('The pin was saved, but some links could not be updated:\n' + linkErrors.join('\n'));
 }
 
 function sameSet(a, b) { return a.length === b.length && a.every(x => b.includes(x)); }
@@ -885,6 +1027,24 @@ async function syncPinEvents(pinId, wanted) {
   }
   if (toAdd.length) {
     const r = await supabase.from('map_pin_events').insert(toAdd.map(event_id => ({ pin_id: pinId, event_id, user_id: currentUser.id })));
+    if (r.error) throw r.error;
+  }
+}
+
+// Make the map_event_pins rows for one event (by='event_id') or one pin (by='pin_id') match `wanted` (ids of the other side).
+async function syncLinks(by, id, wanted) {
+  const other = by === 'event_id' ? 'pin_id' : 'event_id';
+  const cur = await supabase.from('map_event_pins').select(other).eq(by, id);
+  if (cur.error) throw cur.error;
+  const have = (cur.data || []).map(r => r[other]);
+  const toAdd = wanted.filter(x => !have.includes(x));
+  const toRemove = have.filter(x => !wanted.includes(x));
+  if (toRemove.length) {
+    const r = await supabase.from('map_event_pins').delete().eq(by, id).in(other, toRemove);
+    if (r.error) throw r.error;
+  }
+  if (toAdd.length) {
+    const r = await supabase.from('map_event_pins').insert(toAdd.map(o => ({ [by]: id, [other]: o, user_id: currentUser.id })));
     if (r.error) throw r.error;
   }
 }
@@ -907,20 +1067,28 @@ function formEventsHtml() {
 function addFormEvent(id) {
   if (id && !formState.eventIds.includes(id)) formState.eventIds.push(id);
   $('pf-events').innerHTML = formEventsHtml();
-  updateRangeHint();
 }
 function removeFormEvent(id) {
   formState.eventIds = formState.eventIds.filter(x => x !== id);
   $('pf-events').innerHTML = formEventsHtml();
-  updateRangeHint();
 }
 
-// Live preview of the active range the pin will get from the events chosen in the form.
-function updateRangeHint() {
-  const el = $('pf-range');
-  if (!el || !formState) return;
-  const span = spanOf(formState.eventIds, $('pf-still').checked);
-  el.textContent = span ? '🕰 Active: ' + spanText(span) : 'No linked events yet, so this pin is timeless (always shown at full strength in the Year view).';
+// ─── Map event picker inside the pin form ────────────────────────────────────
+function formMapEventsHtml() {
+  const chosen = formState.mapEventIds.map(id => mapEvents.find(e => e.id === id)).filter(Boolean).sort(byStart);
+  const rest = mapEvents.filter(e => !formState.mapEventIds.includes(e.id)).sort(byStart);
+  return chosen.map(e => '<div class="pf-ev"><span>' + esc(e.title) + ' — ' + esc(eventRangeText(e)) + '</span>' +
+      '<button type="button" class="pf-ev-x" title="Remove" onclick="removeFormMapEvent(\'' + e.id + '\')">✕</button></div>').join('') +
+    (rest.length ? '<select onchange="addFormMapEvent(this.value)"><option value="">+ Link a map event…</option>' +
+      rest.map(e => '<option value="' + e.id + '">' + esc(e.title) + ' — ' + esc(eventRangeText(e)) + '</option>').join('') + '</select>' : '');
+}
+function addFormMapEvent(id) {
+  if (id && !formState.mapEventIds.includes(id)) formState.mapEventIds.push(id);
+  $('pf-mevents').innerHTML = formMapEventsHtml();
+}
+function removeFormMapEvent(id) {
+  formState.mapEventIds = formState.mapEventIds.filter(x => x !== id);
+  $('pf-mevents').innerHTML = formMapEventsHtml();
 }
 
 async function deletePin(id) {
@@ -931,6 +1099,7 @@ async function deletePin(id) {
   const mk = markers.get(id); if (mk) mk.remove();
   markers.delete(id);
   pins = pins.filter(p => p.id !== id);
+  mapEvents.forEach(ev => { ev.pin_ids = ev.pin_ids.filter(x => x !== id); });
   if (formState) endForm();
   selectedId = null;
   renderPanel();
@@ -943,14 +1112,194 @@ function focusPin(id) {
   selectPin(id);
 }
 
+// ─── Map events: the key bubble, event panel and event form ─────────────────
+function renderKey() {
+  const el = $('mv-key');
+  if (!lmap) { el.hidden = true; return; }
+  el.hidden = false;
+  const oldList = el.querySelector('.mv-key-list');
+  const scroll = oldList ? oldList.scrollTop : 0;
+  const evs = mapEvents.slice().sort(byStart);
+  const rows = eventsError
+    ? '<div class="mv-key-note" style="color:#a33">Could not load events: ' + esc(eventsError) + '<br>Have you run <code>migration-004</code>?</div>'
+    : evs.length
+      ? evs.map(ev => {
+          const st = eventStatus(ev);
+          return '<div class="mv-key-row' + (st === 'in' ? ' in' : st === 'out' ? ' out' : '') + (ev.id === selectedEventId ? ' sel' : '') + '" onclick="selectEvent(\'' + ev.id + '\')" ' +
+            'title="' + esc(ev.title) + ' — click to show its pins">' +
+            '<div class="mv-key-ttl">⚑ ' + esc(ev.title) + '</div>' +
+            '<div class="mv-key-yrs">' + esc(eventRangeText(ev)) + ' · ' + ev.pin_ids.length + ' pin' + (ev.pin_ids.length === 1 ? '' : 's') + '</div></div>';
+        }).join('')
+      : '<div class="mv-key-note">No events yet. Press + to add one (a war, a festival, a reign…).</div>';
+  el.innerHTML = '<div class="mv-key-head"><span class="mv-key-h" onclick="toggleKey()" title="Show / hide the list">⚑ Events (' + mapEvents.length + ') ' + (keyCollapsed ? '▸' : '▾') + '</span>' +
+      '<button class="mv-key-btn" title="Add an event" onclick="beginEventForm(\'new\')"' + (formOpen() || eventsError ? ' disabled' : '') + '>+</button></div>' +
+    (keyCollapsed ? '' : '<div class="mv-key-list">' + rows + '</div>');
+  const list = el.querySelector('.mv-key-list');
+  if (list) list.scrollTop = scroll;
+}
+
+function toggleKey() { keyCollapsed = !keyCollapsed; renderKey(); }
+
+// Click a key row: its pins stay bright and the rest of the map fades. Click again (or Esc) to clear.
+function selectEvent(id, forceOn) {
+  if (formOpen()) return;
+  if (selectedId) selectPin(null);
+  selectedEventId = forceOn ? id : selectedEventId === id ? null : id;
+  renderPanel();
+}
+
+function eventHtml(ev) {
+  const st = eventStatus(ev);
+  const linked = ev.pin_ids.map(id => pins.find(p => p.id === id)).filter(Boolean).sort((a, b) => a.title.localeCompare(b.title));
+  const tl = ev.timeline_event_id && tlEvents.find(e => e.id === ev.timeline_event_id);
+  return '<div class="pv-title">⚑ ' + esc(ev.title) + '</div>' +
+    '<div class="pv-when">🕰 ' + esc(eventRangeText(ev)) + '</div>' +
+    (st === 'in' ? '<div class="pv-state ok">✓ In effect in ' + esc(yearLabel(activeYear())) + '</div>'
+      : st === 'out' ? '<div class="pv-state faded">Not in effect in ' + esc(yearLabel(activeYear())) + '</div>' : '') +
+    (ev.description ? '<div class="pv-desc">' + esc(ev.description) + '</div>' : '<div class="mp-hint" style="margin-bottom:1rem">No description yet.</div>') +
+    '<div class="pv-link"><div class="pv-link-label">Pins (' + linked.length + ')</div>' +
+      (linked.length ? linked.map(p => { const t = typeOf(p.pin_type);
+        return '<div class="pin-row" onclick="focusPin(\'' + p.id + '\')" style="--c:' + t.color + '"><span class="pin-row-icon">' + t.glyph + '</span>' +
+          '<span class="pin-row-title">' + esc(p.title) + '</span></div>'; }).join('')
+        : '<div class="mp-hint">No pins linked yet. Edit the event to add some.</div>') + '</div>' +
+    (tl ? '<div class="pv-link"><div class="pv-link-label">Timeline event</div><div class="pv-link-main">⧗ ' + esc(tl.title) + ' · ' + esc(eventYearLabel(tl)) + '</div>' +
+      '<a href="../timeline/index.html#event=' + tl.id + '">View on timeline →</a></div>' : '') +
+    '<div class="pv-actions">' +
+      '<button class="mp-btn mp-btn-primary" onclick="beginEventForm(\'edit\', mapEvents.find(e => e.id === selectedEventId))">Edit</button>' +
+      '<button class="mp-btn" onclick="selectEvent(\'' + ev.id + '\')">Show all pins</button>' +
+      '<button class="mp-btn mp-btn-danger" onclick="deleteEvent(\'' + ev.id + '\')">Delete</button>' +
+    '</div>' +
+    '<div class="mp-hint" style="margin-top:1rem">This event\'s pins stay bright and every other pin is faded.</div>';
+}
+
+function beginEventForm(mode, ev) {
+  if (!lmap || formOpen() || eventsError) return;
+  if (selectedId) selectPin(null);
+  setAddMode(false);
+  evForm = { mode, ev: ev || null, pinIds: ev ? ev.pin_ids.slice() : [], tlId: ev ? ev.timeline_event_id || null : null };
+  $('add-pin-btn').disabled = true;
+  renderPanel();
+  const t = $('ef-title'); if (t) t.focus();
+}
+
+function endEventForm() { evForm = null; $('add-pin-btn').disabled = false; }
+function cancelEventForm() { if (!evForm) return; endEventForm(); renderPanel(); }
+
+function efPinsHtml() {
+  const chosen = evForm.pinIds.map(id => pins.find(p => p.id === id)).filter(Boolean).sort((a, b) => a.title.localeCompare(b.title));
+  const rest = pins.filter(p => !evForm.pinIds.includes(p.id)).sort((a, b) => a.title.localeCompare(b.title));
+  return chosen.map(p => '<div class="pf-ev"><span>' + typeOf(p.pin_type).glyph + ' ' + esc(p.title) + '</span>' +
+      '<button type="button" class="pf-ev-x" title="Remove" onclick="removeEventFormPin(\'' + p.id + '\')">✕</button></div>').join('') +
+    (rest.length ? '<select onchange="addEventFormPin(this.value)"><option value="">+ Link a pin…</option>' +
+      rest.map(p => '<option value="' + p.id + '">' + typeOf(p.pin_type).glyph + ' ' + esc(p.title) + '</option>').join('') + '</select>'
+      : pins.length ? '' : '<span class="mp-hint">No pins on this map yet.</span>');
+}
+function addEventFormPin(id) { if (id && !evForm.pinIds.includes(id)) evForm.pinIds.push(id); $('ef-pins').innerHTML = efPinsHtml(); }
+function removeEventFormPin(id) { evForm.pinIds = evForm.pinIds.filter(x => x !== id); $('ef-pins').innerHTML = efPinsHtml(); }
+
+// Picking a timeline event is only a reference, but it fills in an empty title and start year for you.
+function onEventTlChange(v) {
+  evForm.tlId = v || null;
+  const tl = v && tlEvents.find(e => e.id === v);
+  if (!tl) return;
+  if (!$('ef-title').value.trim()) $('ef-title').value = tl.title;
+  if (readYearField('es') === null) setYearField('es', tl.year);
+}
+
+function eventFormHtml() {
+  const isNew = evForm.mode === 'new';
+  const ev = evForm.ev || {};
+  return '<div class="panel-title">' + (isNew ? 'New Event' : 'Edit Event') + '</div>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label for="ef-title">Title</label>' +
+      '<input type="text" id="ef-title" maxlength="120" placeholder="The Siege of Karth" value="' + esc(ev.title || '') + '" onkeydown="if(event.key===\'Enter\')saveEvent()"></div></div>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label for="ef-desc">Description</label>' +
+      '<textarea id="ef-desc">' + esc(ev.description || '') + '</textarea></div></div>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label>Starts</label>' + yearFieldHtml('es', ev.start_year) + '</div></div>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label>Ends</label>' + yearFieldHtml('ee', ev.end_year) +
+      '<span class="mp-hint">Leave blank for a single-year event.</span></div></div>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label>Pins at this event</label><div id="ef-pins">' + efPinsHtml() + '</div></div></div>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label for="ef-tl">Timeline event (optional)</label>' +
+      '<select id="ef-tl" onchange="onEventTlChange(this.value)">' + eventOptionsHtml([], '— none —', evForm.tlId) + '</select>' +
+      '<span class="mp-hint">Just a reference. Picking one fills in an empty title and start year.</span>' +
+      (tlError ? '<span class="mp-hint">Timeline could not be loaded: ' + esc(tlError) + '</span>' : '') + '</div></div>' +
+    '<div class="pv-actions">' +
+      '<button class="mp-btn mp-btn-primary" id="ef-save" onclick="saveEvent()">' + (isNew ? 'Add Event' : 'Save') + '</button>' +
+      '<button class="mp-btn" onclick="cancelEventForm()">Cancel</button>' +
+      (isNew ? '' : '<button class="mp-btn mp-btn-danger" onclick="deleteEvent(\'' + ev.id + '\')">Delete</button>') +
+    '</div><div class="mp-status" id="ef-status"></div>';
+}
+
+async function saveEvent() {
+  const status = $('ef-status');
+  const title = $('ef-title').value.trim();
+  const description = $('ef-desc').value.trim();
+  const start_year = readYearField('es');
+  let end_year = readYearField('ee');
+  if (!title) return setStatus(status, 'An event needs a title.', true);
+  if (start_year === null || Number.isNaN(start_year)) return setStatus(status, 'An event needs a start year (a whole number).', true);
+  if (Number.isNaN(end_year)) return setStatus(status, 'The end year must be a whole number.', true);
+  if (end_year === null) end_year = start_year;
+  if (end_year < start_year) return setStatus(status, 'The end year is before the start year.', true);
+  const timeline_event_id = evForm.tlId || null;
+  const wanted = evForm.pinIds.slice();
+  const isNew = evForm.mode === 'new';
+  const btn = $('ef-save'); btn.disabled = true;
+  let ev;
+
+  try {
+    if (isNew) {
+      const { data, error } = await supabase.from('map_events').insert({
+        map_id: currentMap.id, user_id: currentUser.id, title, description: description || null, start_year, end_year, timeline_event_id,
+      }).select().single();
+      if (error) throw error;
+      ev = data; ev.pin_ids = [];
+    } else {
+      ev = evForm.ev;
+      const patch = { title, description: description || null, start_year, end_year, timeline_event_id };
+      const { error } = await supabase.from('map_events').update(patch).eq('id', ev.id);
+      if (error) throw error;
+      Object.assign(ev, patch);
+    }
+  } catch (e) {
+    setStatus(status, 'Could not save: ' + (e.message || e) + (/map_events|relation/.test(e.message || '') ? ' — have you run migration-004-pin-dates-and-map-events.sql?' : ''), true);
+    btn.disabled = false;
+    return;
+  }
+
+  let linkError = null;
+  if (!sameSet(wanted, ev.pin_ids || [])) {
+    try { await syncLinks('event_id', ev.id, wanted); ev.pin_ids = wanted; }
+    catch (e) { linkError = e; await reloadEventLinks(); }
+  }
+  if (isNew) { mapEvents.push(ev); selectedEventId = ev.id; }
+  endEventForm();
+  renderPanel();
+  if (linkError) alert('The event was saved, but its pins could not be updated:\n' + (linkError.message || linkError));
+}
+
+async function deleteEvent(id) {
+  const ev = mapEvents.find(e => e.id === id);
+  if (!ev || !confirm('Delete the event "' + ev.title + '"? (Its pins are not deleted.)')) return;
+  const { error } = await supabase.from('map_events').delete().eq('id', id);
+  if (error) { alert('Could not delete: ' + error.message); return; }
+  mapEvents = mapEvents.filter(e => e.id !== id);
+  if (selectedEventId === id) selectedEventId = null;
+  if (evForm) endEventForm();
+  renderPanel();
+}
+
 // ─── Side panel ──────────────────────────────────────────────────────────────
 function renderPanel() {
   const el = $('side-panel');
   const pin = pins.find(p => p.id === selectedId);
-  if (formState) { el.innerHTML = formHtml(); updateCoordsHint(); }
+  const ev = mapEvents.find(e => e.id === selectedEventId);
+  if (evForm) el.innerHTML = eventFormHtml();
+  else if (formState) { el.innerHTML = formHtml(); updateCoordsHint(); }
   else if (pin) el.innerHTML = pinHtml(pin);
+  else if (ev) el.innerHTML = eventHtml(ev);
   else el.innerHTML = listHtml();
-  if (formState) updateRangeHint();
+  if (formState) { updateYearHint('ps'); updateYearHint('pe'); }
+  if (evForm) { updateYearHint('es'); updateYearHint('ee'); }
   renderFilters();
   applyFilters();
   applyTimeView();
@@ -987,7 +1336,7 @@ function listHtml() {
     (pins.length ? '<input type="search" id="pin-search" placeholder="Search pins…" value="' + esc(pinSearch) + '" oninput="onPinSearch(this.value)">' : '') +
     '<div id="pin-rows">' + pinRowsHtml() + '</div>' +
     '<div class="mp-hint" style="margin-top:1rem">Scroll to zoom, drag to pan. Click a pin to select it; a selected pin can be dragged to a new spot. ' +
-    'The type chips above the map hide pins from both the map and this list.</div>';
+    'The type chips above the map hide pins from both the map and this list. The Events key (top right of the map) lists what happens in the world: click an event to show only its pins.</div>';
 }
 
 function onPinSearch(v) {
@@ -1126,6 +1475,14 @@ function eventLinkHtml(pin) {
     }).join('') + '</div>';
 }
 
+// Map events (from the key) this pin belongs to; clicking one highlights it on the map.
+function mapEventsHtml(pin) {
+  const evs = mapEvents.filter(e => e.pin_ids.includes(pin.id)).sort(byStart);
+  if (!evs.length) return '';
+  return '<div class="pv-link"><div class="pv-link-label">Map events (' + evs.length + ')</div>' +
+    evs.map(ev => '<div class="pv-ev"><div class="pv-link-main">⚑ <span class="pv-act" onclick="selectEvent(\'' + ev.id + '\', true)">' + esc(ev.title) + '</span> · ' + esc(eventRangeText(ev)) + '</div></div>').join('') + '</div>';
+}
+
 function childLinkHtml(pin) {
   if (!pin.child_map_id) return '';
   const m = maps.find(x => x.id === pin.child_map_id);
@@ -1136,8 +1493,8 @@ function childLinkHtml(pin) {
 
 // <option>s for the "add a timeline event" picker, grouped by Age (same order as the timeline page).
 // Events already linked to the pin are left out.
-function eventOptionsHtml(excludeIds) {
-  let html = '<option value="">+ Add a timeline event…</option>';
+function eventOptionsHtml(excludeIds, placeholder, selectedId) {
+  let html = '<option value="">' + esc(placeholder || '+ Add a timeline event…') + '</option>';
   const byYear = (a, b) => a.year - b.year;
   const avail = tlEvents.filter(e => !excludeIds.includes(e.id));
   const groups = tlAges.slice().sort((a, b) => a.start_year - b.start_year)
@@ -1145,7 +1502,7 @@ function eventOptionsHtml(excludeIds) {
   groups.push({ label: 'Unassigned', evs: avail.filter(e => !tlAges.some(a => a.id === e.age_id)).sort(byYear) });
   groups.filter(g => g.evs.length).forEach(g => {
     html += '<optgroup label="' + esc(g.label) + '">' +
-      g.evs.map(e => '<option value="' + e.id + '">' + esc(eventLabel(e)) + '</option>').join('') + '</optgroup>';
+      g.evs.map(e => '<option value="' + e.id + '"' + (e.id === selectedId ? ' selected' : '') + '>' + esc(eventLabel(e)) + '</option>').join('') + '</optgroup>';
   });
   return html;
 }
@@ -1162,7 +1519,7 @@ function pinHtml(pin) {
     '<div class="pv-type" style="--c:' + t.color + '">' + t.glyph + ' ' + t.label + '</div>' +
     timeStateHtml(pin) +
     (pin.description ? '<div class="pv-desc">' + esc(pin.description) + '</div>' : '<div class="mp-hint" style="margin-bottom:1rem">No description yet.</div>') +
-    eventLinkHtml(pin) + childLinkHtml(pin) +
+    mapEventsHtml(pin) + eventLinkHtml(pin) + childLinkHtml(pin) +
     '<div class="pv-actions">' +
       '<button class="mp-btn mp-btn-primary" onclick="beginForm(\'edit\', pins.find(p => p.id === selectedId))">Edit</button>' +
       '<button class="mp-btn" onclick="selectPin(null)">Close</button>' +
@@ -1183,14 +1540,18 @@ function formHtml() {
       '</select></div></div>' +
     '<div class="mp-form-row"><div class="mp-form-field"><label for="pf-desc">Description</label>' +
       '<textarea id="pf-desc">' + esc(pin.description || '') + '</textarea></div></div>' +
-    '<div class="mp-form-row"><div class="mp-form-field"><label>Timeline events (optional)</label>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label>Exists from</label>' + yearFieldHtml('ps', pin.start_year) +
+      '<span class="mp-hint">Leave blank if it has always been there.</span></div></div>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label>Until</label>' + yearFieldHtml('pe', pin.end_year) +
+      '<span class="mp-hint">Leave blank if it still exists today. Outside these years the pin fades in the Year view.</span></div></div>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label>Map events (optional)</label>' +
+      '<div id="pf-mevents">' + formMapEventsHtml() + '</div>' +
+      (eventsError ? '<span class="mp-hint">Events could not be loaded: ' + esc(eventsError) + '</span>'
+        : !mapEvents.length ? '<span class="mp-hint">No events on this map yet. Add them with + in the Events key on the map.</span>' : '') + '</div></div>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label>Timeline events (optional reference)</label>' +
       '<div id="pf-events">' + formEventsHtml() + '</div>' +
       (tlError ? '<span class="mp-hint">Timeline could not be loaded: ' + esc(tlError) + '</span>'
         : !tlEvents.length ? '<span class="mp-hint">No timeline events yet — add some in the Timeline Builder.</span>' : '') + '</div></div>' +
-    '<div class="mp-form-row"><div class="mp-form-field">' +
-      '<label class="pf-check"><input type="checkbox" id="pf-still" onchange="updateRangeHint()"' + (pin.still_exists === false ? '' : ' checked') + '> Still exists after its last event</label>' +
-      '<span class="mp-hint">Leave ticked for places that last (a city); untick for one-off events (a battle). The pin is active from its earliest to its latest linked event.</span>' +
-      '<span class="mp-hint" id="pf-range"></span></div></div>' +
     '<div class="mp-form-row"><div class="mp-form-field"><label for="pf-child">Opens map (optional)</label>' +
       '<select id="pf-child">' + childOptionsHtml(pin.child_map_id) + '</select>' +
       (maps.length < 2 ? '<span class="mp-hint">Create another map to link a pin to it (e.g. a city map).</span>' : '') + '</div></div>' +
@@ -1207,7 +1568,9 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (addMode) setAddMode(false);
   else if (formState) cancelForm();
+  else if (evForm) cancelEventForm();
   else if (selectedId) selectPin(null);
+  else if (selectedEventId) selectEvent(selectedEventId);
 });
 
 // ─── Init ────────────────────────────────────────────────────────────────────

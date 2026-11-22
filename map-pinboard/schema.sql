@@ -59,11 +59,12 @@ create table if not exists public.map_pins (
   -- in map_pin_events below, so one pin can carry several events over the years.)
   child_map_id      uuid references public.maps(id) on delete set null,
 
-  -- "Current year" view: a pin's active range runs from its earliest to its latest
-  -- linked timeline event. If still_exists is true (the default) it stays active
-  -- after the latest event (a city); if false it ends there (a one-off battle).
-  -- Pins with no linked events are timeless.
-  still_exists      boolean not null default true,
+  -- When this place/thing existed, as absolute years (same scale as timeline_events.year).
+  -- NULL start = always existed; NULL end = still exists today. Outside the range the
+  -- pin fades in the Year view.
+  start_year        integer,
+  end_year          integer,
+  constraint map_pins_year_order check (start_year is null or end_year is null or end_year >= start_year),
 
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
@@ -71,6 +72,40 @@ create table if not exists public.map_pins (
 
 create index if not exists map_pins_map_idx   on public.map_pins (map_id);
 create index if not exists map_pins_child_idx on public.map_pins (child_map_id);
+
+-- ── map_events: things that happen in the world, listed in the key on the map ──
+create table if not exists public.map_events (
+  id          uuid primary key default gen_random_uuid(),
+  map_id      uuid not null references public.maps(id) on delete cascade,
+  user_id     uuid not null default auth.uid() references auth.users(id) on delete cascade,
+
+  title       text not null,
+  description text,
+
+  -- Absolute years. A one-year event has end_year = start_year.
+  start_year  integer not null,
+  end_year    integer not null,
+  check (end_year >= start_year),
+
+  -- Optional reference to a timeline event (dates are stored here, not read from it).
+  timeline_event_id uuid references public.timeline_events(id) on delete set null,
+
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index if not exists map_events_map_idx on public.map_events (map_id);
+
+-- ── map_event_pins: which pins belong to which map event (many-to-many) ──────
+create table if not exists public.map_event_pins (
+  event_id   uuid not null references public.map_events(id) on delete cascade,
+  pin_id     uuid not null references public.map_pins(id)   on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (event_id, pin_id)
+);
+
+create index if not exists map_event_pins_pin_idx on public.map_event_pins (pin_id);
 
 -- ── map_pin_events: which timeline events happened at which pin (many-to-many) ──
 create table if not exists public.map_pin_events (
@@ -99,10 +134,16 @@ drop trigger if exists map_pins_set_updated_at on public.map_pins;
 create trigger map_pins_set_updated_at before update on public.map_pins
   for each row execute function public.set_updated_at();
 
+drop trigger if exists map_events_set_updated_at on public.map_events;
+create trigger map_events_set_updated_at before update on public.map_events
+  for each row execute function public.set_updated_at();
+
 -- ── Row-level security: owner only ──────────────────────────────────────────
 alter table public.maps           enable row level security;
 alter table public.map_pins       enable row level security;
 alter table public.map_pin_events enable row level security;
+alter table public.map_events     enable row level security;
+alter table public.map_event_pins enable row level security;
 
 drop policy if exists "maps: owner all" on public.maps;
 create policy "maps: owner all" on public.maps
@@ -124,6 +165,23 @@ create policy "map_pin_events: owner all" on public.map_pin_events
   with check (
     user_id = auth.uid()
     and exists (select 1 from public.map_pins p where p.id = pin_id and p.user_id = auth.uid())
+  );
+
+drop policy if exists "map_events: owner all" on public.map_events;
+create policy "map_events: owner all" on public.map_events
+  for all to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+-- A link row must belong to you AND join one of your own events to one of your own pins.
+drop policy if exists "map_event_pins: owner all" on public.map_event_pins;
+create policy "map_event_pins: owner all" on public.map_event_pins
+  for all to authenticated
+  using (user_id = auth.uid())
+  with check (
+    user_id = auth.uid()
+    and exists (select 1 from public.map_events e where e.id = event_id and e.user_id = auth.uid())
+    and exists (select 1 from public.map_pins   p where p.id = pin_id   and p.user_id = auth.uid())
   );
 
 -- ── Storage: private "maps" bucket ──────────────────────────────────────────
