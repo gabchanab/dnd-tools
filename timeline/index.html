@@ -105,6 +105,14 @@
 
     .tl-empty { font-size: .8rem; color: var(--text-dim); font-style: italic; padding: 1rem 0; text-align: center; }
 
+    /* ── Links out to the Map Pinboard ── */
+    .tl-map-links { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; }
+    .tl-map-link { font-family: var(--font-heading); font-size: .6rem; font-weight: 600; letter-spacing: .05em;
+      padding: 3px 10px; border-radius: 14px; border: 1px solid var(--border-mid); color: var(--gold-dim);
+      text-decoration: none; background: rgba(255,248,245,.7); }
+    .tl-map-link:hover { border-color: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
+    .tl-event-flash { box-shadow: 0 0 0 3px var(--gold-glow-md), 0 0 18px var(--gold-glow); }
+
     /* ── Legend ── */
     #tl-legend { position: absolute; top: 0; right: 0; width: 168px; z-index: 3;
       background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px;
@@ -282,6 +290,8 @@ let editingAgeId = null;
 let editingEventId = null;
 let formLinks = [];
 let timelineView = 'classic';
+let pinsByEvent = {};   // timeline_event_id -> [map pins linked to it] (from the Map Pinboard)
+let mapNames = {};      // map id -> name
 
 const EVENT_TYPES = {
   cosmic:     { label: 'Cosmic Events',       color: '#5b4b9e' },
@@ -376,14 +386,21 @@ function switchTimelineView(view, btn) {
 
 // ─── Load ────────────────────────────────────────────────────────────────────
 async function loadAll() {
-  const [agesRes, eventsRes, linksRes] = await Promise.all([
+  const [agesRes, eventsRes, linksRes, pinsRes, mapsRes] = await Promise.all([
     supabase.from('timeline_ages').select('*').order('start_year', { ascending: true }),
     supabase.from('timeline_events').select('*').order('year', { ascending: true }).order('created_at', { ascending: true }),
     supabase.from('timeline_links').select('*'),
+    // Optional: pins from the Map Pinboard. If that tool's tables don't exist, these just come back empty.
+    supabase.from('map_pins').select('id, map_id, title, timeline_event_id').not('timeline_event_id', 'is', null),
+    supabase.from('maps').select('id, name'),
   ]);
   ages = agesRes.data || [];
   events = eventsRes.data || [];
   links = linksRes.data || [];
+  pinsByEvent = {};
+  (pinsRes.data || []).forEach(p => { (pinsByEvent[p.timeline_event_id] = pinsByEvent[p.timeline_event_id] || []).push(p); });
+  mapNames = {};
+  (mapsRes.data || []).forEach(m => { mapNames[m.id] = m.name; });
   renderAgeList();
   populateAgeSelect();
   renderEventList();
@@ -628,12 +645,34 @@ async function deleteEvent(id) {
 }
 
 // ─── Timeline visual view ────────────────────────────────────────────────────
+// "📍 Pin · Map" chips that open the Map Pinboard focused on each pin linked to this event.
+function mapLinksHtml(eventId) {
+  const pins = pinsByEvent[eventId];
+  if (!pins || !pins.length) return '';
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  return '<div class="tl-map-links">' + pins.map(p =>
+    '<a class="tl-map-link" title="Show on map" href="../map-pinboard/index.html#map=' + p.map_id + '&amp;pin=' + p.id + '">📍 ' +
+    esc(p.title) + (mapNames[p.map_id] ? ' · ' + esc(mapNames[p.map_id]) : '') + '</a>').join('') + '</div>';
+}
+
+// Landing from the Map Pinboard's "View on timeline" link (#event=<id>): scroll to the card and flash it.
+function focusEventFromHash() {
+  const m = location.hash.match(/^#event=([0-9a-f-]{36})$/i);
+  if (!m) return;
+  const card = document.querySelector('#tl-sections .tl-event-card[data-event-id="' + m[1] + '"]');
+  if (!card) return;
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  card.classList.add('tl-event-flash');
+  setTimeout(() => card.classList.remove('tl-event-flash'), 2600);
+}
+
 function renderEventCard(e) {
   return '<div class="tl-event-card" data-event-id="' + e.id + '">' +
     starBadge(e) +
     '<div class="tl-event-year">' + formatEventYear(e) + '</div>' +
     '<div class="tl-event-title">' + e.title + '</div>' +
     (e.description ? '<div class="tl-event-desc">' + e.description + '</div>' : '') +
+    mapLinksHtml(e.id) +
   '</div>';
 }
 
@@ -802,6 +841,7 @@ function showConstellationDetail(id) {
       '<div class="tl-event-title">' + e.title + '</div>' +
       '<div class="tl-event-year">' + formatEventYear(e) + '</div>' +
       (e.description ? '<div class="tl-event-desc" style="margin-top:.4rem">' + e.description + '</div>' : '') +
+      mapLinksHtml(e.id) +
     '</div>';
   document.querySelectorAll('.tl-const-node').forEach(n => n.classList.toggle('tl-const-node-active', n.dataset.eventId === id));
 }
@@ -866,6 +906,7 @@ window.addEventListener('resize', () => {
   populateEventTypeSelect();
   renderLegend();
   await loadAll();
+  requestAnimationFrame(() => requestAnimationFrame(focusEventFromHash));
 })();
 </script>
 </body>

@@ -136,9 +136,10 @@ every Age (probably fall back to an absolute-year input).
    `map-pinboard/` with the shared js files; add the hub card to `index.html`.
 2. **MVP** — maps list, upload (base image + read dimensions), Leaflet view,
    add / edit / drag / delete pins, pin type icons, side panel with description.
-3. **Links** — timeline event picker on pins; "📍 Show on map" button on the
-   timeline page that opens the map centred on the pin; nested maps (pin →
-   child map, breadcrumb back to parent).
+3. **Links** — ✅ done. Timeline event picker on pins (grouped by Age); "📍"
+   chips on timeline event cards that open the map focused on the pin
+   (`#map=<id>&pin=<id>`); "View on timeline" back-link (`#event=<id>`); nested
+   maps via a pin's "Opens map" (↳ badge on the pin, breadcrumbs back up).
 3b. **Pin years & "current year" view** — see the section below. Needs the
    timeline's Ages, so do it alongside or just after Phase 3.
 4. **Hex grid** — optional gridded image upload, overlay toggle, calibration
