@@ -290,7 +290,7 @@ let editingAgeId = null;
 let editingEventId = null;
 let formLinks = [];
 let timelineView = 'classic';
-let pinsByEvent = {};   // timeline_event_id -> [map pins linked to it] (from the Map Pinboard)
+let pinsByEvent = {};   // event id -> [map pins linked to it] (from the Map Pinboard)
 let mapNames = {};      // map id -> name
 
 const EVENT_TYPES = {
@@ -386,19 +386,25 @@ function switchTimelineView(view, btn) {
 
 // ─── Load ────────────────────────────────────────────────────────────────────
 async function loadAll() {
-  const [agesRes, eventsRes, linksRes, pinsRes, mapsRes] = await Promise.all([
+  const [agesRes, eventsRes, linksRes, pinLinksRes, pinsRes, mapsRes] = await Promise.all([
     supabase.from('timeline_ages').select('*').order('start_year', { ascending: true }),
     supabase.from('timeline_events').select('*').order('year', { ascending: true }).order('created_at', { ascending: true }),
     supabase.from('timeline_links').select('*'),
     // Optional: pins from the Map Pinboard. If that tool's tables don't exist, these just come back empty.
-    supabase.from('map_pins').select('id, map_id, title, timeline_event_id').not('timeline_event_id', 'is', null),
+    supabase.from('map_pin_events').select('pin_id, event_id'),
+    supabase.from('map_pins').select('id, map_id, title'),
     supabase.from('maps').select('id, name'),
   ]);
   ages = agesRes.data || [];
   events = eventsRes.data || [];
   links = linksRes.data || [];
   pinsByEvent = {};
-  (pinsRes.data || []).forEach(p => { (pinsByEvent[p.timeline_event_id] = pinsByEvent[p.timeline_event_id] || []).push(p); });
+  const pinById = {};
+  (pinsRes.data || []).forEach(p => { pinById[p.id] = p; });
+  (pinLinksRes.data || []).forEach(l => {
+    const p = pinById[l.pin_id];
+    if (p) (pinsByEvent[l.event_id] = pinsByEvent[l.event_id] || []).push(p);
+  });
   mapNames = {};
   (mapsRes.data || []).forEach(m => { mapNames[m.id] = m.name; });
   renderAgeList();

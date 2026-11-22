@@ -103,6 +103,13 @@
     .pv-link-main { font-size: .85rem; font-weight: 700; color: var(--text); margin: .15rem 0; }
     .pv-link-desc { font-size: .78rem; color: var(--text-mid); line-height: 1.5; margin-bottom: .3rem; }
     .pv-link a { font-size: .74rem; color: var(--gold-dim); }
+    .pv-ev + .pv-ev { border-top: 1px dashed var(--border); margin-top: .55rem; padding-top: .5rem; }
+
+    #pf-events { display: flex; flex-direction: column; gap: .35rem; }
+    .pf-ev { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .8rem; color: var(--text);
+      padding: 4px 6px 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-inset); }
+    .pf-ev-x { border: none; background: transparent; cursor: pointer; color: var(--text-dim); font-size: .8rem; padding: 2px 6px; border-radius: 4px; }
+    .pf-ev-x:hover { background: rgba(180,50,50,.15); color: #a33; }
 
     .mv-name-input { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--gold-dim);
       padding: 3px 8px; border-radius: 6px; border: 1px solid var(--gold); background: var(--bg-inset); width: min(360px, 100%); }
@@ -228,6 +235,8 @@ let pinSearch = '';           // text in the side-panel search box
 let renaming = false;
 let mapsLoaded = false;       // `maps` has been fetched at least once (the child-map picker needs the full list)
 let tlAges = [], tlEvents = [], tlError = null;   // timeline data for the event picker
+let linksError = null;        // error loading the pin <-> event links (e.g. migration not run yet)
+let resizeObs = null;         // ResizeObserver keeping Leaflet's size in sync with its container
 let childLinks = [];          // [{ map_id, child_map_id }] across all maps, for breadcrumbs
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -421,6 +430,7 @@ async function deleteMap(id) {
 
 // ─── Map view ────────────────────────────────────────────────────────────────
 function destroyMapView() {
+  if (resizeObs) { resizeObs.disconnect(); resizeObs = null; }
   if (lmap) { lmap.remove(); lmap = null; }
   markers.clear();
   currentMap = null; pins = []; selectedId = null; formState = null; addMode = false;
@@ -453,15 +463,21 @@ async function openMap(id, token, focusPinId) {
     $('side-panel').innerHTML = '<div class="mp-empty" style="color:#a33">Could not load the map image: ' + esc(e.message || e) + '</div>';
     return;
   }
-  const [pinsRes, childRes] = await Promise.all([
+  const [pinsRes, childRes, linksRes] = await Promise.all([
     supabase.from('map_pins').select('*').eq('map_id', id).order('created_at', { ascending: true }),
     supabase.from('map_pins').select('map_id, child_map_id').not('child_map_id', 'is', null),   // for breadcrumbs
+    supabase.from('map_pin_events').select('pin_id, event_id'),                                   // pin <-> timeline event links
     loadTimeline(),
     ensureMapsLoaded(),
   ]);
   if (token !== routeToken) return;    // user navigated away while we were loading
   pins = pinsRes.data || [];
   childLinks = childRes.data || [];
+  // Attach each pin's linked timeline event ids as pin.event_ids (client-side only; never sent back in updates).
+  const evByPin = {};
+  (linksRes.data || []).forEach(r => { (evByPin[r.pin_id] = evByPin[r.pin_id] || []).push(r.event_id); });
+  pins.forEach(p => { p.event_ids = evByPin[p.id] || []; });
+  linksError = linksRes.error ? linksRes.error.message : null;
   renderCrumbs();
 
   const W = row.image_width, H = row.image_height;
@@ -469,15 +485,35 @@ async function openMap(id, token, focusPinId) {
   lmap = L.map('map', { crs: L.CRS.Simple, minZoom: -6, maxZoom: 3, zoomSnap: 0.25, zoomDelta: 0.5,
                         attributionControl: false, maxBoundsViscosity: 0.7 });
   L.imageOverlay(url, bounds).addTo(lmap);
-  lmap.fitBounds(bounds, { animate: false });
-  lmap.setMinZoom(lmap.getZoom() - 1);
+  const fitMap = () => {
+    lmap.setMinZoom(-10);                       // lift the floor so fitBounds can pick the true zoom
+    lmap.fitBounds(bounds, { animate: false });
+    lmap.setMinZoom(lmap.getZoom() - 1);
+  };
+  fitMap();
   lmap.setMaxBounds(L.latLngBounds(bounds).pad(0.3));
+
+  // Keep Leaflet in step with its container (the filter bar appearing, window resizes, a container that
+  // wasn't laid out yet when the map was created). Until the user pans/zooms or a pin is focused, a resize
+  // re-fits the whole image; after that we only re-measure so their view isn't yanked around.
+  let userMoved = false;
+  ['mousedown', 'wheel', 'touchstart'].forEach(ev => $('map').addEventListener(ev, () => { userMoved = true; }, { passive: true }));
+  if (focusPinId) userMoved = true;
+  if (resizeObs) resizeObs.disconnect();
+  resizeObs = new ResizeObserver(() => {
+    if (!lmap) return;
+    lmap.invalidateSize();
+    if (!userMoved && lmap.getSize().x > 0 && lmap.getSize().y > 0) fitMap();
+  });
+  resizeObs.observe($('map'));
 
   lmap.on('click', onMapClick);
   pins.forEach(addMarker);
   renderPanel();
   if (focusPinId && pins.some(p => p.id === focusPinId)) focusPin(focusPinId);   // deep link from the timeline page
   if (pinsRes.error) $('side-panel').insertAdjacentHTML('afterbegin', '<div class="mp-status err">Could not load pins: ' + esc(pinsRes.error.message) + '</div>');
+  if (linksError) $('side-panel').insertAdjacentHTML('afterbegin', '<div class="mp-status err">Could not load timeline links: ' + esc(linksError) +
+    '<br>Have you run <code>migration-002-multi-event-pins.sql</code>?</div>');
 }
 
 // ─── Breadcrumbs (ancestor maps reached via a pin's "opens map" link) ────────
@@ -583,10 +619,10 @@ function beginForm(mode, data) {
       formState.x = clamp01(f.x); formState.y = clamp01(f.y);
       updateCoordsHint();
     });
-    formState = { mode, x: data.x, y: data.y, type: 'landmark', draftMarker: mk };
+    formState = { mode, x: data.x, y: data.y, type: 'landmark', draftMarker: mk, eventIds: [] };
   } else {
     const pin = data;
-    formState = { mode, pin, x: pin.x, y: pin.y, type: pin.pin_type };
+    formState = { mode, pin, x: pin.x, y: pin.y, type: pin.pin_type, eventIds: (pin.event_ids || []).slice() };
   }
   $('add-pin-btn').disabled = true;
   renderPanel();
@@ -622,36 +658,98 @@ async function savePin() {
   const title = $('pf-title').value.trim();
   const description = $('pf-desc').value.trim();
   const pin_type = $('pf-type').value;
-  const timeline_event_id = $('pf-event').value || null;
   const child_map_id = $('pf-child').value || null;
   if (!title) return setStatus(status, 'A pin needs a title.', true);
   const btn = $('pf-save'); btn.disabled = true;
+  const isNew = formState.mode === 'new';
+  const wanted = formState.eventIds.slice();
+  let pin;
+
+  // 1) the pin row itself
   try {
-    if (formState.mode === 'new') {
+    if (isNew) {
       const { data, error } = await supabase.from('map_pins').insert({
         map_id: currentMap.id, user_id: currentUser.id,
-        x: formState.x, y: formState.y, title, pin_type, description: description || null, timeline_event_id, child_map_id,
+        x: formState.x, y: formState.y, title, pin_type, description: description || null, child_map_id,
       }).select().single();
       if (error) throw error;
-      pins.push(data);
-      endForm();
-      addMarker(data);
-      selectedId = null;
-      selectPin(data.id);
+      pin = data; pin.event_ids = [];
     } else {
-      const pin = formState.pin;
-      const patch = { x: formState.x, y: formState.y, title, pin_type, description: description || null, timeline_event_id, child_map_id };
+      pin = formState.pin;
+      const patch = { x: formState.x, y: formState.y, title, pin_type, description: description || null, child_map_id };
       const { error } = await supabase.from('map_pins').update(patch).eq('id', pin.id);
       if (error) throw error;
       Object.assign(pin, patch);
-      endForm();
-      refreshMarker(pin);
-      renderPanel();
     }
   } catch (e) {
     setStatus(status, 'Could not save: ' + (e.message || e), true);
     btn.disabled = false;
+    return;
   }
+
+  // 2) its timeline events (separate table). If this fails the pin is still saved, so don't lose it.
+  let linkError = null;
+  if (!sameSet(wanted, pin.event_ids || [])) {
+    try { await syncPinEvents(pin.id, wanted); pin.event_ids = wanted; }
+    catch (e) { linkError = e; await refreshPinEvents(pin); }
+  }
+
+  // 3) update the UI
+  if (isNew) {
+    pins.push(pin);
+    endForm();
+    addMarker(pin);
+    selectedId = null;
+    selectPin(pin.id);
+  } else {
+    endForm();
+    refreshMarker(pin);
+    renderPanel();
+  }
+  if (linkError) alert('The pin was saved, but its timeline events could not be updated:\n' + (linkError.message || linkError));
+}
+
+function sameSet(a, b) { return a.length === b.length && a.every(x => b.includes(x)); }
+
+// Make the database's links for a pin match `wanted` (reads current state first, so it is safe to retry).
+async function syncPinEvents(pinId, wanted) {
+  const cur = await supabase.from('map_pin_events').select('event_id').eq('pin_id', pinId);
+  if (cur.error) throw cur.error;
+  const have = (cur.data || []).map(r => r.event_id);
+  const toAdd = wanted.filter(id => !have.includes(id));
+  const toRemove = have.filter(id => !wanted.includes(id));
+  if (toRemove.length) {
+    const r = await supabase.from('map_pin_events').delete().eq('pin_id', pinId).in('event_id', toRemove);
+    if (r.error) throw r.error;
+  }
+  if (toAdd.length) {
+    const r = await supabase.from('map_pin_events').insert(toAdd.map(event_id => ({ pin_id: pinId, event_id, user_id: currentUser.id })));
+    if (r.error) throw r.error;
+  }
+}
+
+async function refreshPinEvents(pin) {     // best effort: resync the local copy after a failed save
+  try {
+    const r = await supabase.from('map_pin_events').select('event_id').eq('pin_id', pin.id);
+    if (!r.error) pin.event_ids = (r.data || []).map(x => x.event_id);
+  } catch (e) { /* ignore */ }
+}
+
+// ─── Event picker inside the pin form ────────────────────────────────────────
+function formEventsHtml() {
+  const evs = formState.eventIds.map(id => tlEvents.find(e => e.id === id) || { id, title: '(unknown event)', year: 0, unknown: true })
+    .sort((a, b) => a.year - b.year);
+  return evs.map(e => '<div class="pf-ev"><span>' + esc(e.unknown ? e.title : eventLabel(e)) + '</span>' +
+      '<button type="button" class="pf-ev-x" title="Remove" onclick="removeFormEvent(\'' + e.id + '\')">✕</button></div>').join('') +
+    '<select id="pf-event-add" onchange="addFormEvent(this.value)">' + eventOptionsHtml(formState.eventIds) + '</select>';
+}
+function addFormEvent(id) {
+  if (id && !formState.eventIds.includes(id)) formState.eventIds.push(id);
+  $('pf-events').innerHTML = formEventsHtml();
+}
+function removeFormEvent(id) {
+  formState.eventIds = formState.eventIds.filter(x => x !== id);
+  $('pf-events').innerHTML = formEventsHtml();
 }
 
 async function deletePin(id) {
@@ -838,16 +936,21 @@ async function replaceImage(input) {
   }
 }
 
+// All timeline events linked to a pin, oldest first.
 function eventLinkHtml(pin) {
-  if (!pin.timeline_event_id) return '';
-  const ev = tlEvents.find(e => e.id === pin.timeline_event_id);
-  if (!ev) return '<div class="pv-link"><div class="pv-link-label">Timeline event</div><div class="mp-hint">' +
-    (tlError ? 'Timeline could not be loaded.' : 'Linked event not found.') + '</div></div>';
-  const desc = (ev.description || '').trim();
-  return '<div class="pv-link"><div class="pv-link-label">Timeline event</div>' +
-    '<div class="pv-link-main">⧗ ' + esc(ev.title) + ' · ' + esc(eventYearLabel(ev)) + '</div>' +
-    (desc ? '<div class="pv-link-desc">' + esc(desc.length > 220 ? desc.slice(0, 220) + '…' : desc) + '</div>' : '') +
-    '<a href="../timeline/index.html#event=' + ev.id + '">View on timeline →</a></div>';
+  const ids = pin.event_ids || [];
+  if (!ids.length) return '';
+  const evs = ids.map(id => tlEvents.find(e => e.id === id)).filter(Boolean).sort((a, b) => a.year - b.year);
+  if (!evs.length) return '<div class="pv-link"><div class="pv-link-label">Timeline events</div><div class="mp-hint">' +
+    (tlError ? 'Timeline could not be loaded.' : 'Linked events not found.') + '</div></div>';
+  return '<div class="pv-link"><div class="pv-link-label">Timeline events (' + evs.length + ')</div>' +
+    evs.map(ev => {
+      const desc = (ev.description || '').trim();
+      return '<div class="pv-ev">' +
+        '<div class="pv-link-main">⧗ ' + esc(ev.title) + ' · ' + esc(eventYearLabel(ev)) + '</div>' +
+        (desc ? '<div class="pv-link-desc">' + esc(desc.length > 160 ? desc.slice(0, 160) + '…' : desc) + '</div>' : '') +
+        '<a href="../timeline/index.html#event=' + ev.id + '">View on timeline →</a></div>';
+    }).join('') + '</div>';
 }
 
 function childLinkHtml(pin) {
@@ -858,17 +961,18 @@ function childLinkHtml(pin) {
     (m ? '<button class="mp-btn mp-btn-primary" onclick="location.hash=\'#map=' + m.id + '\'">Open map →</button>' : '') + '</div>';
 }
 
-// <option>s for the timeline-event picker, grouped by Age (same order as the timeline page).
-function eventOptionsHtml(selectedId) {
-  let html = '<option value="">— none —</option>';
-  if (!tlEvents.length) return html;
+// <option>s for the "add a timeline event" picker, grouped by Age (same order as the timeline page).
+// Events already linked to the pin are left out.
+function eventOptionsHtml(excludeIds) {
+  let html = '<option value="">+ Add a timeline event…</option>';
   const byYear = (a, b) => a.year - b.year;
+  const avail = tlEvents.filter(e => !excludeIds.includes(e.id));
   const groups = tlAges.slice().sort((a, b) => a.start_year - b.start_year)
-    .map(a => ({ label: a.name, evs: tlEvents.filter(e => e.age_id === a.id).sort(byYear) }));
-  groups.push({ label: 'Unassigned', evs: tlEvents.filter(e => !tlAges.some(a => a.id === e.age_id)).sort(byYear) });
+    .map(a => ({ label: a.name, evs: avail.filter(e => e.age_id === a.id).sort(byYear) }));
+  groups.push({ label: 'Unassigned', evs: avail.filter(e => !tlAges.some(a => a.id === e.age_id)).sort(byYear) });
   groups.filter(g => g.evs.length).forEach(g => {
     html += '<optgroup label="' + esc(g.label) + '">' +
-      g.evs.map(e => '<option value="' + e.id + '"' + (e.id === selectedId ? ' selected' : '') + '>' + esc(eventLabel(e)) + '</option>').join('') + '</optgroup>';
+      g.evs.map(e => '<option value="' + e.id + '">' + esc(eventLabel(e)) + '</option>').join('') + '</optgroup>';
   });
   return html;
 }
@@ -905,8 +1009,8 @@ function formHtml() {
       '</select></div></div>' +
     '<div class="mp-form-row"><div class="mp-form-field"><label for="pf-desc">Description</label>' +
       '<textarea id="pf-desc">' + esc(pin.description || '') + '</textarea></div></div>' +
-    '<div class="mp-form-row"><div class="mp-form-field"><label for="pf-event">Timeline event (optional)</label>' +
-      '<select id="pf-event">' + eventOptionsHtml(pin.timeline_event_id) + '</select>' +
+    '<div class="mp-form-row"><div class="mp-form-field"><label>Timeline events (optional)</label>' +
+      '<div id="pf-events">' + formEventsHtml() + '</div>' +
       (tlError ? '<span class="mp-hint">Timeline could not be loaded: ' + esc(tlError) + '</span>'
         : !tlEvents.length ? '<span class="mp-hint">No timeline events yet — add some in the Timeline Builder.</span>' : '') + '</div></div>' +
     '<div class="mp-form-row"><div class="mp-form-field"><label for="pf-child">Opens map (optional)</label>' +

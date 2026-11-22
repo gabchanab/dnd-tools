@@ -13,7 +13,7 @@ reference map.
 |---|---|
 | Sharing | Owner-only for now (RLS on `user_id`). Revisit for player share links later. |
 | Map structure | Several maps, with nesting: a pin can open a child map. |
-| Pin links (v1) | Timeline events only (`timeline_event_id`). |
+| Pin links | Timeline events — **many per pin** (one place, many things over the years) via the `map_pin_events` join table. |
 | Hex grid | Yes, later. Gridded reference image is pixel-aligned with the plain one. |
 | Grid features | Visual overlay **and** a real distance tool (miles per hex). |
 | Rendering | Leaflet.js with `L.CRS.Simple` (image map mode), loaded from CDN. |
@@ -34,7 +34,12 @@ See [`schema.sql`](schema.sql) for the full, runnable version.
   `grid_hex_size_px`, `grid_origin_x_px/y_px`, `distance_per_hex`,
   `distance_unit`).
 - **`map_pins`** — `map_id`, `x`/`y`, `title`, `pin_type`, `description`,
-  `timeline_event_id`, `child_map_id`.
+  `child_map_id`.
+- **`map_pin_events`** — join table `(pin_id, event_id)` (primary key on the
+  pair, both cascade-delete) linking a pin to any number of timeline events.
+  Existing databases get it from
+  [`migration-002-multi-event-pins.sql`](migration-002-multi-event-pins.sql),
+  which also copies over the old single `map_pins.timeline_event_id` links.
 - **Storage bucket `maps`** (private). Paths: `<user_id>/<map_id>/base.<ext>`
   and `<user_id>/<map_id>/grid.<ext>`. Policies check that the first folder
   equals `auth.uid()`.
@@ -96,7 +101,7 @@ that fades pins that did not exist (or had not happened) in the selected year.
 | Question | Decision |
 |---|---|
 | Year model | Optional **From year** and **To year**. Blank To = ongoing (a city that still stands). A one-off event sets both to the same year. No years at all = timeless, always shown normally. |
-| Linking to a timeline event | Linking auto-fills the pin's year from the event; it stays editable (e.g. add an end year). |
+| Linking to a timeline event | Originally: linking auto-fills the pin's year from the event. **Needs revisiting now that a pin can have many events** — see open points. |
 | Entering years | Same as the timeline: pick an **Age**, then a year relative to it (e.g. "120 PAA"). From and To may be in different Ages. |
 | Default state | Control is **off**: all pins show normally until an Age + year is chosen. A "Show all" button switches it off again. |
 
@@ -126,9 +131,18 @@ like the timeline form does.
 - otherwise → faded (~25–30% opacity, still slightly visible), still clickable
 - the side panel marks faded pins ("not yet founded" / "ended in 340 PAA")
 
-**Open points to settle when building:** whether faded pins should also be
-dimmed in the side-panel list; and what to do when the selected year is outside
-every Age (probably fall back to an absolute-year input).
+**Open points to settle when building:**
+
+- **How linked events interact with the pin's years.** A pin can now have
+  several events (e.g. a city: founded 120, sacked 840, rebuilt 900), so "auto-fill
+  the year from the event" is ambiguous. Options: (a) the pin's From/To stay
+  hand-entered and independent; (b) the pin's *active range* is derived from its
+  events (earliest → latest, or ongoing); (c) the map's current-year view also
+  highlights which of the pin's events had happened by the selected year, e.g.
+  "2 of 3 events so far". Pick one before building 3b.
+- whether faded pins should also be dimmed in the side-panel list;
+- what to do when the selected year is outside every Age (probably fall back to
+  an absolute-year input).
 
 ## Phases
 
@@ -136,7 +150,7 @@ every Age (probably fall back to an absolute-year input).
    `map-pinboard/` with the shared js files; add the hub card to `index.html`.
 2. **MVP** — maps list, upload (base image + read dimensions), Leaflet view,
    add / edit / drag / delete pins, pin type icons, side panel with description.
-3. **Links** — ✅ done. Timeline event picker on pins (grouped by Age); "📍"
+3. **Links** — ✅ done (events many-to-many per pin). Timeline event picker on pins (grouped by Age); "📍"
    chips on timeline event cards that open the map focused on the pin
    (`#map=<id>&pin=<id>`); "View on timeline" back-link (`#event=<id>`); nested
    maps via a pin's "Opens map" (↳ badge on the pin, breadcrumbs back up).

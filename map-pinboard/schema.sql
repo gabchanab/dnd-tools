@@ -55,17 +55,27 @@ create table if not exists public.map_pins (
                 check (pin_type in ('city','town','village','dungeon','landmark','ruin','region','port','other')),
   description   text,
 
-  -- Optional links
-  timeline_event_id uuid references public.timeline_events(id) on delete set null,
-  child_map_id      uuid references public.maps(id) on delete set null,  -- opens a nested map
+  -- Optional link: opens a nested map. (Timeline events are many-to-many and live
+  -- in map_pin_events below, so one pin can carry several events over the years.)
+  child_map_id      uuid references public.maps(id) on delete set null,
 
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
 
 create index if not exists map_pins_map_idx   on public.map_pins (map_id);
-create index if not exists map_pins_event_idx on public.map_pins (timeline_event_id);
 create index if not exists map_pins_child_idx on public.map_pins (child_map_id);
+
+-- ── map_pin_events: which timeline events happened at which pin (many-to-many) ──
+create table if not exists public.map_pin_events (
+  pin_id     uuid not null references public.map_pins(id) on delete cascade,
+  event_id   uuid not null references public.timeline_events(id) on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (pin_id, event_id)
+);
+
+create index if not exists map_pin_events_event_idx on public.map_pin_events (event_id);
 
 -- ── updated_at trigger ──────────────────────────────────────────────────────
 create or replace function public.set_updated_at() returns trigger
@@ -84,8 +94,9 @@ create trigger map_pins_set_updated_at before update on public.map_pins
   for each row execute function public.set_updated_at();
 
 -- ── Row-level security: owner only ──────────────────────────────────────────
-alter table public.maps     enable row level security;
-alter table public.map_pins enable row level security;
+alter table public.maps           enable row level security;
+alter table public.map_pins       enable row level security;
+alter table public.map_pin_events enable row level security;
 
 drop policy if exists "maps: owner all" on public.maps;
 create policy "maps: owner all" on public.maps
@@ -98,6 +109,16 @@ create policy "map_pins: owner all" on public.map_pins
   for all to authenticated
   using (user_id = auth.uid())
   with check (user_id = auth.uid());
+
+-- A link row must belong to you AND point at one of your own pins.
+drop policy if exists "map_pin_events: owner all" on public.map_pin_events;
+create policy "map_pin_events: owner all" on public.map_pin_events
+  for all to authenticated
+  using (user_id = auth.uid())
+  with check (
+    user_id = auth.uid()
+    and exists (select 1 from public.map_pins p where p.id = pin_id and p.user_id = auth.uid())
+  );
 
 -- ── Storage: private "maps" bucket ──────────────────────────────────────────
 -- Object path convention:  <user_id>/<map_id>/base.<ext>
