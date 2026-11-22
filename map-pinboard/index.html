@@ -70,6 +70,7 @@
     .mv-toolbar { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: .8rem; }
     .mv-name { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--gold-dim); letter-spacing: .06em; margin-right: auto; }
     .mv-body { display: grid; grid-template-columns: 1fr 330px; gap: 1rem; height: calc(100vh - 8.5rem); min-height: 440px; }
+    .mv-filters:not([hidden]) + .mv-body { height: calc(100vh - 11.2rem); }
     .mv-mapbox { position: relative; border: 1px solid var(--border-mid); border-radius: 10px; overflow: hidden; background: var(--bg-warm); }
     #map { position: absolute; inset: 0; background: var(--bg-warm); font-family: var(--font-body); }
     #map.adding, #map.adding .leaflet-interactive { cursor: crosshair; }
@@ -86,6 +87,18 @@
     .pin-wrap:hover .pin { transform: scale(1.12); }
     .pin.selected { transform: scale(1.25); box-shadow: 0 0 0 4px var(--gold-glow-md), 0 2px 8px rgba(0,0,0,.4); }
     .pin.draft { border-style: dashed; }
+
+    .mv-name-input { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--gold-dim);
+      padding: 3px 8px; border-radius: 6px; border: 1px solid var(--gold); background: var(--bg-inset); width: min(360px, 100%); }
+    .mv-filters { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; align-items: center; }
+    .mv-chip { font-family: var(--font-heading); font-size: .62rem; font-weight: 600; letter-spacing: .06em;
+      padding: 4px 11px; border-radius: 16px; cursor: pointer; background: rgba(255,248,245,.92);
+      border: 2px solid var(--c); color: var(--text-mid); transition: opacity .15s, background .15s; }
+    .mv-chip:hover { background: var(--bg-inset); }
+    .mv-chip.off { opacity: .4; border-style: dashed; text-decoration: line-through; }
+    .mv-chip span { color: var(--text-dim); margin-left: .25rem; }
+    #pin-search { width: 100%; font-family: var(--font-body); font-size: .82rem; padding: 6px 10px; border-radius: 6px;
+      border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); margin-bottom: .7rem; }
 
     .pin-row { display: flex; align-items: center; gap: .55rem; padding: 6px 8px; border-radius: 6px; cursor: pointer;
                border: 1px solid transparent; font-size: .82rem; color: var(--text); }
@@ -145,8 +158,12 @@
     <div class="mv-toolbar">
       <button class="mp-btn" onclick="location.hash=''">← All maps</button>
       <div class="mv-name" id="mv-name"></div>
+      <button class="mp-btn" id="rename-btn" onclick="startRename()">Rename</button>
+      <button class="mp-btn" id="replace-btn" onclick="$('replace-file').click()" title="Swap in a new image for this map; pins keep their relative positions">Replace image</button>
+      <input type="file" id="replace-file" accept="image/png,image/jpeg,image/webp" hidden onchange="replaceImage(this)">
       <button class="mp-btn" id="add-pin-btn" onclick="toggleAddMode()">+ Add Pin</button>
     </div>
+    <div class="mv-filters" id="mv-filters" hidden></div>
     <div class="mv-body">
       <div class="mv-mapbox">
         <div id="map"></div>
@@ -190,6 +207,9 @@ let selectedId = null;
 let addMode = false;
 let formState = null;         // { mode:'new'|'edit', pin?, x, y, type, draftMarker? }
 let routeToken = 0;
+let hiddenTypes = new Set();  // pin types toggled off in the filter bar
+let pinSearch = '';           // text in the side-panel search box
+let renaming = false;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -362,6 +382,8 @@ function destroyMapView() {
   if (lmap) { lmap.remove(); lmap = null; }
   markers.clear();
   currentMap = null; pins = []; selectedId = null; formState = null; addMode = false;
+  hiddenTypes = new Set(); pinSearch = ''; renaming = false;
+  $('mv-filters').hidden = true; $('add-pin-btn').disabled = false;
 }
 
 async function openMap(id, token) {
@@ -588,21 +610,165 @@ function focusPin(id) {
 // ─── Side panel ──────────────────────────────────────────────────────────────
 function renderPanel() {
   const el = $('side-panel');
-  if (formState) { el.innerHTML = formHtml(); updateCoordsHint(); return; }
   const pin = pins.find(p => p.id === selectedId);
-  if (pin) { el.innerHTML = pinHtml(pin); return; }
-  el.innerHTML = listHtml();
+  if (formState) { el.innerHTML = formHtml(); updateCoordsHint(); }
+  else if (pin) el.innerHTML = pinHtml(pin);
+  else el.innerHTML = listHtml();
+  renderFilters();
+  applyFilters();
+}
+
+// Pins that pass the type filter and the search box (used by the side-panel list).
+function listedPins() {
+  const q = pinSearch.trim().toLowerCase();
+  return pins
+    .filter(p => !hiddenTypes.has(p.pin_type))
+    .filter(p => !q || p.title.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q))
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
+
+function pinRowsHtml() {
+  const list = listedPins();
+  if (list.length) {
+    return list.map(p => { const t = typeOf(p.pin_type);
+      return '<div class="pin-row" onclick="focusPin(\'' + p.id + '\')" style="--c:' + t.color + '">' +
+        '<span class="pin-row-icon">' + t.glyph + '</span><span class="pin-row-title">' + esc(p.title) + '</span></div>'; }).join('');
+  }
+  return pins.length
+    ? '<div class="mp-empty">No pins match.</div>'
+    : '<div class="mp-empty">No pins yet. Press <b>+ Add Pin</b>, then click the map.</div>';
+}
+
+function pinCountText() {
+  const shown = listedPins().length;
+  return shown === pins.length ? String(pins.length) : shown + ' of ' + pins.length;
 }
 
 function listHtml() {
-  const sorted = pins.slice().sort((a, b) => a.title.localeCompare(b.title));
-  return '<div class="panel-title">Pins (' + pins.length + ')</div>' +
-    (sorted.length
-      ? sorted.map(p => { const t = typeOf(p.pin_type);
-          return '<div class="pin-row" onclick="focusPin(\'' + p.id + '\')" style="--c:' + t.color + '">' +
-            '<span class="pin-row-icon">' + t.glyph + '</span><span class="pin-row-title">' + esc(p.title) + '</span></div>'; }).join('')
-      : '<div class="mp-empty">No pins yet. Press <b>+ Add Pin</b>, then click the map.</div>') +
-    '<div class="mp-hint" style="margin-top:1rem">Scroll to zoom, drag to pan. Click a pin to select it; a selected pin can be dragged to a new spot.</div>';
+  return '<div class="panel-title">Pins (<span id="pin-count">' + pinCountText() + '</span>)</div>' +
+    (pins.length ? '<input type="search" id="pin-search" placeholder="Search pins…" value="' + esc(pinSearch) + '" oninput="onPinSearch(this.value)">' : '') +
+    '<div id="pin-rows">' + pinRowsHtml() + '</div>' +
+    '<div class="mp-hint" style="margin-top:1rem">Scroll to zoom, drag to pan. Click a pin to select it; a selected pin can be dragged to a new spot. ' +
+    'The type chips above the map hide pins from both the map and this list.</div>';
+}
+
+function onPinSearch(v) {
+  pinSearch = v;
+  $('pin-rows').innerHTML = pinRowsHtml();     // only the rows, so the search box keeps focus
+  $('pin-count').textContent = pinCountText();
+}
+
+// ─── Type filter chips ───────────────────────────────────────────────────────
+function renderFilters() {
+  const el = $('mv-filters');
+  const counts = {};
+  pins.forEach(p => { counts[p.pin_type] = (counts[p.pin_type] || 0) + 1; });
+  hiddenTypes.forEach(t => { if (!counts[t]) hiddenTypes.delete(t); });   // type no longer used by any pin
+  const types = Object.keys(PIN_TYPES).filter(t => counts[t]);
+  if (types.length < 2 && !hiddenTypes.size) { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.innerHTML = types.map(t => { const d = PIN_TYPES[t];
+      return '<button class="mv-chip' + (hiddenTypes.has(t) ? ' off' : '') + '" style="--c:' + d.color + '" onclick="toggleType(\'' + t + '\')">' +
+        d.glyph + ' ' + d.label + '<span>' + counts[t] + '</span></button>'; }).join('') +
+    (hiddenTypes.size ? '<button class="mp-btn" onclick="clearTypeFilter()">Show all</button>' : '');
+}
+
+function toggleType(t) {
+  if (hiddenTypes.has(t)) hiddenTypes.delete(t); else hiddenTypes.add(t);
+  renderPanel();
+}
+function clearTypeFilter() { hiddenTypes.clear(); renderPanel(); }
+
+// Hide/show map markers. A pin you are selecting or editing always stays visible.
+function applyFilters() {
+  if (!lmap) return;
+  pins.forEach(p => {
+    const mk = markers.get(p.id);
+    if (!mk) return;
+    const keep = !hiddenTypes.has(p.pin_type) || p.id === selectedId || (formState && formState.pin && formState.pin.id === p.id);
+    if (keep && !lmap.hasLayer(mk)) mk.addTo(lmap);
+    else if (!keep && lmap.hasLayer(mk)) mk.remove();
+  });
+}
+
+// ─── Rename map ──────────────────────────────────────────────────────────────
+function startRename() {
+  if (!currentMap || renaming) return;
+  renaming = true;
+  const el = $('mv-name');
+  el.innerHTML = '<input class="mv-name-input" id="rename-input" maxlength="120" value="' + esc(currentMap.name) + '">';
+  const inp = $('rename-input');
+  inp.focus(); inp.select();
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); finishRename(inp.value); }
+    else if (e.key === 'Escape') { e.stopPropagation(); finishRename(currentMap.name); }   // same name = no change
+  });
+  inp.addEventListener('blur', () => finishRename(inp.value));
+}
+
+async function finishRename(value) {
+  if (!renaming) return;
+  renaming = false;
+  const name = value.trim();
+  const el = $('mv-name');
+  if (!name || name === currentMap.name) { el.textContent = currentMap.name; return; }
+  const { error } = await supabase.from('maps').update({ name }).eq('id', currentMap.id);
+  if (error) { alert('Could not rename: ' + error.message); el.textContent = currentMap.name; return; }
+  currentMap.name = name;
+  const m = maps.find(x => x.id === currentMap.id); if (m) m.name = name;
+  el.textContent = name;
+  document.title = name + ' · Map Pinboard';
+}
+
+// ─── Replace map image ───────────────────────────────────────────────────────
+async function replaceImage(input) {
+  const file = input.files[0];
+  input.value = '';
+  if (!file || !currentMap) return;
+  const ext = EXT_FOR_TYPE[file.type];
+  if (!ext) return alert('Only PNG, JPEG or WebP images are supported.');
+  if (file.size > MAX_BYTES) return alert('That file is over 25 MB. Try a smaller or compressed version.');
+
+  const btn = $('replace-btn');
+  const label = btn.textContent;
+  let info = null;
+  const uploaded = [];
+  try {
+    info = await readImage(file);
+    const oldRatio = currentMap.image_width / currentMap.image_height;
+    const newRatio = info.width / info.height;
+    if (Math.abs(newRatio / oldRatio - 1) > 0.01 &&
+        !confirm('The new image has a different shape (' + info.width + '×' + info.height + ' vs ' + currentMap.image_width + '×' + currentMap.image_height + ').\n\n' +
+                 'Pins keep their relative position (% across / % down), so some may no longer sit on the places they mark. Replace anyway?')) return;
+
+    btn.disabled = true; btn.textContent = 'Uploading…';
+    // A fresh filename each time avoids stale CDN/browser caches of the old image.
+    const newPath = currentUser.id + '/' + currentMap.id + '/base-' + Date.now() + '.' + ext;
+    const up = await supabase.storage.from(BUCKET).upload(newPath, file, { contentType: file.type, upsert: false });
+    if (up.error) throw up.error;
+    uploaded.push(newPath);
+
+    const { error } = await supabase.from('maps').update({ image_path: newPath, image_width: info.width, image_height: info.height }).eq('id', currentMap.id);
+    if (error) throw error;
+    uploaded.length = 0;     // the DB now points at the new file, so never clean it up past this point
+
+    const oldPath = currentMap.image_path;
+    try {
+      const thumb = await makeThumb(info.img, 480);
+      if (thumb) await supabase.storage.from(BUCKET).upload(thumbPath(currentMap), thumb, { contentType: 'image/jpeg', upsert: true, cacheControl: '60' });
+    } catch (e) { console.warn('thumbnail skipped', e); }
+    if (oldPath && oldPath !== newPath) await supabase.storage.from(BUCKET).remove([oldPath]);
+
+    Object.assign(currentMap, { image_path: newPath, image_width: info.width, image_height: info.height });
+    const m = maps.find(x => x.id === currentMap.id); if (m) Object.assign(m, currentMap);
+    await openMap(currentMap.id, ++routeToken);      // rebuild the view with the new image
+  } catch (e) {
+    if (uploaded.length) await supabase.storage.from(BUCKET).remove(uploaded);
+    alert('Could not replace the image: ' + (e.message || e));
+  } finally {
+    if (info) URL.revokeObjectURL(info.url);
+    btn.disabled = false; btn.textContent = label;
+  }
 }
 
 function pinHtml(pin) {

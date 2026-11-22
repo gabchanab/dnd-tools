@@ -86,6 +86,50 @@ size on zoom, so no counter-scaling code is needed.
 - **Optional:** highlight the hex under the cursor (draw one hexagon polygon
   from the calibration maths) to confirm calibration is correct.
 
+## Pin years & "current year" view (Phase 3b, TODO)
+
+Goal: pins can say *when* they existed; the map has a "current year" control
+that fades pins that did not exist (or had not happened) in the selected year.
+
+**Decisions (from the brainstorm):**
+
+| Question | Decision |
+|---|---|
+| Year model | Optional **From year** and **To year**. Blank To = ongoing (a city that still stands). A one-off event sets both to the same year. No years at all = timeless, always shown normally. |
+| Linking to a timeline event | Linking auto-fills the pin's year from the event; it stays editable (e.g. add an end year). |
+| Entering years | Same as the timeline: pick an **Age**, then a year relative to it (e.g. "120 PAA"). From and To may be in different Ages. |
+| Default state | Control is **off**: all pins show normally until an Age + year is chosen. A "Show all" button switches it off again. |
+
+**Data:** add two nullable columns to `map_pins`, stored as **absolute** years,
+the same convention `timeline_events.year` already uses:
+
+```sql
+alter table public.map_pins
+  add column if not exists year_start integer,
+  add column if not exists year_end   integer,
+  add constraint map_pins_year_order check (year_end is null or year_start is null or year_end >= year_start);
+```
+
+The Age is *derived* from the absolute year (the Age whose `start_year`..
+`end_year` range contains it; `end_year` null = ongoing), so nothing about Ages
+is duplicated onto the pin. Display uses the Age abbreviation the same way
+`formatEventYear` does on the timeline page.
+
+**Pin form:** "When" section with From (Age select + year-in-Age input) and To
+(same, plus an "Ongoing" option). Shows the computed absolute year as a hint,
+like the timeline form does.
+
+**Map control:** a bar above the map: Age select (names and periods read from
+`timeline_ages`) + year-in-Age input + "Show all". On change, for each pin:
+
+- active in selected year (`year_start` null or ≤ Y, and `year_end` null or ≥ Y) → normal
+- otherwise → faded (~25–30% opacity, still slightly visible), still clickable
+- the side panel marks faded pins ("not yet founded" / "ended in 340 PAA")
+
+**Open points to settle when building:** whether faded pins should also be
+dimmed in the side-panel list; and what to do when the selected year is outside
+every Age (probably fall back to an absolute-year input).
+
 ## Phases
 
 1. **Foundation** — run `schema.sql`; confirm `timeline_events.id` type; create
@@ -95,6 +139,8 @@ size on zoom, so no counter-scaling code is needed.
 3. **Links** — timeline event picker on pins; "📍 Show on map" button on the
    timeline page that opens the map centred on the pin; nested maps (pin →
    child map, breadcrumb back to parent).
+3b. **Pin years & "current year" view** — see the section below. Needs the
+   timeline's Ages, so do it alongside or just after Phase 3.
 4. **Hex grid** — optional gridded image upload, overlay toggle, calibration
    flow, measure tool.
 5. **Later ideas** — pin type filters, routes/paths with travel time, secret
