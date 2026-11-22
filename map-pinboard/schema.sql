@@ -59,6 +59,12 @@ create table if not exists public.map_pins (
   -- in map_pin_events below, so one pin can carry several events over the years.)
   child_map_id      uuid references public.maps(id) on delete set null,
 
+  -- "Current year" view: a pin's active range runs from its earliest to its latest
+  -- linked timeline event. If still_exists is true (the default) it stays active
+  -- after the latest event (a city); if false it ends there (a one-off battle).
+  -- Pins with no linked events are timeless.
+  still_exists      boolean not null default true,
+
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
