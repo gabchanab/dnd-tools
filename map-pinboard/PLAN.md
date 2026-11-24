@@ -118,7 +118,7 @@ lifetime from its timeline events, which blurred the two.
 | Where events live | Per map (new `map_events` table), optional timeline link. |
 | Entering years | Age + year within the Age (or an absolute year); stored as absolute years. |
 | Old event-derived range / "Still exists" | Replaced by the pin's own start/end. `still_exists` is no longer used. |
-| Clicking an event in the key | Shows its pins, fades the rest. Independent of the Year view (the event selection wins while it is active). Click again or Esc to clear. |
+| Picking an event | One shared selection, three ways in: the **event dropdown in the Year view bar**, a row in the corner key, or a map-event link in a pin's panel. Picking sets the year to the event's start. A pin stays bright only if it is linked to the event **and** exists in the chosen year (either filter can also be used alone). "No event selected", Esc or clicking the row again clears the event and keeps the year; **Show all** clears both. |
 | Default state | Year view **off**: every pin and event normal. |
 
 **Behaviour:**
@@ -126,6 +126,7 @@ lifetime from its timeline events, which blurred the two.
 - With a year selected, a pin is `before` if Y < start, `after` if Y > end, else
   active; pins with neither date are "undated" and always shown. Faded pins are
   ~28% opacity (65% when selected), still clickable.
+- The Year view bar holds the Age select, the year box, the event dropdown (oldest first, with its year range), a summary ("150 AE · ⚑ Siege of Karth — 1 shown, 2 faded") and **Show all**.
 - Key rows: bold with a gold edge when the selected year is inside the event's
   range, dimmed when outside, all normal when the Year view is off. Each row
   shows its range and pin count; the header collapses the list and has a **+**.

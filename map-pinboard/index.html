@@ -124,6 +124,7 @@
     .mv-time select, .mv-time input { font-family: var(--font-body); font-size: .8rem; padding: 4px 8px; border-radius: 6px;
       border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); }
     .mv-time input[type=number] { width: 6.5rem; }
+    #tv-event { max-width: 280px; }
     .pin-row.dim { opacity: .45; }
     .pv-when { font-size: .8rem; color: var(--text-mid); margin: 0 0 .7rem; }
     .pv-state { display: block; width: fit-content; font-size: .72rem; padding: 2px 10px; border-radius: 12px; margin-bottom: .7rem; border: 1px solid var(--border-mid); color: var(--text-mid); }
@@ -409,11 +410,11 @@ function pinTimeStatus(pin) {
   return s != null && Y < s ? 'before' : e != null && Y > e ? 'after' : 'active';
 }
 
-// A pin is faded when it did not exist in the selected year. While an event is selected in the key that wins:
-// the event's pins stay bright and every other pin fades, whatever the year.
+// A pin stays bright only if it passes every filter that is on: linked to the selected event (if one is
+// selected) AND existing in the selected year (if the Year view is on). Anything else fades.
 function isFaded(pin) {
   const ev = selectedEventId && mapEvents.find(e => e.id === selectedEventId);
-  if (ev) return !ev.pin_ids.includes(pin.id);
+  if (ev && !ev.pin_ids.includes(pin.id)) return true;
   const s = pinTimeStatus(pin);
   return s === 'before' || s === 'after';
 }
@@ -491,7 +492,7 @@ function renderTimeControl() {
   if (timeView.mode === 'age' && !tlAges.some(a => a.id === timeView.ageId)) timeView.mode = 'off';   // Age was deleted
   const on = timeView.mode !== 'off';
   const ages = tlAges.slice().sort((a, b) => a.start_year - b.start_year);
-  el.className = 'mv-time' + (on ? ' on' : '');
+  el.className = 'mv-time' + (on || selectedEventId ? ' on' : '');
   el.innerHTML = '<span class="mv-time-label">⧗ Year view</span>' +
     '<select id="tv-mode" onchange="onTimeMode(this.value)">' +
       '<option value="off"' + (on ? '' : ' selected') + '>Off — show every pin</option>' +
@@ -501,10 +502,38 @@ function renderTimeControl() {
     '</select>' +
     (on
       ? '<input type="number" id="tv-year" step="1" value="' + (timeView.mode === 'age' ? timeView.rel : timeView.abs) + '" oninput="onTimeYear(this.value)" ' +
-        'title="' + (timeView.mode === 'age' ? 'Year within this Age (0 = its first year)' : 'Absolute year') + '">' +
-        '<span class="mp-hint" id="tv-hint"></span><button class="mp-btn" onclick="clearTimeView()">Show all</button>'
-      : (ages.length ? '' : '<span class="mp-hint">Add Ages in the Timeline Builder to pick a year by Age.</span>'));
+        'title="' + (timeView.mode === 'age' ? 'Year within this Age (0 = its first year)' : 'Absolute year') + '">'
+      : (ages.length ? '' : '<span class="mp-hint">Add Ages in the Timeline Builder to pick a year by Age.</span>')) +
+    '<select id="tv-event" onchange="onTimeEvent(this.value)" title="Show only the pins linked to an event"></select>' +
+    '<span class="mp-hint" id="tv-hint"></span>' +
+    (on || selectedEventId ? '<button class="mp-btn" onclick="clearTimeView()">Show all</button>' : '');
+  renderEventSelect();
   updateTimeHint();
+}
+
+// The event dropdown in the Year view bar. Rebuilt in place (not with the rest of the bar) so the year box keeps focus while typing.
+function renderEventSelect() {
+  const sel = $('tv-event');
+  if (!sel) return;
+  const evs = mapEvents.slice().sort(byStart);
+  sel.disabled = !!eventsError || !evs.length;
+  sel.innerHTML = '<option value="">' + (eventsError ? '⚑ Events unavailable' : evs.length ? '⚑ No event selected' : '⚑ No events yet') + '</option>' +
+    evs.map(ev => '<option value="' + ev.id + '">' + esc(ev.title) + ' (' + esc(eventRangeText(ev)) + ')</option>').join('');
+  sel.value = selectedEventId && evs.some(e => e.id === selectedEventId) ? selectedEventId : '';
+}
+
+// Picking an event also jumps the year to the event's start (see selectEvent); "No event" just clears the event.
+function onTimeEvent(v) {
+  if (formOpen()) { renderEventSelect(); return; }       // finish or cancel the open form first
+  if (v) selectEvent(v, true);
+  else if (selectedEventId) selectEvent(selectedEventId);
+}
+
+// Set the Year view to an absolute year, using the Age that contains it when there is one.
+function setYearTo(abs) {
+  const age = ageOf(abs);
+  if (age) Object.assign(timeView, { mode: 'age', ageId: age.id, rel: abs - age.start_year });
+  else Object.assign(timeView, { mode: 'abs', abs });
 }
 
 function onTimeMode(v) {
@@ -521,7 +550,7 @@ function onTimeYear(v) {
   onTimeChanged();
 }
 
-function clearTimeView() { timeView.mode = 'off'; renderTimeControl(); onTimeChanged(); }
+function clearTimeView() { timeView.mode = 'off'; selectedEventId = null; renderTimeControl(); onTimeChanged(); }
 
 // Re-fade markers; refresh the side panel too unless a form is open (re-rendering it would lose typing).
 function onTimeChanged() {
@@ -533,13 +562,13 @@ function updateTimeHint() {
   const h = $('tv-hint');
   if (!h) return;
   const Y = activeYear();
-  if (Y === null) { h.textContent = 'Enter a year.'; return; }
-  let active = 0, timeless = 0, faded = 0;
-  pins.forEach(p => { const s = pinTimeStatus(p); if (s === 'active') active++; else if (s === 'timeless') timeless++; else faded++; });
-  const lab = yearLabel(Y);
-  h.textContent = lab + (lab === 'Year ' + Y ? '' : ' (absolute year ' + Y + ')') + ' — ' + active + ' active' +
-    (timeless ? ', ' + timeless + ' undated' : '') + ', ' + faded + ' faded' +
-    (selectedEventId ? ' (an event is selected, so its pins are shown instead)' : '');
+  const ev = selectedEventId && mapEvents.find(e => e.id === selectedEventId);
+  if (Y === null && !ev) { h.textContent = timeView.mode !== 'off' ? 'Enter a year.' : ''; return; }
+  const faded = pins.filter(isFaded).length;
+  const parts = [];
+  if (Y !== null) { const lab = yearLabel(Y); parts.push(lab + (lab === 'Year ' + Y ? '' : ' (absolute year ' + Y + ')')); }
+  if (ev) parts.push('⚑ ' + ev.title);
+  h.textContent = parts.join(' · ') + ' — ' + (pins.length - faded) + ' shown, ' + faded + ' faded';
 }
 
 // Fade pins that did not exist yet / no longer exist in the selected year (still visible, still clickable).
@@ -1144,7 +1173,11 @@ function toggleKey() { keyCollapsed = !keyCollapsed; renderKey(); }
 function selectEvent(id, forceOn) {
   if (formOpen()) return;
   if (selectedId) selectPin(null);
+  const prev = selectedEventId;
   selectedEventId = forceOn ? id : selectedEventId === id ? null : id;
+  const ev = selectedEventId && mapEvents.find(e => e.id === selectedEventId);
+  if (ev && selectedEventId !== prev) setYearTo(ev.start_year);      // jump the year to when the event began
+  renderTimeControl();
   renderPanel();
 }
 
@@ -1169,7 +1202,7 @@ function eventHtml(ev) {
       '<button class="mp-btn" onclick="selectEvent(\'' + ev.id + '\')">Show all pins</button>' +
       '<button class="mp-btn mp-btn-danger" onclick="deleteEvent(\'' + ev.id + '\')">Delete</button>' +
     '</div>' +
-    '<div class="mp-hint" style="margin-top:1rem">This event\'s pins stay bright and every other pin is faded.</div>';
+    '<div class="mp-hint" style="margin-top:1rem">Pins linked to this event stay bright (if they exist in the chosen year); every other pin is faded.</div>';
 }
 
 function beginEventForm(mode, ev) {
@@ -1271,8 +1304,9 @@ async function saveEvent() {
     try { await syncLinks('event_id', ev.id, wanted); ev.pin_ids = wanted; }
     catch (e) { linkError = e; await reloadEventLinks(); }
   }
-  if (isNew) { mapEvents.push(ev); selectedEventId = ev.id; }
+  if (isNew) { mapEvents.push(ev); selectedEventId = ev.id; setYearTo(ev.start_year); }
   endEventForm();
+  renderTimeControl();
   renderPanel();
   if (linkError) alert('The event was saved, but its pins could not be updated:\n' + (linkError.message || linkError));
 }
@@ -1285,6 +1319,7 @@ async function deleteEvent(id) {
   mapEvents = mapEvents.filter(e => e.id !== id);
   if (selectedEventId === id) selectedEventId = null;
   if (evForm) endEventForm();
+  renderTimeControl();
   renderPanel();
 }
 
@@ -1336,7 +1371,7 @@ function listHtml() {
     (pins.length ? '<input type="search" id="pin-search" placeholder="Search pins…" value="' + esc(pinSearch) + '" oninput="onPinSearch(this.value)">' : '') +
     '<div id="pin-rows">' + pinRowsHtml() + '</div>' +
     '<div class="mp-hint" style="margin-top:1rem">Scroll to zoom, drag to pan. Click a pin to select it; a selected pin can be dragged to a new spot. ' +
-    'The type chips above the map hide pins from both the map and this list. The Events key (top right of the map) lists what happens in the world: click an event to show only its pins.</div>';
+    'The type chips above the map hide pins from both the map and this list. The Events key (top right of the map) lists what happens in the world: pick an event (here or in the Year view bar) to show only its pins.</div>';
 }
 
 function onPinSearch(v) {
