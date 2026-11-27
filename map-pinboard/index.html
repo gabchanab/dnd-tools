@@ -147,12 +147,7 @@
     .mv-time .mp-hint:empty { display: none; }
     #view-map.has-panel .mv-time { left: calc((100% - var(--panel-w) - 10px) / 2); max-width: calc(100% - var(--panel-w) - 200px); }
 
-    /* top right: events list; slides aside for the details drawer */
-    .mv-key { top: 10px; right: 10px; width: 240px; max-height: 60%; display: flex; flex-direction: column; transition: right .18s ease-out; }
-    #view-map.has-panel .mv-key { right: calc(var(--panel-w) + 20px); }
-    .mv-key-head { display: flex; align-items: center; justify-content: space-between; gap: .4rem; padding: .55rem .75rem; flex: none; cursor: pointer; user-select: none;
-      font-family: var(--font-heading); font-size: .66rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-dim); }
-    .mv-key-list { overflow-y: auto; padding: 0 .4rem .45rem; }
+    /* event rows in the search panel */
     .mv-key-row { display: flex; align-items: stretch; gap: 8px; padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1.5px solid transparent;
       font-size: .8rem; color: var(--text); }
     .mv-key-text { min-width: 0; }
@@ -168,7 +163,6 @@
     .mv-key-row.sel { border-color: var(--gold-dim); box-shadow: 0 0 8px rgba(255,190,30,.7); }   /* only a clicked event has a border */
     .mv-key-ttl { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .mv-key-yrs { font-size: .68rem; color: var(--text-dim); }
-    .mv-key-note { font-size: .72rem; color: var(--text-dim); font-style: italic; padding: .2rem .4rem .2rem; }
 
     /* right: details drawer */
     .mv-side { top: 10px; right: 10px; bottom: 10px; width: var(--panel-w); box-sizing: border-box; overflow-y: auto; overflow-x: hidden;
@@ -221,8 +215,6 @@
 
     @media (max-width: 800px) {
       .mv-left { right: 10px; width: auto; bottom: 200px; }
-      .mv-key { top: 62px; width: 180px; max-height: 40%; }
-      #view-map.has-panel .mv-key { right: 10px; }
       .mv-side { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 58%; }
       .mv-time, #view-map.has-panel .mv-time { left: 10px; right: 10px; transform: none; width: auto; max-width: none; }
       #map .leaflet-bottom .leaflet-control { margin-bottom: 118px; }
@@ -273,7 +265,7 @@
       <div class="mv-crumbs" id="mv-crumbs"></div>
       <div class="mv-name" id="mv-name"></div>
     </div>
-    <button type="button" class="mv-float mv-pins-btn" id="pins-btn" onclick="togglePins(true)"><i class="ti ti-search" aria-hidden="true"></i> Pins and filters</button>
+    <button type="button" class="mv-float mv-pins-btn" id="pins-btn" onclick="togglePins(true)"><i class="ti ti-search" aria-hidden="true"></i> Locations and Events</button>
     <div class="mv-float mv-pins" id="pins-panel" hidden>
       <div class="mv-pins-head">
         <div class="mv-seg" role="group" aria-label="Search and filter">
@@ -289,7 +281,6 @@
 
   <div class="mv-float mv-banner" id="mv-banner" hidden><span>Click the map to place the pin</span><button type="button" class="mp-btn" onclick="setAddMode(false)">Cancel</button></div>
   <div class="mv-float mv-notice" id="mv-notice" hidden></div>
-  <div class="mv-float mv-key" id="mv-key" hidden></div>
 
   <div class="mv-edit">
     <button type="button" class="mv-float mv-edit-btn" id="edit-btn" onclick="toggleEditMenu()" aria-expanded="false"><i class="ti ti-edit" aria-hidden="true"></i> Edit</button>
@@ -363,12 +354,11 @@ let resizeObs = null;         // ResizeObserver keeping Leaflet's size in sync w
 //   mode 'off' = every pin normal;  'age' = year relative to an Age's start;  'abs' = absolute year
 let timeView = { mode: 'off', ageId: null, rel: 0, abs: 0 };
 let childLinks = [];          // [{ map_id, child_map_id }] across all maps, for breadcrumbs
-// Map events: things that happen in the world (start/end year), listed in the key bubble. Each carries pin_ids.
+// Map events: things that happen in the world (start/end year), listed in the search panel. Each carries pin_ids.
 let mapEvents = [];
 let selectedEventId = null;   // event clicked in the list: its pins are highlighted (independent of year fading)
 let evForm = null;            // { mode:'new'|'edit', ev?, pinIds:[], tlId } while the event form is open
 let eventsError = null;       // error loading map events (e.g. migration 004 not run yet)
-let keyCollapsed = true;      // the events list starts folded away
 const formOpen = () => !!(formState || evForm);
 let replacing = false;        // a map image upload is in progress
 let userMoved = false;        // the view was panned/zoomed or jumped to a pin, so resizes must not re-fit it
@@ -441,7 +431,7 @@ function eventLabel(ev) { return ev.title + ' — ' + eventYearLabel(ev); }
 
 // ─── Year view ───────────────────────────────────────────────────────────────
 // A pin has its own optional start_year / end_year (absolute years): blank start = always existed,
-// blank end = still exists today. Map events have a start and end year too and live in the key bubble.
+// blank end = still exists today. Map events have a start and end year too.
 // Linking a pin to timeline events is only a reference now; it no longer decides when the pin exists.
 
 function ageRangeLabel(a) {   // same wording as the timeline page
@@ -482,7 +472,7 @@ function pinTimeStatus(pin) {
 
 // Two independent pin states:
 //   faded       = it does not exist in the selected year (Year view)
-//   highlighted = it is linked to the event clicked in the events list
+//   highlighted = it is linked to the event clicked in the events list (search panel)
 function isFaded(pin) {
   const s = pinTimeStatus(pin);
   return s === 'before' || s === 'after';
@@ -660,7 +650,6 @@ function applyTimeView() {
   });
   updateTimeHint();
   renderList();
-  renderKey();
 }
 
 // Panel text for a pin: when it existed, and where it stands in the selected year.
@@ -810,7 +799,7 @@ function destroyMapView() {
   hiddenEventTypes = new Set(); eventSearch = ''; listMode = 'pins';
   mapEvents = []; selectedEventId = null; evForm = null; eventsError = null; yearJump = null;
   childLinks = [];
-  $('mv-filters').hidden = true; $('mv-key').hidden = true; $('add-pin-btn').disabled = false;
+  $('mv-filters').hidden = true; $('add-pin-btn').disabled = false;
   $('mv-time').hidden = true; $('mv-banner').hidden = true; showNotice('');
   $('side-panel').hidden = true; $('side-panel').innerHTML = ''; $('view-map').classList.remove('has-panel');
   $('pins-panel').hidden = true; $('pins-btn').hidden = false; setListMode('pins'); $('pin-rows').innerHTML = ''; $('pin-count').textContent = '0'; $('event-count').textContent = '0';
@@ -1277,46 +1266,21 @@ function focusPin(id) {
   if (shift.x || shift.y) { userMoved = true; lmap.panBy(shift, { animate: true }); }
 }
 
-// ─── Map events: the key bubble, event panel and event form ─────────────────
-function renderKey() {
-  const el = $('mv-key');
-  if (!lmap) { el.hidden = true; return; }
-  el.hidden = false;
-  const oldList = el.querySelector('.mv-key-list');
-  const scroll = oldList ? oldList.scrollTop : 0;
-  const evs = mapEvents.filter(eventTypeShown).sort(byStart);
-  const rows = eventsError
-    ? '<div class="mv-key-note" style="color:#a33">Could not load events: ' + esc(eventsError) + '<br>Have you run <code>migration-004</code>?</div>'
-    : evs.length
-      ? evs.map(ev => eventRowHtml(ev, 'selectEvent')).join('')
-      : '<div class="mv-key-note">' + (mapEvents.length ? 'All events are filtered out.' : 'No events yet. Choose Edit, then Add event.') + '</div>';
-  const count = evs.length === mapEvents.length ? mapEvents.length : evs.length + ' of ' + mapEvents.length;
-  el.innerHTML = '<div class="mv-key-head" onclick="toggleKey()" title="Show or hide the list"><span>' + ic('flag') + ' Events (' + count + ')</span>' +
-      ic(keyCollapsed ? 'chevron-right' : 'chevron-down') + '</div>' +
-    (keyCollapsed ? '' : '<div class="mv-key-list">' + rows + '</div>');
-  const list = el.querySelector('.mv-key-list');
-  if (list) list.scrollTop = scroll;
-}
-
-// ─── Event types ─────────────────────────────────────────────────────────────
+// ─── Map events: event list rows, event panel and event form ────────────────
 const eventTypeKey = ev => EVENT_TYPES[ev.event_type] ? ev.event_type : 'none';
-// A type filtered off hides the event from the lists, except the one you have selected.
-const eventTypeShown = ev => !hiddenEventTypes.has(eventTypeKey(ev)) || ev.id === selectedEventId;
 function eventBar(type) {
   const t = EVENT_TYPES[type];
   return '<span class="ev-bar"' + (t ? ' style="--c:' + t.color + '"' : '') + '></span>';
 }
 
-// One row of an event list (the key bubble and the search panel share it).
-function eventRowHtml(ev, onClick) {
+// One row of the event list in the search panel.
+function eventRowHtml(ev) {
   const st = eventStatus(ev), t = EVENT_TYPES[ev.event_type];
-  return '<div class="mv-key-row' + (st === 'in' ? ' in' : st === 'out' ? ' out' : '') + (ev.id === selectedEventId ? ' sel' : '') + '" onclick="' + onClick + '(\'' + ev.id + '\')" ' +
+  return '<div class="mv-key-row' + (st === 'in' ? ' in' : st === 'out' ? ' out' : '') + (ev.id === selectedEventId ? ' sel' : '') + '" onclick="pickEvent(\'' + ev.id + '\')" ' +
     'title="' + esc(ev.title) + (t ? ' (' + t.label + ')' : '') + ' — click to highlight its pins">' + eventBar(ev.event_type) +
     '<div class="mv-key-text"><div class="mv-key-ttl">' + esc(ev.title) + '</div>' +
-    '<div class="mv-key-yrs">' + esc(eventRangeText(ev)) + ' · ' + ev.pin_ids.length + ' pin' + (ev.pin_ids.length === 1 ? '' : 's') + '</div></div></div>';
+    '<div class="mv-key-yrs">' + esc(eventRangeText(ev)) + ' · ' + ev.pin_ids.length + ' location' + (ev.pin_ids.length === 1 ? '' : 's') + '</div></div></div>';
 }
-
-function toggleKey() { keyCollapsed = !keyCollapsed; renderKey(); }
 
 // Click an event: its pins are highlighted and the year jumps to its start. Click again (or close the drawer) to
 // clear the highlight and put the year back.
@@ -1547,9 +1511,9 @@ function listedEvents() {
 }
 
 function eventListHtml() {
-  if (eventsError) return '<div class="mp-empty" style="color:#a33">Could not load events.</div>';
+  if (eventsError) return '<div class="mp-empty" style="color:#a33">Could not load events: ' + esc(eventsError) + '<br>Have you run <code>migration-004</code>?</div>';
   const list = listedEvents();
-  if (list.length) return list.map(ev => eventRowHtml(ev, 'pickEvent')).join('');
+  if (list.length) return list.map(eventRowHtml).join('');
   return '<div class="mp-empty">' + (mapEvents.length ? 'No events match.' : 'No events yet. Choose Edit, then Add event.') + '</div>';
 }
 

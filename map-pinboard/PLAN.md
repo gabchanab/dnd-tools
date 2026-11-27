@@ -106,8 +106,8 @@ lifetime from its timeline events, which blurred the two.
 - **Map events** (`map_events`, per map) are things that happen: a title,
   description, **start and end year** (blank end = single year) and an optional
   link to a timeline event (just a reference; picking one fills an empty title
-  and start year). They live in an **Events key**, a bubble in the top-right
-  corner of the map, listed oldest first.
+  and start year). They are listed oldest first on
+  the **Events** side of the search panel.
 - **Pin ↔ event links** (`map_event_pins`, many-to-many) can be edited from the
   pin form or the event form.
 
@@ -127,9 +127,9 @@ lifetime from its timeline events, which blurred the two.
   active; pins with neither date are "undated" and always shown. Faded pins are
   ~28% opacity (65% when selected), still clickable.
 - The year control holds the Age select, the year box with ‹ › steps, a summary and **Show all**.
-- Key rows: bold with a gold edge when the selected year is inside the event's
+- Event rows: tinted and bold when the selected year is inside the event's
   range, dimmed when outside, all normal when the Year view is off. Each row
-  shows its range and pin count; the header collapses the list and has a **+**.
+  shows its range and location (linked pin) count.
 - Pin panel shows "Exists: …" and its state in the selected year, plus the map
   events it belongs to (click one to highlight it). Event panel shows its
   range, state, linked pins (click to focus) and timeline reference.
@@ -150,8 +150,7 @@ parchment style. Replaces the earlier stacked toolbar / bars / side panel.
 
 | Where | What |
 |---|---|
-| Top left | "All maps", breadcrumbs, map name; **Pins and filters** button: a **Pins / Events** toggle flips the search box, type chips and list between the two. |
-| Top right | **Events** list (collapsible; folded by default). Slides aside when the drawer opens. |
+| Top left | "All maps", breadcrumbs, map name; **Locations and Events** button: a **Pins / Events** toggle flips the search box, type chips and list between the two. |
 | Right | **Details drawer**, only while a pin or event is selected or a form is open; circled ✕ closes. |
 | Bottom left | **Edit** menu (Add pin, Add event, Rename map, Replace image) above the zoom buttons. |
 | Bottom centre | **Year** control: Age, ‹ year ›, Show all. |
@@ -161,10 +160,11 @@ parchment style. Replaces the earlier stacked toolbar / bars / side panel.
   copied into `EVENT_TYPES` here (keep the two in step). Event lists show a
   vertical colour bar (neutral when untyped); the drawer shows a type badge.
   Needs [`migration-005-map-event-types.sql`](migration-005-map-event-types.sql).
-- Event type chips filter both the search panel and the top-right list (the
-  selected event stays listed). Search text only filters the search panel. Each
+- Event search and type chips only filter the list in the search panel. Each
   side of the toggle keeps its own search and filter. Type filters don't change
   which pins an event highlights.
+- The separate events list in the top-right corner was removed "for now"; the
+  search panel is the only events list.
 - **Two independent pin states:** *faded* = does not exist in the selected year;
   *highlighted* (glow) = linked to the event clicked in the list. A pin can be both.
 - Clicking an event highlights its pins and jumps the year to its start; click it
