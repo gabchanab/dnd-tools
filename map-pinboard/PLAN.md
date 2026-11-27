@@ -160,8 +160,11 @@ parchment style. Replaces the earlier stacked toolbar / bars / side panel.
 - **Two independent pin states:** *faded* = does not exist in the selected year;
   *highlighted* (glow) = linked to the event clicked in the list. A pin can be both.
 - Clicking an event highlights its pins and jumps the year to its start; click it
-  again (or close the drawer) to clear. The year bar no longer has an event dropdown.
-- Events whose range covers the selected year light up in the list.
+  again (or close the drawer, or Esc) to clear. Clearing also puts the year view
+  back how it was, unless you changed the year in the meantime. The year bar no
+  longer has an event dropdown.
+- Events whose range covers the selected year light up in the list (tint and bold
+  title; only a clicked event has a border).
 - Pins are teardrops (tip marks the spot) with [Tabler](https://tabler.io/icons)
   line icons (CDN, `@tabler/icons-webfont@3.19.0`) instead of emojis. Fantasy
   silhouettes (game-icons.net, needs a credit line) were considered for later.

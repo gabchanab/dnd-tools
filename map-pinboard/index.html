@@ -150,14 +150,14 @@
     .mv-key-head { display: flex; align-items: center; justify-content: space-between; gap: .4rem; padding: .55rem .75rem; flex: none; cursor: pointer; user-select: none;
       font-family: var(--font-heading); font-size: .66rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-dim); }
     .mv-key-list { overflow-y: auto; padding: 0 .4rem .45rem; }
-    .mv-key-row { padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1.5px solid transparent; border-left: 3px solid transparent;
+    .mv-key-row { padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1.5px solid transparent;
       font-size: .8rem; color: var(--text); }
     .mv-key-row + .mv-key-row { margin-top: 2px; }
     .mv-key-row:hover { background: var(--bg-inset); }
-    .mv-key-row.in { border-left-color: var(--gold-dim); background: #f0dcae; }
+    .mv-key-row.in { background: #f0dcae; }                 /* covers the selected year: tint + bold, no border */
     .mv-key-row.in .mv-key-ttl { font-weight: 700; }
     .mv-key-row.out { color: var(--text-dim); }
-    .mv-key-row.sel { border-color: var(--gold-dim); border-left-color: var(--gold-dim); box-shadow: 0 0 8px rgba(255,190,30,.7); }
+    .mv-key-row.sel { border-color: var(--gold-dim); box-shadow: 0 0 8px rgba(255,190,30,.7); }   /* only a clicked event has a border */
     .mv-key-ttl { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .mv-key-yrs { font-size: .68rem; color: var(--text-dim); }
     .mv-key-note { font-size: .72rem; color: var(--text-dim); font-style: italic; padding: .2rem .4rem .2rem; }
@@ -575,6 +575,20 @@ function setYearTo(abs) {
   else Object.assign(timeView, { mode: 'abs', abs });
 }
 
+// Selecting an event jumps the year to its start. Deselecting puts the year view back how it was before,
+// unless you changed the year yourself in the meantime (then your year stays).
+let yearJump = null;          // { before: copy of timeView, to: the absolute year jumped to }
+const stillOnJump = () => !!yearJump && activeYear() === yearJump.to;
+function jumpYearTo(abs) {
+  const before = stillOnJump() ? yearJump.before : { ...timeView };   // event -> event keeps the original
+  setYearTo(abs);
+  yearJump = { before, to: abs };
+}
+function undoYearJump() {
+  if (stillOnJump()) Object.assign(timeView, yearJump.before);
+  yearJump = null;
+}
+
 function onTimeMode(v) {
   if (v === 'off') timeView.mode = 'off';
   else if (v === 'abs') { const y = activeYear(); timeView.mode = 'abs'; timeView.abs = y === null ? 0 : y; }
@@ -768,7 +782,7 @@ function destroyMapView() {
   markers.clear();
   currentMap = null; pins = []; selectedId = null; formState = null; addMode = false;
   hiddenTypes = new Set(); pinSearch = ''; renaming = false;
-  mapEvents = []; selectedEventId = null; evForm = null; eventsError = null;
+  mapEvents = []; selectedEventId = null; evForm = null; eventsError = null; yearJump = null;
   childLinks = [];
   $('mv-filters').hidden = true; $('mv-key').hidden = true; $('add-pin-btn').disabled = false;
   $('mv-time').hidden = true; $('mv-banner').hidden = true; showNotice('');
@@ -1265,14 +1279,18 @@ function renderKey() {
 
 function toggleKey() { keyCollapsed = !keyCollapsed; renderKey(); }
 
-// Click an event: its pins are highlighted and the year jumps to its start. Click again (or close the drawer) to clear.
+// Click an event: its pins are highlighted and the year jumps to its start. Click again (or close the drawer) to
+// clear the highlight and put the year back.
 function selectEvent(id, forceOn) {
   if (formOpen()) return;
   if (selectedId) selectPin(null);
   const prev = selectedEventId;
   selectedEventId = forceOn ? id : selectedEventId === id ? null : id;
   const ev = selectedEventId && mapEvents.find(e => e.id === selectedEventId);
-  if (ev && selectedEventId !== prev) setYearTo(ev.start_year);      // jump the year to when the event began
+  if (selectedEventId !== prev) {
+    if (ev) jumpYearTo(ev.start_year);      // jump the year to when the event began
+    else undoYearJump();
+  }
   renderTimeControl();
   renderPanel();
 }
@@ -1398,7 +1416,7 @@ async function saveEvent() {
     try { await syncLinks('event_id', ev.id, wanted); ev.pin_ids = wanted; }
     catch (e) { linkError = e; await reloadEventLinks(); }
   }
-  if (isNew) { mapEvents.push(ev); selectedEventId = ev.id; setYearTo(ev.start_year); }
+  if (isNew) { mapEvents.push(ev); selectedEventId = ev.id; jumpYearTo(ev.start_year); }
   endEventForm();
   renderTimeControl();
   renderPanel();
@@ -1411,7 +1429,7 @@ async function deleteEvent(id) {
   const { error } = await supabase.from('map_events').delete().eq('id', id);
   if (error) { alert('Could not delete: ' + error.message); return; }
   mapEvents = mapEvents.filter(e => e.id !== id);
-  if (selectedEventId === id) selectedEventId = null;
+  if (selectedEventId === id) { selectedEventId = null; undoYearJump(); }
   if (evForm) endEventForm();
   renderTimeControl();
   renderPanel();
