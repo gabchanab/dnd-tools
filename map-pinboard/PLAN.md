@@ -150,13 +150,21 @@ parchment style. Replaces the earlier stacked toolbar / bars / side panel.
 
 | Where | What |
 |---|---|
-| Top left | "All maps", breadcrumbs, map name; **Pins and filters** button (search, type chips, pin list). |
-| Top right | **Events** list (collapsible; folded by default on phones). Slides aside when the drawer opens. |
+| Top left | "All maps", breadcrumbs, map name; **Pins and filters** button: a **Pins / Events** toggle flips the search box, type chips and list between the two. |
+| Top right | **Events** list (collapsible; folded by default). Slides aside when the drawer opens. |
 | Right | **Details drawer**, only while a pin or event is selected or a form is open; circled ✕ closes. |
 | Bottom left | **Edit** menu (Add pin, Add event, Rename map, Replace image) above the zoom buttons. |
 | Bottom centre | **Year** control: Age, ‹ year ›, Show all. |
 
 - **Delete** is only inside the Edit form of a pin or event.
+- **Event types** (optional) use the timeline page's keys, labels and colours,
+  copied into `EVENT_TYPES` here (keep the two in step). Event lists show a
+  vertical colour bar (neutral when untyped); the drawer shows a type badge.
+  Needs [`migration-005-map-event-types.sql`](migration-005-map-event-types.sql).
+- Event type chips filter both the search panel and the top-right list (the
+  selected event stays listed). Search text only filters the search panel. Each
+  side of the toggle keeps its own search and filter. Type filters don't change
+  which pins an event highlights.
 - **Two independent pin states:** *faded* = does not exist in the selected year;
   *highlighted* (glow) = linked to the event clicked in the list. A pin can be both.
 - Clicking an event highlights its pins and jumps the year to its start; click it

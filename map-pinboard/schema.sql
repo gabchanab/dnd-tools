@@ -81,6 +81,7 @@ create table if not exists public.map_events (
 
   title       text not null,
   description text,
+  event_type  text,   -- optional; same keys as the timeline page's event types
 
   -- Absolute years. A one-year event has end_year = start_year.
   start_year  integer not null,
