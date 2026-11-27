@@ -118,7 +118,7 @@ lifetime from its timeline events, which blurred the two.
 | Where events live | Per map (new `map_events` table), optional timeline link. |
 | Entering years | Age + year within the Age (or an absolute year); stored as absolute years. |
 | Old event-derived range / "Still exists" | Replaced by the pin's own start/end. `still_exists` is no longer used. |
-| Picking an event | One shared selection, three ways in: the **event dropdown in the Year view bar**, a row in the corner key, or a map-event link in a pin's panel. Picking sets the year to the event's start. A pin stays bright only if it is linked to the event **and** exists in the chosen year (either filter can also be used alone). "No event selected", Esc or clicking the row again clears the event and keeps the year; **Show all** clears both. |
+| Picking an event | Click it in the events list (or a map-event link in a pin's drawer): its pins are highlighted and the year jumps to its start. See *Map page layout*. |
 | Default state | Year view **off**: every pin and event normal. |
 
 **Behaviour:**
@@ -126,7 +126,7 @@ lifetime from its timeline events, which blurred the two.
 - With a year selected, a pin is `before` if Y < start, `after` if Y > end, else
   active; pins with neither date are "undated" and always shown. Faded pins are
   ~28% opacity (65% when selected), still clickable.
-- The Year view bar holds the Age select, the year box, the event dropdown (oldest first, with its year range), a summary ("150 AE · ⚑ Siege of Karth — 1 shown, 2 faded") and **Show all**.
+- The year control holds the Age select, the year box with ‹ › steps, a summary and **Show all**.
 - Key rows: bold with a gold edge when the selected year is inside the event's
   range, dimmed when outside, all normal when the Year view is off. Each row
   shows its range and pin count; the header collapses the list and has a **+**.
@@ -142,6 +142,34 @@ so existing pins start undated.
 **Not built (ideas):** a slider to scrub the year; remembering the year across
 reloads or putting it in the URL; map events shared across maps; showing events
 on the timeline page.
+
+## Map page layout (redesign, ✅ done)
+
+The map fills the browser window and everything else floats on it, in a
+parchment style. Replaces the earlier stacked toolbar / bars / side panel.
+
+| Where | What |
+|---|---|
+| Top left | "All maps", breadcrumbs, map name; **Pins and filters** button (search, type chips, pin list). |
+| Top right | **Events** list (collapsible; folded by default on phones). Slides aside when the drawer opens. |
+| Right | **Details drawer**, only while a pin or event is selected or a form is open; circled ✕ closes. |
+| Bottom left | **Edit** menu (Add pin, Add event, Rename map, Replace image) above the zoom buttons. |
+| Bottom centre | **Year** control: Age, ‹ year ›, Show all. |
+
+- **Delete** is only inside the Edit form of a pin or event.
+- **Two independent pin states:** *faded* = does not exist in the selected year;
+  *highlighted* (glow) = linked to the event clicked in the list. A pin can be both.
+- Clicking an event highlights its pins and jumps the year to its start; click it
+  again (or close the drawer) to clear. The year bar no longer has an event dropdown.
+- Events whose range covers the selected year light up in the list.
+- Pins are teardrops (tip marks the spot) with [Tabler](https://tabler.io/icons)
+  line icons (CDN, `@tabler/icons-webfont@3.19.0`) instead of emojis. Fantasy
+  silhouettes (game-icons.net, needs a credit line) were considered for later.
+- The map opens covering the window; zooming out stops when the whole image shows.
+- Under 800px wide the drawer becomes a bottom sheet.
+
+Where the sections above describe the older toolbar, side panel or event
+dropdown, or say an event selection fades other pins, this section wins.
 
 ## Phases
 

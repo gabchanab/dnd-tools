@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../character builder/static/css/sheet.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
   <style>
     [hidden] { display: none !important; }
     body { padding: 3rem 1.2rem 2rem; }
@@ -65,132 +66,159 @@
     .mp-card-sub { font-size: .68rem; color: var(--text-dim); font-style: italic; }
     .mp-card-actions { display: flex; gap: .4rem; margin-top: .3rem; }
 
-    /* ── Map view ── */
-    /* The map view is a flex column (toolbar, year view, filters, then the map+panel filling what's left),
-       so adding or hiding a row never needs a hard-coded height. */
-    #view-map .mp-wrap { max-width: 1500px; display: flex; flex-direction: column; height: calc(100vh - 5rem); min-height: 560px; }
-    #view-map .mp-wrap > * { flex: none; }
-    .mv-toolbar { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: .8rem; }
-    .mv-name { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--gold-dim); letter-spacing: .06em; margin-right: auto; }
-    #view-map .mp-wrap > .mv-body { flex: 1; min-height: 0; }
-    .mv-body { display: grid; grid-template-columns: 1fr 330px; grid-template-rows: minmax(0, 1fr); gap: 1rem; }
-    .mv-mapbox { position: relative; border: 1px solid var(--border-mid); border-radius: 10px; overflow: hidden; background: var(--bg-warm); }
+    /* ── Map view: the map fills the window and everything else floats on it (parchment style) ── */
+    body.map-open { overflow: hidden; }
+    #view-map { position: fixed; inset: 0; z-index: 2; color: var(--text); --panel-w: 330px;
+      --bg-panel: #fbf3e4; --bg-inset: #f5e9d0; --bg-warm: #d9c9a3; --border: #e0cb9a; --border-mid: #b99345;
+      --gold: #b99345; --gold-dim: #8a6414; --gold-glow: rgba(185,147,69,.2); --gold-glow-md: rgba(185,147,69,.38);
+      --text: #3d2c14; --text-mid: #5c4a2e; --text-dim: #8a7656; }
     #map { position: absolute; inset: 0; background: var(--bg-warm); font-family: var(--font-body); }
     #map.adding, #map.adding .leaflet-interactive { cursor: crosshair; }
-    .mv-banner { position: absolute; top: .7rem; left: 50%; transform: translateX(-50%); z-index: 800;
-                 background: rgba(255,250,248,.94); border: 1px solid var(--gold); border-radius: 20px; padding: .35rem 1rem;
-                 font-size: .75rem; color: var(--gold-dim); box-shadow: 0 0 12px var(--gold-glow); pointer-events: none; }
-    .panel { resize: none; }
-    .mv-side { overflow-y: auto; overflow-x: hidden; margin: 0; }
+    .mv-float { position: absolute; z-index: 1000; background: var(--bg-panel); border: 1px solid var(--border-mid); border-radius: 10px;
+      box-shadow: 0 3px 16px rgba(40,25,5,.28); font-family: var(--font-body); }
+    #view-map i.ti { line-height: 1; vertical-align: -.12em; }
 
-    .pin-wrap { background: none; border: none; }
-    .pin { width: 30px; height: 30px; border-radius: 50%; background: #fffaf5; border: 3px solid var(--c, #6b4f9a);
-           display: flex; align-items: center; justify-content: center; font-size: 15px; line-height: 1;
-           box-shadow: 0 2px 6px rgba(0,0,0,.35); transition: transform .12s; }
-    .pin-wrap:hover .pin { transform: scale(1.12); }
-    .pin.selected { transform: scale(1.25); box-shadow: 0 0 0 4px var(--gold-glow-md), 0 2px 8px rgba(0,0,0,.4); }
-    .pin.draft { border-style: dashed; }
-    .pin { position: relative; }
-    .pin-badge { position: absolute; right: -7px; bottom: -7px; width: 17px; height: 17px; border-radius: 50%;
-      background: var(--gold); color: #fff; border: 1.5px solid #fffaf5; font-size: 10px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; }
-
-    .mv-crumbs { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+    /* top left: breadcrumbs + name, then the pins list */
+    .mv-left { position: absolute; top: 10px; left: 10px; bottom: 140px; width: 300px; z-index: 1050; display: flex; flex-direction: column;
+      align-items: flex-start; gap: 8px; pointer-events: none; }
+    .mv-left > * { pointer-events: auto; }
+    .mv-left > .mv-float, .mv-edit > .mv-float { position: relative; }
+    .mv-top { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; padding: 6px 12px 6px 8px; max-width: 100%; box-sizing: border-box; }
+    .mv-crumbs { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
     .mv-crumb-sep { color: var(--text-dim); font-size: .8rem; }
-    .mv-crumb { font-family: var(--font-heading); font-size: .66rem; font-weight: 600; letter-spacing: .06em; padding: 5px 12px;
+    .mv-crumb { font-family: var(--font-heading); font-size: .66rem; font-weight: 600; letter-spacing: .06em; padding: 5px 10px;
       border-radius: 16px; cursor: pointer; background: transparent; border: 1px solid var(--border); color: var(--text-mid); }
     .mv-crumb:hover { border-color: var(--gold); color: var(--gold-dim); }
+    .mv-name { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--gold-dim); letter-spacing: .05em; }
+    .mv-name-input { font-family: var(--font-display); font-size: .95rem; font-weight: 700; color: var(--gold-dim);
+      padding: 3px 8px; border-radius: 6px; border: 1px solid var(--gold); background: var(--bg-inset); width: 220px; max-width: 100%; }
+    .mv-pins-btn { cursor: pointer; padding: 7px 14px; font-size: .85rem; color: var(--text-mid); }
+    .mv-pins { width: 100%; box-sizing: border-box; padding: 8px 12px 10px; overflow-y: auto; flex: 0 1 auto; min-height: 0; }
+    .mv-pins-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
+    .mv-pins-head .panel-title { margin: 0; }
+    #pin-search { width: 100%; box-sizing: border-box; font-family: var(--font-body); font-size: .82rem; padding: 6px 10px; border-radius: 6px;
+      border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); margin-bottom: .6rem; }
+    .mv-filters { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .6rem; align-items: center; }
+    .mv-chip { font-family: var(--font-heading); font-size: .6rem; font-weight: 600; letter-spacing: .05em;
+      padding: 4px 9px; border-radius: 16px; cursor: pointer; background: #fffaf2; border: 2px solid var(--c); color: var(--text-mid); }
+    .mv-chip.off { opacity: .45; border-style: dashed; text-decoration: line-through; }
+    .mv-chip span { color: var(--text-dim); margin-left: .25rem; }
+    .pin-row { display: flex; align-items: center; gap: .55rem; padding: 5px 6px; border-radius: 6px; cursor: pointer;
+      border: 1px solid transparent; font-size: .84rem; color: var(--text); }
+    .pin-row:hover { background: var(--bg-inset); border-color: var(--border); }
+    .pin-row-icon { width: 22px; height: 22px; box-sizing: border-box; border-radius: 50%; border: 2px solid var(--c); color: var(--c); background: #fff;
+      display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+    .pin-row-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pin-row.dim { opacity: .45; }
+    .pin-row.lit { background: #fbe7a8; border-color: #d9a520; }
 
+    /* top centre: placing banner and load notices */
+    .mv-banner, .mv-notice { top: 10px; left: 50%; transform: translateX(-50%); z-index: 1200; display: flex; align-items: center; gap: .7rem;
+      padding: 7px 12px; font-size: .82rem; color: var(--text-mid); width: max-content; max-width: min(480px, calc(100% - 20px)); box-sizing: border-box; }
+    .mv-notice.err { color: #a33; }
+
+    /* bottom left: Edit menu above the zoom buttons */
+    .mv-edit { position: absolute; left: 10px; bottom: 84px; z-index: 1060; display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 8px; }
+    .mv-edit-btn { cursor: pointer; padding: 7px 14px; font-size: .9rem; color: var(--gold-dim); font-weight: 600; }
+    .mv-edit-btn.mp-btn-active { background: #f0dcae; }
+    .mv-edit-menu { display: flex; flex-direction: column; padding: 4px; min-width: 175px; }
+    .mv-menu-item { display: flex; align-items: center; gap: .55rem; border: 0; background: transparent; cursor: pointer; padding: 8px 10px;
+      border-radius: 6px; font-family: var(--font-body); font-size: .88rem; color: var(--text); text-align: left; }
+    .mv-menu-item:hover:not(:disabled) { background: var(--bg-inset); }
+    .mv-menu-item:disabled { opacity: .45; cursor: default; }
+    #map .leaflet-bar { border: 1px solid var(--border-mid); border-radius: 10px; overflow: hidden; box-shadow: 0 3px 16px rgba(40,25,5,.28); }
+    #map .leaflet-bar a { background: var(--bg-panel); color: var(--gold-dim); border-bottom-color: var(--border); width: 34px; height: 30px; line-height: 30px; }
+    #map .leaflet-bar a.leaflet-disabled { opacity: .45; }
+
+    /* bottom centre: the year */
+    .mv-time { left: 50%; transform: translateX(-50%); bottom: 10px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+      gap: .5rem; padding: 7px 12px; width: max-content; max-width: calc(100% - 190px); box-sizing: border-box; color: var(--gold-dim); }
+    .mv-time.on { box-shadow: 0 0 0 3px var(--gold-glow-md), 0 3px 16px rgba(40,25,5,.28); }
+    .mv-time select, .mv-time input { font-family: var(--font-body); font-size: .84rem; padding: 4px 8px; border-radius: 6px;
+      border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); max-width: 230px; }
+    .mv-time input[type=number] { width: 5.2rem; text-align: center; font-weight: 700; }
+    .tv-step { display: inline-flex; align-items: center; gap: 3px; }
+    .tv-arrow { border: 0; background: transparent; cursor: pointer; color: var(--gold-dim); font-size: 1.1rem; padding: 3px; border-radius: 6px; }
+    .tv-arrow:hover { background: var(--bg-inset); }
+    .mv-time .mp-hint { flex-basis: 100%; text-align: center; }
+    .mv-time .mp-hint:empty { display: none; }
+    #view-map.has-panel .mv-time { left: calc((100% - var(--panel-w) - 10px) / 2); max-width: calc(100% - var(--panel-w) - 200px); }
+
+    /* top right: events list; slides aside for the details drawer */
+    .mv-key { top: 10px; right: 10px; width: 240px; max-height: 60%; display: flex; flex-direction: column; transition: right .18s ease-out; }
+    #view-map.has-panel .mv-key { right: calc(var(--panel-w) + 20px); }
+    .mv-key-head { display: flex; align-items: center; justify-content: space-between; gap: .4rem; padding: .55rem .75rem; flex: none; cursor: pointer; user-select: none;
+      font-family: var(--font-heading); font-size: .66rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-dim); }
+    .mv-key-list { overflow-y: auto; padding: 0 .4rem .45rem; }
+    .mv-key-row { padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1.5px solid transparent; border-left: 3px solid transparent;
+      font-size: .8rem; color: var(--text); }
+    .mv-key-row + .mv-key-row { margin-top: 2px; }
+    .mv-key-row:hover { background: var(--bg-inset); }
+    .mv-key-row.in { border-left-color: var(--gold-dim); background: #f0dcae; }
+    .mv-key-row.in .mv-key-ttl { font-weight: 700; }
+    .mv-key-row.out { color: var(--text-dim); }
+    .mv-key-row.sel { border-color: var(--gold-dim); border-left-color: var(--gold-dim); box-shadow: 0 0 8px rgba(255,190,30,.7); }
+    .mv-key-ttl { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mv-key-yrs { font-size: .68rem; color: var(--text-dim); }
+    .mv-key-note { font-size: .72rem; color: var(--text-dim); font-style: italic; padding: .2rem .4rem .2rem; }
+
+    /* right: details drawer */
+    .mv-side { top: 10px; right: 10px; bottom: 10px; width: var(--panel-w); box-sizing: border-box; overflow-y: auto; overflow-x: hidden;
+      padding: 14px 16px; z-index: 1100; animation: mv-slide .18s ease-out; }
+    @keyframes mv-slide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .mv-x { border: 0; background: var(--bg-panel); border-radius: 50%; cursor: pointer; color: var(--gold-dim); font-size: 1.45rem; padding: 0; line-height: 1; }
+    .mv-x:hover { color: var(--text); }
+    .mv-side > .mv-x { position: sticky; top: 0; float: right; margin: -4px -6px 4px 8px; z-index: 2; }
+
+    /* teardrop pins: the tip (bottom centre) marks the spot */
+    .pin-wrap { background: none; border: none; }
+    .pin-scale { position: relative; width: 30px; height: 36px; transform-origin: 50% 100%; transition: transform .12s; }
+    .pin-wrap:hover .pin-scale { transform: scale(1.12); }
+    .pin-scale.selected, .pin-wrap:hover .pin-scale.selected { transform: scale(1.28); }
+    .pin { position: absolute; top: 0; left: 0; width: 30px; height: 30px; box-sizing: border-box; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+      background: #fff; border: 2.5px solid var(--c, #6b4f9a); color: var(--c, #6b4f9a); display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+    .pin > i { transform: rotate(45deg); font-size: 16px; }
+    .pin-scale.selected .pin { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c), 0 2px 8px rgba(0,0,0,.4); }
+    .pin-scale.draft .pin { border-style: dashed; }
+    .pin-wrap.lit .pin { background: #fff3c4; box-shadow: 0 0 0 4px #ffcf3a, 0 0 14px 8px rgba(255,190,30,.85); }
+    .pin-badge { position: absolute; right: -7px; top: -6px; width: 17px; height: 17px; border-radius: 50%;
+      background: var(--gold-dim); color: #fff; border: 1.5px solid #fffaf5; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+
+    /* drawer contents */
+    .pv-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: .3rem; }
+    .pv-type { display: inline-block; font-family: var(--font-heading); font-size: .6rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 12px; border: 1px solid var(--c); color: var(--text-mid); margin-bottom: .7rem; }
+    .pv-desc { font-size: .87rem; color: var(--text-mid); line-height: 1.55; white-space: pre-wrap; margin-bottom: 1rem; }
+    .pv-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
     .pv-link { border: 1px solid var(--border); border-radius: 8px; background: var(--bg-inset); padding: .6rem .75rem; margin-bottom: .8rem; }
     .pv-link-label { font-family: var(--font-heading); font-size: .58rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
     .pv-link-main { font-size: .85rem; font-weight: 700; color: var(--text); margin: .15rem 0; }
     .pv-link-desc { font-size: .78rem; color: var(--text-mid); line-height: 1.5; margin-bottom: .3rem; }
     .pv-link a { font-size: .74rem; color: var(--gold-dim); }
     .pv-ev + .pv-ev { border-top: 1px dashed var(--border); margin-top: .55rem; padding-top: .5rem; }
-
-    #pf-events, #pf-mevents, #ef-pins { display: flex; flex-direction: column; gap: .35rem; }
-    .pf-ev { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .8rem; color: var(--text);
-      padding: 4px 6px 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-inset); }
-    .pf-ev-x { border: none; background: transparent; cursor: pointer; color: var(--text-dim); font-size: .8rem; padding: 2px 6px; border-radius: 4px; }
-    .pf-ev-x:hover { background: rgba(180,50,50,.15); color: #a33; }
-
-    .mv-name-input { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--gold-dim);
-      padding: 3px 8px; border-radius: 6px; border: 1px solid var(--gold); background: var(--bg-inset); width: min(360px, 100%); }
-    /* ── Year view ── */
-    .mv-time { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .8rem; padding: .5rem .8rem;
-      background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; }
-    .mv-time.on { border-color: var(--gold); box-shadow: 0 0 12px var(--gold-glow); }
-    .mv-time-label { font-family: var(--font-heading); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-dim); }
-    .mv-time select, .mv-time input { font-family: var(--font-body); font-size: .8rem; padding: 4px 8px; border-radius: 6px;
-      border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); }
-    .mv-time input[type=number] { width: 6.5rem; }
-    #tv-event { max-width: 280px; }
-    .pin-row.dim { opacity: .45; }
-    .pv-when { font-size: .8rem; color: var(--text-mid); margin: 0 0 .7rem; }
+    .pv-act { color: var(--gold-dim); cursor: pointer; text-decoration: underline; }
+    .pv-when { font-size: .82rem; color: var(--text-mid); margin: 0 0 .7rem; }
     .pv-state { display: block; width: fit-content; font-size: .72rem; padding: 2px 10px; border-radius: 12px; margin-bottom: .7rem; border: 1px solid var(--border-mid); color: var(--text-mid); }
     .pv-state.faded { background: rgba(138,144,176,.15); border-style: dashed; }
     .pv-state.ok { border-color: #4a9b5e; color: #2d7a3a; }
-    .mp-form-field label.pf-check { display: flex; align-items: center; gap: .5rem; font-family: var(--font-body); font-size: .82rem;
-      text-transform: none; letter-spacing: 0; color: var(--text); cursor: pointer; }
-    .mp-form-field .pf-check input { width: auto; padding: 0; }
-
-    /* Age + year picker used for pin and event dates */
+    #pf-events, #pf-mevents, #ef-pins { display: flex; flex-direction: column; gap: .35rem; }
+    .pf-ev { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .8rem; color: var(--text);
+      padding: 4px 6px 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-inset); }
+    .pf-ev-x { border: none; background: transparent; cursor: pointer; color: var(--text-dim); font-size: .85rem; padding: 2px 6px; border-radius: 4px; }
+    .pf-ev-x:hover { background: rgba(180,50,50,.15); color: #a33; }
     .yf { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
     .mp-form-field .yf select { flex: 1 1 130px; min-width: 0; width: auto; }
     .mp-form-field .yf input { flex: none; width: 5.5rem; }
-    .pv-act { color: var(--gold-dim); cursor: pointer; text-decoration: underline; }
-
-    /* ── Events key: a bubble in the corner of the map ── */
-    .mv-key { position: absolute; top: .7rem; right: .7rem; z-index: 800; width: 250px; max-width: calc(100% - 1.4rem); max-height: 60%;
-      display: flex; flex-direction: column; background: rgba(255,250,248,.95); border: 1px solid var(--border-mid);
-      border-radius: 12px; box-shadow: 0 2px 14px rgba(0,0,0,.2); backdrop-filter: blur(4px); font-family: var(--font-body); }
-    .mv-key-head { display: flex; align-items: center; gap: .4rem; padding: .45rem .5rem .45rem .75rem; flex: none; }
-    .mv-key-h { font-family: var(--font-heading); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--gold-dim); margin-right: auto; cursor: pointer; user-select: none; }
-    .mv-key-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border-mid); background: transparent; color: var(--gold-dim);
-      cursor: pointer; font-size: .95rem; line-height: 1; padding: 0; }
-    .mv-key-btn:hover:not(:disabled) { border-color: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
-    .mv-key-btn:disabled { opacity: .4; cursor: default; }
-    .mv-key-list { overflow-y: auto; padding: 0 .4rem .45rem; }
-    .mv-key-row { padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; border-left: 3px solid transparent;
-      font-size: .78rem; color: var(--text); transition: opacity .15s; }
-    .mv-key-row + .mv-key-row { margin-top: 2px; }
-    .mv-key-row:hover { background: var(--bg-inset); border-color: var(--border); }
-    .mv-key-row.in { border-left-color: var(--gold); background: var(--gold-glow); }
-    .mv-key-row.in .mv-key-ttl { font-weight: 700; }
-    .mv-key-row.out { opacity: .4; }
-    .mv-key-row.sel { border-color: var(--gold); border-left-color: var(--gold); background: var(--gold-glow-md); opacity: 1; }
-    .mv-key-ttl { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .mv-key-yrs { font-size: .68rem; color: var(--text-dim); }
-    .mv-key-note { font-size: .7rem; color: var(--text-dim); font-style: italic; padding: .2rem .4rem .1rem; }
-
-    .mv-filters { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; align-items: center; }
-    .mv-chip { font-family: var(--font-heading); font-size: .62rem; font-weight: 600; letter-spacing: .06em;
-      padding: 4px 11px; border-radius: 16px; cursor: pointer; background: rgba(255,248,245,.92);
-      border: 2px solid var(--c); color: var(--text-mid); transition: opacity .15s, background .15s; }
-    .mv-chip:hover { background: var(--bg-inset); }
-    .mv-chip.off { opacity: .4; border-style: dashed; text-decoration: line-through; }
-    .mv-chip span { color: var(--text-dim); margin-left: .25rem; }
-    #pin-search { width: 100%; font-family: var(--font-body); font-size: .82rem; padding: 6px 10px; border-radius: 6px;
-      border: 1px solid var(--border-mid); background: var(--bg-inset); color: var(--text); margin-bottom: .7rem; }
-
-    .pin-row { display: flex; align-items: center; gap: .55rem; padding: 6px 8px; border-radius: 6px; cursor: pointer;
-               border: 1px solid transparent; font-size: .82rem; color: var(--text); }
-    .pin-row:hover { background: var(--bg-inset); border-color: var(--border); }
-    .pin-row-icon { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--c); background: #fffaf5;
-                    display: inline-flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
-    .pin-row-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .pv-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: .3rem; }
-    .pv-type { display: inline-block; font-family: var(--font-heading); font-size: .6rem; font-weight: 700; letter-spacing: .08em;
-               text-transform: uppercase; padding: 2px 10px; border-radius: 12px; border: 1px solid var(--c); color: var(--text-mid); margin-bottom: .7rem; }
-    .pv-desc { font-size: .85rem; color: var(--text-mid); line-height: 1.55; white-space: pre-wrap; margin-bottom: 1rem; }
-    .pv-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
 
     @media (max-width: 800px) {
-      #view-map .mp-wrap { height: auto; min-height: 0; }
-      #view-map .mp-wrap > .mv-body { flex: none; }
-      .mv-body { grid-template-columns: 1fr; grid-template-rows: 60vh auto; }
-      .mv-side { overflow: visible; }
+      .mv-left { right: 10px; width: auto; bottom: 200px; }
+      .mv-key { top: 62px; width: 180px; max-height: 40%; }
+      #view-map.has-panel .mv-key { right: 10px; }
+      .mv-side { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 58%; }
+      .mv-time, #view-map.has-panel .mv-time { left: 10px; right: 10px; transform: none; width: auto; max-width: none; }
+      #map .leaflet-bottom .leaflet-control { margin-bottom: 118px; }
+      .mv-edit { bottom: 192px; }
     }
   </style>
 </head>
@@ -230,26 +258,40 @@
 
 <!-- ═════════ Single map ═════════ -->
 <div id="view-map" hidden>
-  <div class="mp-wrap">
-    <div class="mv-toolbar">
+  <div id="map"></div>
+
+  <div class="mv-left">
+    <div class="mv-float mv-top">
       <div class="mv-crumbs" id="mv-crumbs"></div>
       <div class="mv-name" id="mv-name"></div>
-      <button class="mp-btn" id="rename-btn" onclick="startRename()">Rename</button>
-      <button class="mp-btn" id="replace-btn" onclick="$('replace-file').click()" title="Swap in a new image for this map; pins keep their relative positions">Replace image</button>
-      <input type="file" id="replace-file" accept="image/png,image/jpeg,image/webp" hidden onchange="replaceImage(this)">
-      <button class="mp-btn" id="add-pin-btn" onclick="toggleAddMode()">+ Add Pin</button>
     </div>
-    <div class="mv-time" id="mv-time"></div>
-    <div class="mv-filters" id="mv-filters" hidden></div>
-    <div class="mv-body">
-      <div class="mv-mapbox">
-        <div id="map"></div>
-        <div class="mv-banner" id="mv-banner" hidden>Click the map to place the pin · Esc to cancel</div>
-        <div class="mv-key" id="mv-key" hidden></div>
-      </div>
-      <aside class="panel mv-side" id="side-panel"></aside>
+    <button type="button" class="mv-float mv-pins-btn" id="pins-btn" onclick="togglePins(true)"><i class="ti ti-search" aria-hidden="true"></i> Pins and filters</button>
+    <div class="mv-float mv-pins" id="pins-panel" hidden>
+      <div class="mv-pins-head"><span class="panel-title">Pins (<span id="pin-count">0</span>)</span>
+        <button type="button" class="mv-x" onclick="togglePins(false)" aria-label="Close pin list" title="Close"><i class="ti ti-circle-x" aria-hidden="true"></i></button></div>
+      <input type="search" id="pin-search" placeholder="Search pins…" oninput="onPinSearch(this.value)">
+      <div class="mv-filters" id="mv-filters" hidden></div>
+      <div id="pin-rows"></div>
     </div>
   </div>
+
+  <div class="mv-float mv-banner" id="mv-banner" hidden><span>Click the map to place the pin</span><button type="button" class="mp-btn" onclick="setAddMode(false)">Cancel</button></div>
+  <div class="mv-float mv-notice" id="mv-notice" hidden></div>
+  <div class="mv-float mv-key" id="mv-key" hidden></div>
+
+  <div class="mv-edit">
+    <button type="button" class="mv-float mv-edit-btn" id="edit-btn" onclick="toggleEditMenu()" aria-expanded="false"><i class="ti ti-edit" aria-hidden="true"></i> Edit</button>
+    <div class="mv-float mv-edit-menu" id="edit-menu" hidden>
+      <button type="button" class="mv-menu-item" id="add-pin-btn" onclick="toggleEditMenu(false); toggleAddMode()"><i class="ti ti-map-pin-plus" aria-hidden="true"></i> Add pin</button>
+      <button type="button" class="mv-menu-item" id="add-event-btn" onclick="toggleEditMenu(false); beginEventForm('new')"><i class="ti ti-flag-plus" aria-hidden="true"></i> Add event</button>
+      <button type="button" class="mv-menu-item" id="rename-btn" onclick="toggleEditMenu(false); startRename()"><i class="ti ti-cursor-text" aria-hidden="true"></i> Rename map</button>
+      <button type="button" class="mv-menu-item" id="replace-btn" onclick="toggleEditMenu(false); $('replace-file').click()" title="Swap in a new image for this map; pins keep their relative positions"><i class="ti ti-photo" aria-hidden="true"></i> Replace image</button>
+    </div>
+  </div>
+  <input type="file" id="replace-file" accept="image/png,image/jpeg,image/webp" hidden onchange="replaceImage(this)">
+
+  <div class="mv-float mv-time" id="mv-time" hidden></div>
+  <aside class="mv-float mv-side" id="side-panel" hidden></aside>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -263,15 +305,15 @@ const MAX_BYTES = 25 * 1024 * 1024;
 const EXT_FOR_TYPE = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
 
 const PIN_TYPES = {
-  city:     { label: 'City',     glyph: '🏰', color: '#b8283a' },
-  town:     { label: 'Town',     glyph: '🏘️', color: '#d4a017' },
-  village:  { label: 'Village',  glyph: '🏠', color: '#8b5a2b' },
-  dungeon:  { label: 'Dungeon',  glyph: '💀', color: '#4a3570' },
-  landmark: { label: 'Landmark', glyph: '⭐', color: '#2f8f9e' },
-  ruin:     { label: 'Ruin',     glyph: '🏚️', color: '#7a7a7a' },
-  region:   { label: 'Region',   glyph: '🗺️', color: '#4a9b5e' },
-  port:     { label: 'Port',     glyph: '⚓', color: '#3a6ea5' },
-  other:    { label: 'Other',    glyph: '📍', color: '#6b4f9a' },
+  city:     { label: 'City',     icon: 'building-castle', color: '#b8283a' },
+  town:     { label: 'Town',     icon: 'building-community', color: '#d4a017' },
+  village:  { label: 'Village',  icon: 'home', color: '#8b5a2b' },
+  dungeon:  { label: 'Dungeon',  icon: 'skull', color: '#4a3570' },
+  landmark: { label: 'Landmark', icon: 'star', color: '#2f8f9e' },
+  ruin:     { label: 'Ruin',     icon: 'building-monument', color: '#7a7a7a' },
+  region:   { label: 'Region',   icon: 'map-2', color: '#4a9b5e' },
+  port:     { label: 'Port',     icon: 'anchor', color: '#3a6ea5' },
+  other:    { label: 'Other',    icon: 'map-pin', color: '#6b4f9a' },
 };
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -298,11 +340,13 @@ let timeView = { mode: 'off', ageId: null, rel: 0, abs: 0 };
 let childLinks = [];          // [{ map_id, child_map_id }] across all maps, for breadcrumbs
 // Map events: things that happen in the world (start/end year), listed in the key bubble. Each carries pin_ids.
 let mapEvents = [];
-let selectedEventId = null;   // event highlighted from the key: its pins stay bright, the rest fade
+let selectedEventId = null;   // event clicked in the list: its pins are highlighted (independent of year fading)
 let evForm = null;            // { mode:'new'|'edit', ev?, pinIds:[], tlId } while the event form is open
 let eventsError = null;       // error loading map events (e.g. migration 004 not run yet)
-let keyCollapsed = false;
+let keyCollapsed = window.innerWidth <= 800;   // events list starts folded away on phones
 const formOpen = () => !!(formState || evForm);
+let replacing = false;        // a map image upload is in progress
+let userMoved = false;        // the view was panned/zoomed or jumped to a pin, so resizes must not re-fit it
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -311,6 +355,7 @@ function esc(s) {
 }
 function setStatus(el, msg, isErr) { el.textContent = msg || ''; el.classList.toggle('err', !!isErr); }
 function typeOf(t) { return PIN_TYPES[t] || PIN_TYPES.other; }
+const ic = name => '<i class="ti ti-' + name + '" aria-hidden="true"></i>';   // Tabler line icon
 
 // Pin position is stored as a fraction (0..1) of the image, origin top-left.
 // Leaflet's CRS.Simple has y growing upward, so flip y when converting.
@@ -410,13 +455,17 @@ function pinTimeStatus(pin) {
   return s != null && Y < s ? 'before' : e != null && Y > e ? 'after' : 'active';
 }
 
-// A pin stays bright only if it passes every filter that is on: linked to the selected event (if one is
-// selected) AND existing in the selected year (if the Year view is on). Anything else fades.
+// Two independent pin states:
+//   faded       = it does not exist in the selected year (Year view)
+//   highlighted = it is linked to the event clicked in the events list
 function isFaded(pin) {
-  const ev = selectedEventId && mapEvents.find(e => e.id === selectedEventId);
-  if (ev && !ev.pin_ids.includes(pin.id)) return true;
   const s = pinTimeStatus(pin);
   return s === 'before' || s === 'after';
+}
+const selectedEvent = () => mapEvents.find(e => e.id === selectedEventId);
+function isHighlighted(pin) {
+  const ev = selectedEvent();
+  return !!ev && ev.pin_ids.includes(pin.id);
 }
 
 function pinRangeText(pin) {
@@ -492,41 +541,31 @@ function renderTimeControl() {
   if (timeView.mode === 'age' && !tlAges.some(a => a.id === timeView.ageId)) timeView.mode = 'off';   // Age was deleted
   const on = timeView.mode !== 'off';
   const ages = tlAges.slice().sort((a, b) => a.start_year - b.start_year);
-  el.className = 'mv-time' + (on || selectedEventId ? ' on' : '');
-  el.innerHTML = '<span class="mv-time-label">⧗ Year view</span>' +
-    '<select id="tv-mode" onchange="onTimeMode(this.value)">' +
-      '<option value="off"' + (on ? '' : ' selected') + '>Off — show every pin</option>' +
+  el.hidden = false;
+  el.className = 'mv-float mv-time' + (on ? ' on' : '');
+  el.innerHTML = ic('hourglass') +
+    '<select id="tv-mode" aria-label="Year view" onchange="onTimeMode(this.value)">' +
+      '<option value="off"' + (on ? '' : ' selected') + '>Year view off</option>' +
       ages.map(a => '<option value="age:' + a.id + '"' + (timeView.mode === 'age' && timeView.ageId === a.id ? ' selected' : '') + '>' +
         esc(a.name) + ' (' + esc(ageRangeLabel(a)) + ')</option>').join('') +
       '<option value="abs"' + (timeView.mode === 'abs' ? ' selected' : '') + '>Absolute year…</option>' +
     '</select>' +
     (on
-      ? '<input type="number" id="tv-year" step="1" value="' + (timeView.mode === 'age' ? timeView.rel : timeView.abs) + '" oninput="onTimeYear(this.value)" ' +
-        'title="' + (timeView.mode === 'age' ? 'Year within this Age (0 = its first year)' : 'Absolute year') + '">'
+      ? '<span class="tv-step"><button type="button" class="tv-arrow" onclick="stepYear(-1)" aria-label="Previous year">' + ic('chevron-left') + '</button>' +
+        '<input type="number" id="tv-year" step="1" value="' + (timeView.mode === 'age' ? timeView.rel : timeView.abs) + '" oninput="onTimeYear(this.value)" ' +
+        'title="' + (timeView.mode === 'age' ? 'Year within this Age (0 = its first year)' : 'Absolute year') + '">' +
+        '<button type="button" class="tv-arrow" onclick="stepYear(1)" aria-label="Next year">' + ic('chevron-right') + '</button></span>' +
+        '<button type="button" class="mp-btn" onclick="clearTimeView()" title="Turn the year view off">Show all</button>'
       : (ages.length ? '' : '<span class="mp-hint">Add Ages in the Timeline Builder to pick a year by Age.</span>')) +
-    '<select id="tv-event" onchange="onTimeEvent(this.value)" title="Show only the pins linked to an event"></select>' +
-    '<span class="mp-hint" id="tv-hint"></span>' +
-    (on || selectedEventId ? '<button class="mp-btn" onclick="clearTimeView()">Show all</button>' : '');
-  renderEventSelect();
+    '<span class="mp-hint" id="tv-hint"></span>';
   updateTimeHint();
 }
 
-// The event dropdown in the Year view bar. Rebuilt in place (not with the rest of the bar) so the year box keeps focus while typing.
-function renderEventSelect() {
-  const sel = $('tv-event');
-  if (!sel) return;
-  const evs = mapEvents.slice().sort(byStart);
-  sel.disabled = !!eventsError || !evs.length;
-  sel.innerHTML = '<option value="">' + (eventsError ? '⚑ Events unavailable' : evs.length ? '⚑ No event selected' : '⚑ No events yet') + '</option>' +
-    evs.map(ev => '<option value="' + ev.id + '">' + esc(ev.title) + ' (' + esc(eventRangeText(ev)) + ')</option>').join('');
-  sel.value = selectedEventId && evs.some(e => e.id === selectedEventId) ? selectedEventId : '';
-}
-
-// Picking an event also jumps the year to the event's start (see selectEvent); "No event" just clears the event.
-function onTimeEvent(v) {
-  if (formOpen()) { renderEventSelect(); return; }       // finish or cancel the open form first
-  if (v) selectEvent(v, true);
-  else if (selectedEventId) selectEvent(selectedEventId);
+function stepYear(d) {
+  const key = timeView.mode === 'age' ? 'rel' : 'abs';
+  timeView[key] = (Number.isFinite(timeView[key]) ? timeView[key] : 0) + d;
+  $('tv-year').value = timeView[key];
+  onTimeChanged();
 }
 
 // Set the Year view to an absolute year, using the Age that contains it when there is one.
@@ -550,7 +589,7 @@ function onTimeYear(v) {
   onTimeChanged();
 }
 
-function clearTimeView() { timeView.mode = 'off'; selectedEventId = null; renderTimeControl(); onTimeChanged(); }
+function clearTimeView() { timeView.mode = 'off'; renderTimeControl(); onTimeChanged(); }
 
 // Re-fade markers; refresh the side panel too unless a form is open (re-rendering it would lose typing).
 function onTimeChanged() {
@@ -562,26 +601,26 @@ function updateTimeHint() {
   const h = $('tv-hint');
   if (!h) return;
   const Y = activeYear();
-  const ev = selectedEventId && mapEvents.find(e => e.id === selectedEventId);
-  if (Y === null && !ev) { h.textContent = timeView.mode !== 'off' ? 'Enter a year.' : ''; return; }
+  if (Y === null) { h.textContent = timeView.mode !== 'off' ? 'Enter a year.' : ''; return; }
   const faded = pins.filter(isFaded).length;
-  const parts = [];
-  if (Y !== null) { const lab = yearLabel(Y); parts.push(lab + (lab === 'Year ' + Y ? '' : ' (absolute year ' + Y + ')')); }
-  if (ev) parts.push('⚑ ' + ev.title);
-  h.textContent = parts.join(' · ') + ' — ' + (pins.length - faded) + ' shown, ' + faded + ' faded';
+  const lab = yearLabel(Y);
+  h.textContent = lab + (lab === 'Year ' + Y ? '' : ' (absolute year ' + Y + ')') + ' — ' + (pins.length - faded) + ' shown, ' + faded + ' faded';
 }
 
-// Fade pins that did not exist yet / no longer exist in the selected year (still visible, still clickable).
+// Show both pin states on the map and in the pin list. Faded pins stay visible and clickable.
 function applyTimeView() {
   if (!lmap) return;
   pins.forEach(p => {
     const mk = markers.get(p.id);
     if (!mk) return;
-    const faded = isFaded(p);
-    mk.setOpacity(faded ? (p.id === selectedId ? 0.65 : 0.28) : 1);
-    mk.setZIndexOffset(p.id === selectedId ? 1000 : faded ? -500 : 0);
+    const faded = isFaded(p), lit = isHighlighted(p), sel = p.id === selectedId;
+    mk.setOpacity(faded ? (lit || sel ? 0.6 : 0.3) : 1);
+    mk.setZIndexOffset(sel ? 1000 : lit ? 600 : faded ? -500 : 0);
+    const el = mk.getElement();
+    if (el) el.classList.toggle('lit', lit);
   });
   updateTimeHint();
+  renderPinRows();
   renderKey();
 }
 
@@ -589,10 +628,10 @@ function applyTimeView() {
 function timeStateHtml(pin) {
   const st = pinTimeStatus(pin);
   const range = pinRangeText(pin);
-  let html = range ? '<div class="pv-when">🕰 Exists: ' + esc(range) + '</div>' : '';
+  let html = range ? '<div class="pv-when">' + ic('clock') + ' Exists: ' + esc(range) + '</div>' : '';
   if (st === 'before') html += '<div class="pv-state faded">Not yet — appears ' + esc(yearLabel(pin.start_year)) + '</div>';
   else if (st === 'after') html += '<div class="pv-state faded">Gone — ended ' + esc(yearLabel(pin.end_year)) + '</div>';
-  else if (st === 'active') html += '<div class="pv-state ok">✓ Exists in ' + esc(yearLabel(activeYear())) + '</div>';
+  else if (st === 'active') html += '<div class="pv-state ok">' + ic('check') + ' Exists in ' + esc(yearLabel(activeYear())) + '</div>';
   else if (st === 'timeless') html += '<div class="pv-state">No dates set — always shown</div>';
   return html;
 }
@@ -604,7 +643,7 @@ async function renderMapList() {
   if (!maps.length) { el.innerHTML = '<div class="mp-empty">No maps yet. Upload one above to get started.</div>'; return; }
   el.innerHTML = '<div class="mp-grid">' + maps.map(m =>
     '<div class="mp-card">' +
-      '<div class="mp-card-thumb" id="thumb-' + m.id + '" onclick="location.hash=\'#map=' + m.id + '\'">🗺</div>' +
+      '<div class="mp-card-thumb" id="thumb-' + m.id + '" onclick="location.hash=\'#map=' + m.id + '\'">' + ic('map-2') + '</div>' +
       '<div class="mp-card-body">' +
         '<div class="mp-card-name" title="' + esc(m.name) + '" onclick="location.hash=\'#map=' + m.id + '\'">' + esc(m.name) + '</div>' +
         '<div class="mp-card-sub">' + m.image_width + ' × ' + m.image_height + ' px</div>' +
@@ -629,6 +668,7 @@ function showList() {
   $('view-map').hidden = true;
   $('view-list').hidden = false;
   $('back-btn').hidden = false;
+  document.body.classList.remove('map-open');
   document.title = 'Map Pinboard';
   loadMaps().then(ok => { if (ok) renderMapList(); });
 }
@@ -729,7 +769,44 @@ function destroyMapView() {
   currentMap = null; pins = []; selectedId = null; formState = null; addMode = false;
   hiddenTypes = new Set(); pinSearch = ''; renaming = false;
   mapEvents = []; selectedEventId = null; evForm = null; eventsError = null;
+  childLinks = [];
   $('mv-filters').hidden = true; $('mv-key').hidden = true; $('add-pin-btn').disabled = false;
+  $('mv-time').hidden = true; $('mv-banner').hidden = true; showNotice('');
+  $('side-panel').hidden = true; $('side-panel').innerHTML = ''; $('view-map').classList.remove('has-panel');
+  $('pins-panel').hidden = true; $('pins-btn').hidden = false; $('pin-search').value = ''; $('pin-rows').innerHTML = ''; $('pin-count').textContent = '0';
+  toggleEditMenu(false);
+}
+
+// Small message at the top centre of the map (loading, upload progress, load errors).
+function showNotice(html, isErr) {
+  const el = $('mv-notice');
+  el.innerHTML = html || '';
+  el.hidden = !html;
+  el.classList.toggle('err', !!isErr);
+}
+
+// ─── Edit menu and pins panel ───────────────────────────────────────────────
+function toggleEditMenu(open) {
+  const menu = $('edit-menu');
+  const show = open === undefined ? menu.hidden : open;
+  if (show) {
+    $('add-pin-btn').disabled = !lmap || formOpen();
+    $('add-event-btn').disabled = !lmap || formOpen() || !!eventsError;
+    $('rename-btn').disabled = !currentMap;
+    $('replace-btn').disabled = !lmap || formOpen() || replacing;
+  }
+  menu.hidden = !show;
+  $('edit-btn').setAttribute('aria-expanded', String(show));
+  $('edit-btn').classList.toggle('mp-btn-active', show);
+}
+document.addEventListener('pointerdown', e => {            // a click anywhere else closes the Edit menu
+  if (!$('edit-menu').hidden && !e.target.closest('.mv-edit')) toggleEditMenu(false);
+}, true);
+
+function togglePins(open) {
+  $('pins-panel').hidden = !open;
+  $('pins-btn').hidden = open;
+  if (open) $('pin-search').focus();
 }
 
 async function openMap(id, token, focusPinId) {
@@ -737,7 +814,8 @@ async function openMap(id, token, focusPinId) {
   $('view-list').hidden = true;
   $('view-map').hidden = false;
   $('back-btn').hidden = true;
-  $('side-panel').innerHTML = '<div class="mp-empty">Loading map…</div>';
+  document.body.classList.add('map-open');
+  showNotice('Loading map…');
 
   let row = maps.find(m => m.id === id);
   if (!row) {
@@ -747,6 +825,7 @@ async function openMap(id, token, focusPinId) {
     row = data;
   }
   currentMap = row;
+  renderCrumbs();
   $('mv-name').textContent = row.name;
   document.title = row.name + ' · Map Pinboard';
 
@@ -754,7 +833,7 @@ async function openMap(id, token, focusPinId) {
   try { url = await signedUrl(row.image_path); }
   catch (e) {
     if (token !== routeToken) return;
-    $('side-panel').innerHTML = '<div class="mp-empty" style="color:#a33">Could not load the map image: ' + esc(e.message || e) + '</div>';
+    showNotice('Could not load the map image: ' + esc(e.message || e), true);
     return;
   }
   const [pinsRes, childRes, linksRes, eventsRes, evLinksRes] = await Promise.all([
@@ -782,21 +861,25 @@ async function openMap(id, token, focusPinId) {
 
   const W = row.image_width, H = row.image_height;
   const bounds = [[0, 0], [H, W]];
-  lmap = L.map('map', { crs: L.CRS.Simple, minZoom: -6, maxZoom: 3, zoomSnap: 0.25, zoomDelta: 0.5,
-                        attributionControl: false, maxBoundsViscosity: 0.7 });
+  lmap = L.map('map', { crs: L.CRS.Simple, minZoom: -6, maxZoom: 3, zoomSnap: 0.1, zoomDelta: 0.5,
+                        zoomControl: false, attributionControl: false, maxBoundsViscosity: 0.7 });
+  L.control.zoom({ position: 'bottomleft' }).addTo(lmap);
   L.imageOverlay(url, bounds).addTo(lmap);
+  // Open with the image covering the whole window; zooming out stops once the whole image is visible.
   const fitMap = () => {
-    lmap.setMinZoom(-10);                       // lift the floor so fitBounds can pick the true zoom
-    lmap.fitBounds(bounds, { animate: false });
-    lmap.setMinZoom(lmap.getZoom() - 1);
+    lmap.setMinZoom(-10);                                  // lift the floor so the true zooms can be computed
+    const cover = lmap.getBoundsZoom(bounds, true);
+    const whole = lmap.getBoundsZoom(bounds, false);
+    lmap.setView([H / 2, W / 2], cover, { animate: false });
+    lmap.setMinZoom(Math.min(whole, cover));
   };
   fitMap();
   lmap.setMaxBounds(L.latLngBounds(bounds).pad(0.3));
 
   // Keep Leaflet in step with its container (the filter bar appearing, window resizes, a container that
   // wasn't laid out yet when the map was created). Until the user pans/zooms or a pin is focused, a resize
-  // re-fits the whole image; after that we only re-measure so their view isn't yanked around.
-  let userMoved = false;
+  // re-fits the image to the window; after that we only re-measure so their view isn't yanked around.
+  userMoved = false;
   ['mousedown', 'wheel', 'touchstart'].forEach(ev => $('map').addEventListener(ev, () => { userMoved = true; }, { passive: true }));
   if (focusPinId) userMoved = true;
   if (resizeObs) resizeObs.disconnect();
@@ -811,9 +894,10 @@ async function openMap(id, token, focusPinId) {
   pins.forEach(addMarker);
   renderPanel();
   if (focusPinId && pins.some(p => p.id === focusPinId)) focusPin(focusPinId);   // deep link from the timeline page
-  if (pinsRes.error) $('side-panel').insertAdjacentHTML('afterbegin', '<div class="mp-status err">Could not load pins: ' + esc(pinsRes.error.message) + '</div>');
-  if (linksError) $('side-panel').insertAdjacentHTML('afterbegin', '<div class="mp-status err">Could not load timeline links: ' + esc(linksError) +
-    '<br>Have you run <code>migration-002-multi-event-pins.sql</code>?</div>');
+  const problems = [];
+  if (pinsRes.error) problems.push('Could not load pins: ' + esc(pinsRes.error.message));
+  if (linksError) problems.push('Could not load timeline links: ' + esc(linksError) + '<br>Have you run <code>migration-002-multi-event-pins.sql</code>?');
+  showNotice(problems.length ? '<span>' + problems.join('<br>') + '</span><button type="button" class="mv-x" onclick="showNotice(\'\')" aria-label="Dismiss">' + ic('circle-x') + '</button>' : '', true);
 }
 
 // Give every map event its pin_ids from the join-table rows (rows for other maps' events are ignored).
@@ -837,7 +921,7 @@ function renderCrumbs() {
   const seen = new Set([currentMap.id]);
   for (let cur = parentOf[currentMap.id]; cur && !seen.has(cur) && chain.length < 12; cur = parentOf[cur]) { seen.add(cur); chain.unshift(cur); }
   $('mv-crumbs').innerHTML =
-    '<button class="mp-btn" onclick="location.hash=\'\'">← All maps</button>' +
+    '<button class="mp-btn" onclick="location.hash=\'\'">' + ic('arrow-left') + ' All maps</button>' +
     chain.map(id => { const m = maps.find(x => x.id === id);
       return '<span class="mv-crumb-sep">›</span><button class="mv-crumb" onclick="location.hash=\'#map=' + id + '\'">' + esc(m ? m.name : 'Map') + '</button>'; }).join('') +
     (chain.length ? '<span class="mv-crumb-sep">›</span>' : '');
@@ -849,16 +933,17 @@ function pinIcon(type, opts) {
   const t = typeOf(type);
   return L.divIcon({
     className: 'pin-wrap',
-    html: '<div class="pin' + (opts.selected ? ' selected' : '') + (opts.draft ? ' draft' : '') + '" style="--c:' + t.color + '">' + t.glyph +
-          (opts.child ? '<span class="pin-badge" title="Opens another map">↳</span>' : '') + '</div>',
-    iconSize: [30, 30], iconAnchor: [15, 15],
+    html: '<div class="pin-scale' + (opts.selected ? ' selected' : '') + (opts.draft ? ' draft' : '') + '" style="--c:' + t.color + '">' +
+          '<div class="pin">' + ic(t.icon) + '</div>' +
+          (opts.child ? '<span class="pin-badge" title="Opens another map">' + ic('corner-down-right') + '</span>' : '') + '</div>',
+    iconSize: [30, 36], iconAnchor: [15, 36],
   });
 }
 
 function addMarker(pin) {
   const mk = L.marker(toLatLng(pin), { icon: pinIcon(pin.pin_type, { selected: pin.id === selectedId, child: !!pin.child_map_id }), draggable: false, keyboard: false })
     .addTo(lmap)
-    .bindTooltip(esc(pin.title), { direction: 'top', offset: [0, -16] });
+    .bindTooltip(esc(pin.title), { direction: 'top', offset: [0, -36] });
   mk.on('click', () => selectPin(pin.id));
   mk.on('dragend', () => onDragEnd(pin.id, mk));
   markers.set(pin.id, mk);
@@ -962,6 +1047,7 @@ function onFormTypeChange(type) {
   formState.type = type;
   if (formState.mode === 'new') formState.draftMarker.setIcon(pinIcon(type, { draft: true }));
   else markers.get(formState.pin.id).setIcon(pinIcon(type, { selected: true, child: !!formState.pin.child_map_id }));
+  applyTimeView();
 }
 
 function updateCoordsHint() {
@@ -1090,7 +1176,7 @@ function formEventsHtml() {
   const evs = formState.eventIds.map(id => tlEvents.find(e => e.id === id) || { id, title: '(unknown event)', year: 0, unknown: true })
     .sort((a, b) => a.year - b.year);
   return evs.map(e => '<div class="pf-ev"><span>' + esc(e.unknown ? e.title : eventLabel(e)) + '</span>' +
-      '<button type="button" class="pf-ev-x" title="Remove" onclick="removeFormEvent(\'' + e.id + '\')">✕</button></div>').join('') +
+      '<button type="button" class="pf-ev-x" title="Remove" onclick="removeFormEvent(\'' + e.id + '\')">' + ic('x') + '</button></div>').join('') +
     '<select id="pf-event-add" onchange="addFormEvent(this.value)">' + eventOptionsHtml(formState.eventIds) + '</select>';
 }
 function addFormEvent(id) {
@@ -1107,7 +1193,7 @@ function formMapEventsHtml() {
   const chosen = formState.mapEventIds.map(id => mapEvents.find(e => e.id === id)).filter(Boolean).sort(byStart);
   const rest = mapEvents.filter(e => !formState.mapEventIds.includes(e.id)).sort(byStart);
   return chosen.map(e => '<div class="pf-ev"><span>' + esc(e.title) + ' — ' + esc(eventRangeText(e)) + '</span>' +
-      '<button type="button" class="pf-ev-x" title="Remove" onclick="removeFormMapEvent(\'' + e.id + '\')">✕</button></div>').join('') +
+      '<button type="button" class="pf-ev-x" title="Remove" onclick="removeFormMapEvent(\'' + e.id + '\')">' + ic('x') + '</button></div>').join('') +
     (rest.length ? '<select onchange="addFormMapEvent(this.value)"><option value="">+ Link a map event…</option>' +
       rest.map(e => '<option value="' + e.id + '">' + esc(e.title) + ' — ' + esc(eventRangeText(e)) + '</option>').join('') + '</select>' : '');
 }
@@ -1137,8 +1223,18 @@ async function deletePin(id) {
 function focusPin(id) {
   const pin = pins.find(p => p.id === id);
   if (!pin || !lmap) return;
-  lmap.setView(toLatLng(pin), Math.max(lmap.getZoom(), lmap.getMinZoom() + 1), { animate: true });
+  const phone = window.innerWidth <= 800;
+  if (phone) togglePins(false);
   selectPin(id);
+  // Only move the map if the pin is off screen or behind a panel, and then only just far enough to show it.
+  const size = lmap.getSize();
+  const clear = phone
+    ? { left: 20, right: size.x - 20, top: 110, bottom: size.y * 0.4 }
+    : { left: $('pins-panel').hidden ? 30 : 330, right: size.x - 370, top: 50, bottom: size.y - 90 };
+  const at = lmap.latLngToContainerPoint(toLatLng(pin));
+  const past = (v, lo, hi) => v < lo ? v - lo - 40 : v > hi ? v - hi + 40 : 0;      // 40px of breathing room
+  const shift = L.point(past(at.x, clear.left, clear.right), past(at.y, clear.top, clear.bottom));
+  if (shift.x || shift.y) { userMoved = true; lmap.panBy(shift, { animate: true }); }
 }
 
 // ─── Map events: the key bubble, event panel and event form ─────────────────
@@ -1155,13 +1251,13 @@ function renderKey() {
       ? evs.map(ev => {
           const st = eventStatus(ev);
           return '<div class="mv-key-row' + (st === 'in' ? ' in' : st === 'out' ? ' out' : '') + (ev.id === selectedEventId ? ' sel' : '') + '" onclick="selectEvent(\'' + ev.id + '\')" ' +
-            'title="' + esc(ev.title) + ' — click to show its pins">' +
-            '<div class="mv-key-ttl">⚑ ' + esc(ev.title) + '</div>' +
+            'title="' + esc(ev.title) + ' — click to highlight its pins">' +
+            '<div class="mv-key-ttl">' + esc(ev.title) + '</div>' +
             '<div class="mv-key-yrs">' + esc(eventRangeText(ev)) + ' · ' + ev.pin_ids.length + ' pin' + (ev.pin_ids.length === 1 ? '' : 's') + '</div></div>';
         }).join('')
-      : '<div class="mv-key-note">No events yet. Press + to add one (a war, a festival, a reign…).</div>';
-  el.innerHTML = '<div class="mv-key-head"><span class="mv-key-h" onclick="toggleKey()" title="Show / hide the list">⚑ Events (' + mapEvents.length + ') ' + (keyCollapsed ? '▸' : '▾') + '</span>' +
-      '<button class="mv-key-btn" title="Add an event" onclick="beginEventForm(\'new\')"' + (formOpen() || eventsError ? ' disabled' : '') + '>+</button></div>' +
+      : '<div class="mv-key-note">No events yet. Choose Edit, then Add event.</div>';
+  el.innerHTML = '<div class="mv-key-head" onclick="toggleKey()" title="Show or hide the list"><span>' + ic('flag') + ' Events (' + mapEvents.length + ')</span>' +
+      ic(keyCollapsed ? 'chevron-right' : 'chevron-down') + '</div>' +
     (keyCollapsed ? '' : '<div class="mv-key-list">' + rows + '</div>');
   const list = el.querySelector('.mv-key-list');
   if (list) list.scrollTop = scroll;
@@ -1169,7 +1265,7 @@ function renderKey() {
 
 function toggleKey() { keyCollapsed = !keyCollapsed; renderKey(); }
 
-// Click a key row: its pins stay bright and the rest of the map fades. Click again (or Esc) to clear.
+// Click an event: its pins are highlighted and the year jumps to its start. Click again (or close the drawer) to clear.
 function selectEvent(id, forceOn) {
   if (formOpen()) return;
   if (selectedId) selectPin(null);
@@ -1185,24 +1281,22 @@ function eventHtml(ev) {
   const st = eventStatus(ev);
   const linked = ev.pin_ids.map(id => pins.find(p => p.id === id)).filter(Boolean).sort((a, b) => a.title.localeCompare(b.title));
   const tl = ev.timeline_event_id && tlEvents.find(e => e.id === ev.timeline_event_id);
-  return '<div class="pv-title">⚑ ' + esc(ev.title) + '</div>' +
-    '<div class="pv-when">🕰 ' + esc(eventRangeText(ev)) + '</div>' +
-    (st === 'in' ? '<div class="pv-state ok">✓ In effect in ' + esc(yearLabel(activeYear())) + '</div>'
+  return '<div class="pv-title">' + ic('flag') + ' ' + esc(ev.title) + '</div>' +
+    '<div class="pv-when">' + ic('clock') + ' ' + esc(eventRangeText(ev)) + '</div>' +
+    (st === 'in' ? '<div class="pv-state ok">' + ic('check') + ' In effect in ' + esc(yearLabel(activeYear())) + '</div>'
       : st === 'out' ? '<div class="pv-state faded">Not in effect in ' + esc(yearLabel(activeYear())) + '</div>' : '') +
     (ev.description ? '<div class="pv-desc">' + esc(ev.description) + '</div>' : '<div class="mp-hint" style="margin-bottom:1rem">No description yet.</div>') +
     '<div class="pv-link"><div class="pv-link-label">Pins (' + linked.length + ')</div>' +
       (linked.length ? linked.map(p => { const t = typeOf(p.pin_type);
-        return '<div class="pin-row" onclick="focusPin(\'' + p.id + '\')" style="--c:' + t.color + '"><span class="pin-row-icon">' + t.glyph + '</span>' +
+        return '<div class="pin-row' + (isFaded(p) ? ' dim' : '') + '" onclick="focusPin(\'' + p.id + '\')" style="--c:' + t.color + '"><span class="pin-row-icon">' + ic(t.icon) + '</span>' +
           '<span class="pin-row-title">' + esc(p.title) + '</span></div>'; }).join('')
         : '<div class="mp-hint">No pins linked yet. Edit the event to add some.</div>') + '</div>' +
-    (tl ? '<div class="pv-link"><div class="pv-link-label">Timeline event</div><div class="pv-link-main">⧗ ' + esc(tl.title) + ' · ' + esc(eventYearLabel(tl)) + '</div>' +
+    (tl ? '<div class="pv-link"><div class="pv-link-label">Timeline event</div><div class="pv-link-main">' + ic('hourglass') + ' ' + esc(tl.title) + ' · ' + esc(eventYearLabel(tl)) + '</div>' +
       '<a href="../timeline/index.html#event=' + tl.id + '">View on timeline →</a></div>' : '') +
     '<div class="pv-actions">' +
-      '<button class="mp-btn mp-btn-primary" onclick="beginEventForm(\'edit\', mapEvents.find(e => e.id === selectedEventId))">Edit</button>' +
-      '<button class="mp-btn" onclick="selectEvent(\'' + ev.id + '\')">Show all pins</button>' +
-      '<button class="mp-btn mp-btn-danger" onclick="deleteEvent(\'' + ev.id + '\')">Delete</button>' +
+      '<button class="mp-btn mp-btn-primary" onclick="beginEventForm(\'edit\', selectedEvent())">Edit</button>' +
     '</div>' +
-    '<div class="mp-hint" style="margin-top:1rem">Pins linked to this event stay bright (if they exist in the chosen year); every other pin is faded.</div>';
+    '<div class="mp-hint" style="margin-top:1rem">The pins linked to this event are highlighted on the map.</div>';
 }
 
 function beginEventForm(mode, ev) {
@@ -1221,10 +1315,10 @@ function cancelEventForm() { if (!evForm) return; endEventForm(); renderPanel();
 function efPinsHtml() {
   const chosen = evForm.pinIds.map(id => pins.find(p => p.id === id)).filter(Boolean).sort((a, b) => a.title.localeCompare(b.title));
   const rest = pins.filter(p => !evForm.pinIds.includes(p.id)).sort((a, b) => a.title.localeCompare(b.title));
-  return chosen.map(p => '<div class="pf-ev"><span>' + typeOf(p.pin_type).glyph + ' ' + esc(p.title) + '</span>' +
-      '<button type="button" class="pf-ev-x" title="Remove" onclick="removeEventFormPin(\'' + p.id + '\')">✕</button></div>').join('') +
+  return chosen.map(p => '<div class="pf-ev"><span>' + ic(typeOf(p.pin_type).icon) + ' ' + esc(p.title) + '</span>' +
+      '<button type="button" class="pf-ev-x" title="Remove" onclick="removeEventFormPin(\'' + p.id + '\')">' + ic('x') + '</button></div>').join('') +
     (rest.length ? '<select onchange="addEventFormPin(this.value)"><option value="">+ Link a pin…</option>' +
-      rest.map(p => '<option value="' + p.id + '">' + typeOf(p.pin_type).glyph + ' ' + esc(p.title) + '</option>').join('') + '</select>'
+      rest.map(p => '<option value="' + p.id + '">' + esc(p.title) + ' (' + typeOf(p.pin_type).label + ')</option>').join('') + '</select>'
       : pins.length ? '' : '<span class="mp-hint">No pins on this map yet.</span>');
 }
 function addEventFormPin(id) { if (id && !evForm.pinIds.includes(id)) evForm.pinIds.push(id); $('ef-pins').innerHTML = efPinsHtml(); }
@@ -1324,20 +1418,28 @@ async function deleteEvent(id) {
 }
 
 // ─── Side panel ──────────────────────────────────────────────────────────────
+// The drawer only appears while a pin or event is selected, or a form is open.
 function renderPanel() {
   const el = $('side-panel');
   const pin = pins.find(p => p.id === selectedId);
-  const ev = mapEvents.find(e => e.id === selectedEventId);
-  if (evForm) el.innerHTML = eventFormHtml();
-  else if (formState) { el.innerHTML = formHtml(); updateCoordsHint(); }
-  else if (pin) el.innerHTML = pinHtml(pin);
-  else if (ev) el.innerHTML = eventHtml(ev);
-  else el.innerHTML = listHtml();
-  if (formState) { updateYearHint('ps'); updateYearHint('pe'); }
+  const ev = selectedEvent();
+  const html = evForm ? eventFormHtml() : formState ? formHtml() : pin ? pinHtml(pin) : ev ? eventHtml(ev) : '';
+  el.innerHTML = html ? '<button type="button" class="mv-x" onclick="closePanel()" aria-label="Close" title="Close">' + ic('circle-x') + '</button>' + html : '';
+  el.hidden = !html;
+  $('view-map').classList.toggle('has-panel', !!html);
+  if (formState) { updateCoordsHint(); updateYearHint('ps'); updateYearHint('pe'); }
   if (evForm) { updateYearHint('es'); updateYearHint('ee'); }
   renderFilters();
   applyFilters();
   applyTimeView();
+}
+
+// The circled X (and Esc): cancel a form, otherwise close the selected pin, otherwise clear the selected event.
+function closePanel() {
+  if (evForm) cancelEventForm();
+  else if (formState) cancelForm();
+  else if (selectedId) selectPin(null);
+  else if (selectedEventId) selectEvent(selectedEventId);
 }
 
 // Pins that pass the type filter and the search box (used by the side-panel list).
@@ -1353,12 +1455,12 @@ function pinRowsHtml() {
   const list = listedPins();
   if (list.length) {
     return list.map(p => { const t = typeOf(p.pin_type);
-      return '<div class="pin-row' + (isFaded(p) ? ' dim' : '') + '" onclick="focusPin(\'' + p.id + '\')" style="--c:' + t.color + '">' +
-        '<span class="pin-row-icon">' + t.glyph + '</span><span class="pin-row-title">' + esc(p.title) + '</span></div>'; }).join('');
+      return '<div class="pin-row' + (isFaded(p) ? ' dim' : '') + (isHighlighted(p) ? ' lit' : '') + '" onclick="focusPin(\'' + p.id + '\')" style="--c:' + t.color + '">' +
+        '<span class="pin-row-icon">' + ic(t.icon) + '</span><span class="pin-row-title">' + esc(p.title) + '</span></div>'; }).join('');
   }
   return pins.length
     ? '<div class="mp-empty">No pins match.</div>'
-    : '<div class="mp-empty">No pins yet. Press <b>+ Add Pin</b>, then click the map.</div>';
+    : '<div class="mp-empty">No pins yet. Choose Edit, then Add pin.</div>';
 }
 
 function pinCountText() {
@@ -1366,18 +1468,14 @@ function pinCountText() {
   return shown === pins.length ? String(pins.length) : shown + ' of ' + pins.length;
 }
 
-function listHtml() {
-  return '<div class="panel-title">Pins (<span id="pin-count">' + pinCountText() + '</span>)</div>' +
-    (pins.length ? '<input type="search" id="pin-search" placeholder="Search pins…" value="' + esc(pinSearch) + '" oninput="onPinSearch(this.value)">' : '') +
-    '<div id="pin-rows">' + pinRowsHtml() + '</div>' +
-    '<div class="mp-hint" style="margin-top:1rem">Scroll to zoom, drag to pan. Click a pin to select it; a selected pin can be dragged to a new spot. ' +
-    'The type chips above the map hide pins from both the map and this list. The Events key (top right of the map) lists what happens in the world: pick an event (here or in the Year view bar) to show only its pins.</div>';
+function renderPinRows() {          // only the rows and count, so the search box keeps focus
+  $('pin-rows').innerHTML = pinRowsHtml();
+  $('pin-count').textContent = pinCountText();
 }
 
 function onPinSearch(v) {
   pinSearch = v;
-  $('pin-rows').innerHTML = pinRowsHtml();     // only the rows, so the search box keeps focus
-  $('pin-count').textContent = pinCountText();
+  renderPinRows();
 }
 
 // ─── Type filter chips ───────────────────────────────────────────────────────
@@ -1391,7 +1489,7 @@ function renderFilters() {
   el.hidden = false;
   el.innerHTML = types.map(t => { const d = PIN_TYPES[t];
       return '<button class="mv-chip' + (hiddenTypes.has(t) ? ' off' : '') + '" style="--c:' + d.color + '" onclick="toggleType(\'' + t + '\')">' +
-        d.glyph + ' ' + d.label + '<span>' + counts[t] + '</span></button>'; }).join('') +
+        ic(d.icon) + ' ' + d.label + '<span>' + counts[t] + '</span></button>'; }).join('') +
     (hiddenTypes.size ? '<button class="mp-btn" onclick="clearTypeFilter()">Show all</button>' : '');
 }
 
@@ -1451,8 +1549,6 @@ async function replaceImage(input) {
   if (!ext) return alert('Only PNG, JPEG or WebP images are supported.');
   if (file.size > MAX_BYTES) return alert('That file is over 25 MB. Try a smaller or compressed version.');
 
-  const btn = $('replace-btn');
-  const label = btn.textContent;
   let info = null;
   const uploaded = [];
   try {
@@ -1463,7 +1559,7 @@ async function replaceImage(input) {
         !confirm('The new image has a different shape (' + info.width + '×' + info.height + ' vs ' + currentMap.image_width + '×' + currentMap.image_height + ').\n\n' +
                  'Pins keep their relative position (% across / % down), so some may no longer sit on the places they mark. Replace anyway?')) return;
 
-    btn.disabled = true; btn.textContent = 'Uploading…';
+    replacing = true; showNotice('Uploading the new image…');
     // A fresh filename each time avoids stale CDN/browser caches of the old image.
     const newPath = currentUser.id + '/' + currentMap.id + '/base-' + Date.now() + '.' + ext;
     const up = await supabase.storage.from(BUCKET).upload(newPath, file, { contentType: file.type, upsert: false });
@@ -1483,13 +1579,15 @@ async function replaceImage(input) {
 
     Object.assign(currentMap, { image_path: newPath, image_width: info.width, image_height: info.height });
     const m = maps.find(x => x.id === currentMap.id); if (m) Object.assign(m, currentMap);
+    showNotice('');
     await openMap(currentMap.id, ++routeToken);      // rebuild the view with the new image
   } catch (e) {
     if (uploaded.length) await supabase.storage.from(BUCKET).remove(uploaded);
+    showNotice('');
     alert('Could not replace the image: ' + (e.message || e));
   } finally {
     if (info) URL.revokeObjectURL(info.url);
-    btn.disabled = false; btn.textContent = label;
+    replacing = false;
   }
 }
 
@@ -1504,7 +1602,7 @@ function eventLinkHtml(pin) {
     evs.map(ev => {
       const desc = (ev.description || '').trim();
       return '<div class="pv-ev">' +
-        '<div class="pv-link-main">⧗ ' + esc(ev.title) + ' · ' + esc(eventYearLabel(ev)) + '</div>' +
+        '<div class="pv-link-main">' + ic('hourglass') + ' ' + esc(ev.title) + ' · ' + esc(eventYearLabel(ev)) + '</div>' +
         (desc ? '<div class="pv-link-desc">' + esc(desc.length > 160 ? desc.slice(0, 160) + '…' : desc) + '</div>' : '') +
         '<a href="../timeline/index.html#event=' + ev.id + '">View on timeline →</a></div>';
     }).join('') + '</div>';
@@ -1515,7 +1613,7 @@ function mapEventsHtml(pin) {
   const evs = mapEvents.filter(e => e.pin_ids.includes(pin.id)).sort(byStart);
   if (!evs.length) return '';
   return '<div class="pv-link"><div class="pv-link-label">Map events (' + evs.length + ')</div>' +
-    evs.map(ev => '<div class="pv-ev"><div class="pv-link-main">⚑ <span class="pv-act" onclick="selectEvent(\'' + ev.id + '\', true)">' + esc(ev.title) + '</span> · ' + esc(eventRangeText(ev)) + '</div></div>').join('') + '</div>';
+    evs.map(ev => '<div class="pv-ev"><div class="pv-link-main">' + ic('flag') + ' <span class="pv-act" onclick="selectEvent(\'' + ev.id + '\', true)">' + esc(ev.title) + '</span> · ' + esc(eventRangeText(ev)) + '</div></div>').join('') + '</div>';
 }
 
 function childLinkHtml(pin) {
@@ -1551,14 +1649,12 @@ function childOptionsHtml(selectedId) {
 function pinHtml(pin) {
   const t = typeOf(pin.pin_type);
   return '<div class="pv-title">' + esc(pin.title) + '</div>' +
-    '<div class="pv-type" style="--c:' + t.color + '">' + t.glyph + ' ' + t.label + '</div>' +
+    '<div class="pv-type" style="--c:' + t.color + '">' + ic(t.icon) + ' ' + t.label + '</div>' +
     timeStateHtml(pin) +
     (pin.description ? '<div class="pv-desc">' + esc(pin.description) + '</div>' : '<div class="mp-hint" style="margin-bottom:1rem">No description yet.</div>') +
     mapEventsHtml(pin) + eventLinkHtml(pin) + childLinkHtml(pin) +
     '<div class="pv-actions">' +
       '<button class="mp-btn mp-btn-primary" onclick="beginForm(\'edit\', pins.find(p => p.id === selectedId))">Edit</button>' +
-      '<button class="mp-btn" onclick="selectPin(null)">Close</button>' +
-      '<button class="mp-btn mp-btn-danger" onclick="deletePin(\'' + pin.id + '\')">Delete</button>' +
     '</div>' +
     '<div class="mp-hint" style="margin-top:1rem">Drag this pin on the map to move it.</div>';
 }
@@ -1571,7 +1667,7 @@ function formHtml() {
       '<input type="text" id="pf-title" maxlength="120" value="' + esc(pin.title || '') + '" onkeydown="if(event.key===\'Enter\')savePin()"></div></div>' +
     '<div class="mp-form-row"><div class="mp-form-field"><label for="pf-type">Type</label>' +
       '<select id="pf-type" onchange="onFormTypeChange(this.value)">' +
-      Object.entries(PIN_TYPES).map(([k, t]) => '<option value="' + k + '"' + (k === formState.type ? ' selected' : '') + '>' + t.glyph + ' ' + t.label + '</option>').join('') +
+      Object.entries(PIN_TYPES).map(([k, t]) => '<option value="' + k + '"' + (k === formState.type ? ' selected' : '') + '>' + t.label + '</option>').join('') +
       '</select></div></div>' +
     '<div class="mp-form-row"><div class="mp-form-field"><label for="pf-desc">Description</label>' +
       '<textarea id="pf-desc">' + esc(pin.description || '') + '</textarea></div></div>' +
@@ -1582,7 +1678,7 @@ function formHtml() {
     '<div class="mp-form-row"><div class="mp-form-field"><label>Map events (optional)</label>' +
       '<div id="pf-mevents">' + formMapEventsHtml() + '</div>' +
       (eventsError ? '<span class="mp-hint">Events could not be loaded: ' + esc(eventsError) + '</span>'
-        : !mapEvents.length ? '<span class="mp-hint">No events on this map yet. Add them with + in the Events key on the map.</span>' : '') + '</div></div>' +
+        : !mapEvents.length ? '<span class="mp-hint">No events on this map yet. Choose Edit, then Add event.</span>' : '') + '</div></div>' +
     '<div class="mp-form-row"><div class="mp-form-field"><label>Timeline events (optional reference)</label>' +
       '<div id="pf-events">' + formEventsHtml() + '</div>' +
       (tlError ? '<span class="mp-hint">Timeline could not be loaded: ' + esc(tlError) + '</span>'
@@ -1600,12 +1696,11 @@ function formHtml() {
 
 // ─── Keyboard ────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
-  if (e.key !== 'Escape') return;
-  if (addMode) setAddMode(false);
-  else if (formState) cancelForm();
-  else if (evForm) cancelEventForm();
-  else if (selectedId) selectPin(null);
-  else if (selectedEventId) selectEvent(selectedEventId);
+  if (e.key !== 'Escape' || $('view-map').hidden) return;
+  if (!$('edit-menu').hidden) toggleEditMenu(false);
+  else if (addMode) setAddMode(false);
+  else if (formOpen() || selectedId || selectedEventId) closePanel();
+  else if (!$('pins-panel').hidden) togglePins(false);
 });
 
 // ─── Init ────────────────────────────────────────────────────────────────────
